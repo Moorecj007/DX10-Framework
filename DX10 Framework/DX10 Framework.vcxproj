@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3FA9ED47-87E6-423F-96C3-D4F67A2CA89B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>DX10Framework</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)Libraries\VLD\include;$(ProjectDir)Libraries\Box2D;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(ProjectDir)Libraries\VLD\lib\Win32;$(LibraryPath);$(DXSDK_DIR)Lib\x86;$(ProjectDir)Libraries\Box2D</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)Libraries\VLD\include;$(ProjectDir)Libraries\Box2D;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(ProjectDir)Libraries\VLD\lib\Win32;$(LibraryPath);$(DXSDK_DIR)Lib\x86;$(ProjectDir)Libraries\Box2D</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <BrowseInformation>true</BrowseInformation>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories />
+    </Link>
+    <FxCompile>
+      <EntryPointName />
+      <ShaderModel>4.0</ShaderModel>
+      <ShaderType>Effect</ShaderType>
+    </FxCompile>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories />
+    </Link>
+    <FxCompile>
+      <EntryPointName />
+      <ShaderModel>4.0</ShaderModel>
+      <ShaderType>Effect</ShaderType>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Files\Application.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.cpp" />
+    <ClCompile Include="Files\DX10\DX10\DX10_Renderer.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Generic.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Objects\DX10_Obj_Color.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Objects\DX10_Obj_Generic.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Objects\DX10_Obj_LitTex.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Systems\DX10_StaticBuffer.cpp" />
+    <ClCompile Include="Files\GDI\GDI\GDI_Backbuffer.cpp" />
+    <ClCompile Include="Files\GDI\GDI\GDI_Renderer.cpp" />
+    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Quad.cpp" />
+    <ClCompile Include="Files\Physics\2D Physics\2D_Physics.cpp" />
+    <ClCompile Include="Files\Utility\DirectInput.cpp" />
+    <ClCompile Include="Files\Utility\Timer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Files\Application.h" />
+    <ClInclude Include="Files\App_Macro.h" />
+    <ClInclude Include="Files\DX10\DX10.h" />
+    <ClInclude Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.h" />
+    <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h" />
+    <ClInclude Include="Files\DX10\DX10\DX10_Shader_Structures.h" />
+    <ClInclude Include="Files\DX10\DX10\DX10_Utilities.h" />
+    <ClInclude Include="Files\DX10\DX10\DX10_Vertex.h" />
+    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.h" />
+    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Generic.h" />
+    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.h" />
+    <ClInclude Include="Files\DX10\DX10\Objects\DX10_Obj_Color.h" />
+    <ClInclude Include="Files\DX10\DX10\Objects\DX10_Obj_Generic.h" />
+    <ClInclude Include="Files\DX10\DX10\Objects\DX10_Obj_LitTex.h" />
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h" />
+    <ClInclude Include="Files\DX10\DX10\Systems\DX10_StaticBuffer.h" />
+    <ClInclude Include="Files\GDI\GDI.h" />
+    <ClInclude Include="Files\GDI\GDI\GDI_Backbuffer.h" />
+    <ClInclude Include="Files\GDI\GDI\GDI_Renderer.h" />
+    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Quad.h" />
+    <ClInclude Include="Files\Physics\2D Physics\2D_Physics.h" />
+    <ClInclude Include="Files\Utility\DirectInput.h" />
+    <ClInclude Include="Files\Utility\Timer.h" />
+    <ClInclude Include="Files\Utility\Utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\FX\Color.fx" />
+    <FxCompile Include="Resources\FX\LightStructures.fx" />
+    <FxCompile Include="Resources\FX\LitTex.fx" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
