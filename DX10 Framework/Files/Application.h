@@ -25,6 +25,7 @@
 #include "Utility\Timer.h"
 #include "DX10\DX10.h"
 #include "GDI\GDI.h"
+#include "Physics\2D Physics\Physics_2D.h"
 
 class Application
 {
@@ -106,9 +107,10 @@ public:
 	/***********************
 	* Process: Process the Application
 	* @author: Callan Moore
+	* @parameter: _dt: The current delta tick
 	* @return: void
 	********************/
-	void Process();
+	void Process(float _dt);
 
 	/***********************
 	* Draw: Draw the Application components
@@ -148,25 +150,28 @@ private:
 	int m_clientWidth;
 	int m_clientHeight;
 	bool m_online;
-
+	
 	// Timer Variables
 	Timer* m_pTimer;
-	float m_dt;
+	float m_deltaTick;
+	int m_fps; // TO DO
+	float m_fpsTimer; // TO DO
 
 	// Input Variables
 	bool* m_pKeyDown;
 
 	// Renderer Variables
 	DX10_Renderer* m_pDX10_Renderer;
-	CGDI_Renderer* m_pGDIRenderer;
+	GDI_Renderer* m_pGDIRenderer;
 
-	
+	// Camera
+	DX10_Camera_FirstPerson* m_pCamera;
 
 	// Objects
 	DX10_Obj_Generic* m_pCube;
-	CGDI_Quad* m_pQuad;
-	CGDI_Quad* m_pQuad2;
-	CGDI_Quad* m_pQuad3;
+	GDI_Obj_Generic* m_pQuad;
+	GDI_Obj_Generic* m_pQuad2;
+	GDI_Obj_Generic* m_pQuad3;
 
 	// Meshes
 	DX10_Mesh_Generic* m_pCubeMesh;
@@ -174,9 +179,9 @@ private:
 	// Shaders
 	DX10_Shader_LitTex* m_pShader_LitTex;
 
-public:
-	// Camera
-	DX10_Camera_FirstPerson* m_pCamera;
+	// Physics
+	Physics_2D* m_pPhysics2D;
+
 };
 
 #endif // __APPLICATION_H__

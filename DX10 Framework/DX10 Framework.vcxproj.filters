@@ -111,9 +111,6 @@
     <ClInclude Include="Files\Utility\Utilities.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\2D_Physics.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h">
       <Filter>Header Files\DX10</Filter>
     </ClInclude>
@@ -153,6 +150,21 @@
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h">
       <Filter>Header Files\DX10\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Files\Physics\2D Physics\Physics_2D.h">
+      <Filter>Header Files\Physics\2D Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Physics\2D Physics\Physics_Body_2D.h">
+      <Filter>Header Files\Physics\2D Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Generic.h">
+      <Filter>Header Files\GDI\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Triangle.h">
+      <Filter>Header Files\GDI\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Circle.h">
+      <Filter>Header Files\GDI\Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
@@ -172,9 +184,6 @@
     </ClCompile>
     <ClCompile Include="Files\Utility\Timer.cpp">
       <Filter>Source Files\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Physics\2D Physics\2D_Physics.cpp">
-      <Filter>Source Files\Physics\2D Physics</Filter>
     </ClCompile>
     <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.cpp">
       <Filter>Source Files\DX10\Meshes</Filter>
@@ -202,6 +211,21 @@
     </ClCompile>
     <ClCompile Include="Files\DX10\DX10\Systems\DX10_StaticBuffer.cpp">
       <Filter>Source Files\DX10\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Physics\2D Physics\Physics_2D.cpp">
+      <Filter>Source Files\Physics\2D Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Physics\2D Physics\Physics_Body_2D.cpp">
+      <Filter>Source Files\Physics\2D Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Circle.cpp">
+      <Filter>Source Files\GDI\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Generic.cpp">
+      <Filter>Source Files\GDI\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Triangle.cpp">
+      <Filter>Source Files\GDI\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

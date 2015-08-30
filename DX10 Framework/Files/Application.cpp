@@ -18,13 +18,26 @@
 // Static Variables
 Application* Application::s_pApp = 0;
 
-int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdLine, int _cmdShow){
+// Global Variables
+FILE* g_file;
+
+int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdLine, int _cmdShow)
+{
+	#ifdef _DEBUG
+		//Create a Console window
+		if (AllocConsole())
+		{
+			freopen_s(&g_file, "conout$", "w", stdout);
+			HWND hWnd = GetConsoleWindow();
+			ShowWindow(hWnd, 1);
+		}
+	#endif
+
 	int clientWidth = 1000;
 	int clientHeight = 1000;
 
 	// Create the Application 
 	Application* pApp = Application::GetInstance();
-	
 	
 	if (pApp->CreateWindowApp(clientWidth, clientHeight, _hInstance) == true)
 	{
@@ -155,8 +168,8 @@ Application* Application::GetInstance()
 bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hInstance)
 {
 	// Determine which Rendererer to use
-	bool usingDX10Renderer = true;
-	bool usingGDIRenderer = false;
+	bool usingDX10Renderer = false;
+	bool usingGDIRenderer = true;
 
 	// Default state so only one renderer can be active at any time
 	if (usingDX10Renderer == usingGDIRenderer)
@@ -183,56 +196,64 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		// Initialise the Objects
 		m_pCamera = new DX10_Camera_FirstPerson();
 		m_pCamera->Initialise(m_pDX10_Renderer, _hInstance, m_hWnd);
-		
-		TVertexNormalUV vert;
-		m_pCubeMesh = new DX10_Mesh_Rect_Prism();
-		VALIDATE(m_pCubeMesh->Initialise(m_pDX10_Renderer, vert, { 2.0f, 2.0f, 2.0f }));
-		
-		m_pShader_LitTex = new DX10_Shader_LitTex();
-		VALIDATE(m_pShader_LitTex->Initialise(m_pDX10_Renderer));
-		
-		// Create Fire Animation
-		std::vector<UINT>* pFireAnimTex = new std::vector<UINT>;
-		for (int i = 0; i < 120; i++)
-		{
-			std::string strFilePath = "FireAnim/Fire";
-			std::string strNumber = std::to_string(i + 1);
-			if (strNumber.length() == 1)
-			{
-				strFilePath.append("00");
-			}
-			else if ((strNumber.length() == 2))
-			{
-				strFilePath.append("0");
-			}
-			strFilePath.append(strNumber);
-			strFilePath.append(".bmp");
-		
-			pFireAnimTex->push_back(0);
-			m_pDX10_Renderer->CreateTexture(strFilePath, &(*pFireAnimTex)[i]);
-		}
-		m_pCube = new DX10_Obj_LitTex(m_pShader_LitTex, pFireAnimTex, 4.0f);
-		VALIDATE(m_pCube->Initialise(m_pDX10_Renderer, m_pCubeMesh));
 	}
 	
 	if (usingGDIRenderer == true)
 	{
 		// Initialise the Renderer
-		m_pGDIRenderer = new CGDI_Renderer();
+		m_pGDIRenderer = new GDI_Renderer();
 		VALIDATE(m_pGDIRenderer->Initialise(m_hWnd, _hInstance, m_clientWidth, m_clientHeight));
+
+		// Initialise the Physics system
+		m_pPhysics2D = new Physics_2D();
+		VALIDATE(m_pPhysics2D->Initialise(20.0f));
 	
 		// Initialise the Objects
-		m_pQuad = new CGDI_Quad();
-		VALIDATE(m_pQuad->Initialise(m_pGDIRenderer, { 400, 400 }, 70, 5, RGB(255, 0, 0)));
-		m_pQuad2 = new CGDI_Quad();
-		VALIDATE(m_pQuad2->Initialise(m_pGDIRenderer, { 200, 600 }, 100, 100, 0x00FF00));
-		m_pQuad3 = new CGDI_Quad();
-		VALIDATE(m_pQuad3->Initialise(m_pGDIRenderer, { 800, 700 }, 20, 40, 0x0000FF));
+		Physics_Body_2D* tempBody;
+		TPhysicsProperties physProps;
+
+		m_pQuad = new GDI_Obj_Quad(m_pGDIRenderer);
+		physProps.movable = true;
+		physProps.pos = { 600, 500 };
+		physProps.scale = { 220, 10 };
+		physProps.density = 1.0f;
+		physProps.friction = 0.3f;
+		physProps.restitution = 0.0f;
+		physProps.angle = DegreesToRadians(0.0f);
+		tempBody = m_pPhysics2D->CreatePhysicsObject_Quad(physProps);
+		VALIDATE(m_pQuad->Initialise(tempBody, 0xFF0000));
+
+		m_pQuad2 = new GDI_Obj_Quad(m_pGDIRenderer);
+		physProps.movable = false;
+		physProps.pos = { 0, 500 };
+		physProps.scale = { 1000, 10 };
+		physProps.density = 1.0f;
+		physProps.friction = 0.0f;
+		physProps.restitution = 0.0f;
+		physProps.angle = DegreesToRadians(0.0f);
+		tempBody = m_pPhysics2D->CreatePhysicsObject_Quad(physProps);
+		VALIDATE(m_pQuad2->Initialise(tempBody, 0x00FF00));
+
+		m_pPhysics2D->CreateRopeJoint(m_pQuad->GetPhysicsBody(), m_pQuad2->GetPhysicsBody(), { 495, 500 }, { 495, 450 });
+
+		//m_pQuad3 = new GDI_Obj_Circle(m_pGDIRenderer);
+		//physProps.movable = true;
+		//physProps.pos = { 505, 300 };
+		//physProps.scale = { 50, 50 };
+		//physProps.density = 1.0f;
+		//physProps.friction = 0.3f;
+		//physProps.restitution = 0.0f;
+		//physProps.angle = DegreesToRadians(0.0f);
+		//tempBody = m_pPhysics2D->CreatePhysicsObject_Circle(physProps);
+		//VALIDATE(m_pQuad3->Initialise(tempBody, 0x0000FF));
 	}
 
 	m_online = true;
 	m_pTimer = new Timer();
 	m_pTimer->Reset();
+	m_fps = 0;
+	m_deltaTick = 0;
+	m_fpsTimer = 0;
 	
 	return true;
 }
@@ -263,6 +284,8 @@ void Application::ShutDown()
 	ReleasePtr(m_pQuad2);
 	ReleasePtr(m_pQuad3);
 
+	ReleasePtr(m_pPhysics2D);
+
 	// Delete and free the memory from the Renderer
 	if (m_pDX10_Renderer != 0)
 	{
@@ -273,30 +296,50 @@ void Application::ShutDown()
 }
 
 void Application::ExecuteOneFrame()
-{	
-	Process();
-	Draw();
-}
-
-void Application::Process()
 {
 	// Retrieve the Delta Tick of the last frame
-	//Sleep(1);
 	m_pTimer->Tick();
-	m_dt = m_pTimer->GetDeltaTime();
+	float dt = m_pTimer->GetDeltaTime();
+	m_deltaTick += dt;
+	m_fpsTimer += dt;
 
+	// Limit to 60 FPS
+	if (m_deltaTick > (1.0 / 60.0f))
+	{
+		Process(m_deltaTick);
+		Draw();
+
+		m_deltaTick -= (1.0f / 60.0f);
+		m_fps++;
+	}	
+
+	// Reset FPS counters
+	if (m_fpsTimer >= 1.0f)
+	{
+		printf("%d \n", m_fps);
+		m_fpsTimer -= 1.0f;
+		m_fps = 0;
+	}
+}
+
+void Application::Process(float _dt)
+{
 	HandleInput();
 
 	if (m_pDX10_Renderer != 0)
 	{
-		m_pCamera->Process(m_dt);
-		m_pCube->Process(m_dt);
+		m_pCamera->Process(_dt);
+		m_pCube->Process(_dt);
 		m_pShader_LitTex->SetUpPerFrame();
 	}
 
 	if (m_pGDIRenderer != 0)
 	{
+		m_pPhysics2D->Process();
 
+		m_pQuad->Process(_dt);
+		m_pQuad2->Process(_dt);
+		//m_pQuad3->Process(_dt);
 	}
 }
 
@@ -319,7 +362,7 @@ void Application::Draw()
 
 		m_pQuad->Render();
 		m_pQuad2->Render();
-		m_pQuad3->Render();
+		//m_pQuad3->Render();
 
 		m_pGDIRenderer->EndRender();
 	}

@@ -15,16 +15,16 @@
 // This Include
 #include "GDI_Renderer.h"
 
-CGDI_Renderer::CGDI_Renderer()
+GDI_Renderer::GDI_Renderer()
 {
 }
 
-CGDI_Renderer::~CGDI_Renderer()
+GDI_Renderer::~GDI_Renderer()
 {
 	ReleasePtr(m_pBackBuffer);
 }
 
-bool CGDI_Renderer::Initialise(HWND _hWnd, HINSTANCE _hInstance, int _clientWidth, int _clientHeight)
+bool GDI_Renderer::Initialise(HWND _hWnd, HINSTANCE _hInstance, int _clientWidth, int _clientHeight)
 {
 	m_hWnd = _hWnd;
 	m_hInstance = _hInstance;
@@ -38,49 +38,67 @@ bool CGDI_Renderer::Initialise(HWND _hWnd, HINSTANCE _hInstance, int _clientWidt
 	return true;
 }
 
-void CGDI_Renderer::Render(POINT* _pPoints, COLORREF _color, int _size)
+void GDI_Renderer::RenderPolygon(POINT* _pPoints, COLORREF _color, int _size)
 {
 	HDC hdc = m_pBackBuffer->GetBFDC();
 
 	HBRUSH brush = CreateSolidBrush(_color);
 	SelectObject(hdc, brush);
 
-	// Draw the Object with a solif fill color
+	// Draw the Object with a solid fill color
 	Polygon(hdc, _pPoints, _size);
 	DeleteObject(brush);
 
 	HPEN hPenOld;
 	// Draw a line
 	HPEN hLinePen;
-	
+
 	// Draw a black outline onto the object
 	hLinePen = CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
-	
-	for (int i = 0; i < _size; i++)
-	{
-		if (i == _size - 1)
-		{
-			MoveToEx(hdc, (int)_pPoints[i].x, (int)_pPoints[i].y, NULL);
-			LineTo(hdc, (int)_pPoints[0].x, (int)_pPoints[0].y);
-		}
-		else
-		{
-			MoveToEx(hdc, (int)_pPoints[i].x, (int)_pPoints[i].y, NULL);
-			LineTo(hdc, (int)_pPoints[i + 1].x, (int)_pPoints[i + 1].y);
-		}
-	}
+
+	Polygon(hdc, _pPoints, _size);
+
+	SelectObject(hdc, hPenOld);
+	DeleteObject(hLinePen);
+}
+
+void GDI_Renderer::RenderEllipse(v2float _center, COLORREF _color, v2float _scale)
+{
+	HDC hdc = m_pBackBuffer->GetBFDC();
+
+	HBRUSH brush = CreateSolidBrush(_color);
+	SelectObject(hdc, brush);
+
+	int ellipseLeft = (int)(_center.x - _scale.x / 2.0f);
+	int ellipseTop = (int)(_center.y - _scale.y / 2.0f);
+	int ellipseRight = (int)(_center.x + _scale.x / 2.0f);
+	int ellipseBottom = (int)(_center.y + _scale.y / 2.0f);
+
+	// Draw the Object with a solid fill color
+	Ellipse(hdc, ellipseLeft, ellipseTop, ellipseRight, ellipseBottom);
+	DeleteObject(brush);
+
+	HPEN hPenOld;
+	// Draw a line
+	HPEN hLinePen;
+
+	// Draw a black outline onto the object
+	hLinePen = CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
+	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
+
+	Ellipse(hdc, ellipseLeft, ellipseTop, ellipseRight, ellipseBottom);
 	
 	SelectObject(hdc, hPenOld);
 	DeleteObject(hLinePen);
 }
 
-void CGDI_Renderer::BeginRender()
+void GDI_Renderer::BeginRender()
 {
 	m_pBackBuffer->Clear();
 }
 
-void CGDI_Renderer::EndRender()
+void GDI_Renderer::EndRender()
 {
 	m_pBackBuffer->Present();
 }

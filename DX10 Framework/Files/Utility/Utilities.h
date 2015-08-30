@@ -21,6 +21,7 @@
 // Defines
 #define _USE_MATH_DEFINES
 #define ReleasePtr(x) { if(x){ delete x; x = 0;} }
+#define ReleasePtrArray(x) { if(x){ delete[] x; x = 0;} }
 
 #if defined(DEBUG) | defined(_DEBUG)
 #define VALIDATE(x) {								\
@@ -51,6 +52,177 @@ struct v2float
 {
 	float x;
 	float y;
+
+	/***********************
+	* v2float: Constructor for the v2float struct
+	* @author: Callan Moore
+	* @parameter: x: X coordinate
+	* @parameter: y: Y coordinate
+	********************/
+	v2float(float _x = 0, float _y = 0)
+	{
+		x = _x;
+		y = _y;
+	}
+
+	/***********************
+	* operator=: Assignment Operator for the v2float struct
+	* @author: Callan Moore
+	* @parameter: _v2: v2float to be copied
+	* @return: v2float: the result of the assignment
+	********************/
+	v2float& operator=(const v2float _v2)
+	{
+		x = _v2.x;
+		y = _v2.y;
+		return *this;
+	}
+
+	/***********************
+	* operator==: Is equal to Operator for the v2float struct
+	* @author: Callan Moore
+	* @parameter: _v2: v2float to be checked against
+	* @return: bool: True if the v2floats are equal
+	********************/
+	bool operator==(const v2float _v2)
+	{
+		if (x == _v2.x
+			&&	y == _v2.y)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	/***********************
+	* operator+: Addition Operator for the v2float struct plus a v2float
+	* @author: Callan Moore
+	* @parameter: _v2: Right hand side of the addition
+	* @return: v2float: The result of the addition
+	********************/
+	v2float operator+ (const v2float _v2) const
+	{
+		return v2float{ _v2.x + x, _v2.y + y};
+	}
+
+	/***********************
+	* operator+: Addition Operator for the v2float struct plus a float
+	* @author: Callan Moore
+	* @parameter: _f: Right hand side of the addition
+	* @return: v2float: The result of the addition
+	********************/
+	v2float operator+ (const float _f) const
+	{
+		return v2float{ _f + x, _f + y};
+	}
+
+	/***********************
+	* operator+=: Addition Assignment Operator for the v2float struct
+	* @author: Callan Moore
+	* @parameter: _v2: Right hand side of the addition
+	* @return: v2float: The result of the addition assignment
+	********************/
+	v2float operator+= (const v2float _v2)
+	{
+		return v2float{ x += _v2.x, y += _v2.y};
+	}
+
+	/***********************
+	* operator-: Subtraction Operator for the v2float struct minus a v2float
+	* @author: Callan Moore
+	* @parameter: _v2: Right hand side of the subtraction
+	* @return: v2float: The result of the subtraction
+	********************/
+	v2float operator- (const v2float _v2) const
+	{
+		return v2float{ x - _v2.x, y - _v2.y};
+	}
+
+	/***********************
+	* operator-: Subtraction Operator for the v2float struct minus a float
+	* @author: Callan Moore
+	* @parameter: _f: Right hand side of the subtraction
+	* @return: v2float: The result of the subtraction
+	********************/
+	v2float operator- (const float _f) const
+	{
+		return v2float{ x - _f, y - _f};
+	}
+
+	/***********************
+	* operator-=: Subtraction Assignment Operator for the v2float struct minus a v2float
+	* @author: Callan Moore
+	* @parameter: _v2: Right hand side of the subtraction
+	* @return: v2float: The result of the subtraction
+	********************/
+	v2float operator-= (const v2float _v2)
+	{
+		return v2float{ x -= _v2.x, y -= _v2.y};
+	}
+
+	/***********************
+	* operator*: Multiplication Operator for a v2float times a v3float
+	* @author: Callan Moore
+	* @parameter: _v2: Right hand side of the multiplication
+	* @return: v2float: The result of the multiplication
+	********************/
+	v2float operator* (const v2float _v2) const
+	{
+		return v2float{ _v2.x * x, _v2.y * y};
+	}
+
+	/***********************
+	* operator*: Multiplication Operator for a v2float times a float
+	* @author: Callan Moore
+	* @parameter: _v2: Right hand side of the multiplication
+	* @return: v2float: The result of the multiplication
+	********************/
+	v2float operator* (const float _f) const
+	{
+		return v2float{ _f * x, _f * y};
+	}
+
+	/***********************
+	* operator/: Division Operator for a v2float times a float
+	* @author: Callan Moore
+	* @parameter: _v2: Right hand side of the Division
+	* @return: v2float: The result of the Division
+	********************/
+	v2float operator/ (const float _f) const
+	{
+		return v2float{ x / _f, y / _f};
+	}
+
+	/***********************
+	* Magnitude: Calculate the magnitude of this v2float
+	* @author: Callan Moore
+	* @return: float: The magnitude of the v2float
+	********************/
+	float Magnitude()
+	{
+		return (sqrt(pow(x, 2) + pow(y, 2)));
+	}
+
+	/***********************
+	* NormaliseV2Float: Normalise a vector of 2 floats
+	* @author: Callan Moore
+	* @parameter: _v2: vector to normalize
+	* @return: v2float: the normalized vector
+	********************/
+	v2float Normalise()
+	{
+		float fMagnitude = this->Magnitude();
+
+		if (fMagnitude != 0)
+		{
+			this->x = (this->x / fMagnitude);
+			this->y = (this->y / fMagnitude);
+		}
+		return (*this);
+	}
 };
 
 /***********************

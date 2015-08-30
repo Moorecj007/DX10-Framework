@@ -6,26 +6,25 @@
 *
 * (c) 2005 - 2015 Media Design School
 *
-* File Name : GDI_Obj_Quad.cpp
-* Description : A Quadrilateral for GDI use
+* File Name : GDI_Obj_Circle.h
+* Description : A Circle for GDI use
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */
 
 // This Include
-#include "GDI_Obj_Quad.h"
+#include "GDI_Obj_Circle.h"
 
-GDI_Obj_Quad::GDI_Obj_Quad(GDI_Renderer* _pGDIRenderer)
+GDI_Obj_Circle::GDI_Obj_Circle(GDI_Renderer* _pGDIRenderer)
 {
 	m_pGDIRenderer = _pGDIRenderer;
 }
 
-GDI_Obj_Quad::~GDI_Obj_Quad()
+GDI_Obj_Circle::~GDI_Obj_Circle()
 {
-	
 }
 
-bool GDI_Obj_Quad::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color)
+bool GDI_Obj_Circle::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color)
 {
 	// Assign Member variables
 	m_pPhysicsBody = _pPhysicsBody;
@@ -38,7 +37,7 @@ bool GDI_Obj_Quad::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color)
 	return true;
 }
 
-void GDI_Obj_Quad::Process(float _dt)
+void GDI_Obj_Circle::Process(float _dt)
 {
 	v2float pos = m_pPhysicsBody->GetPosition();
 	v2float scale = m_pPhysicsBody->GetScale();
@@ -65,4 +64,9 @@ void GDI_Obj_Quad::Process(float _dt)
 	{
 		CalcRotation(&m_points[i], angle, pos);
 	}
+}
+
+void GDI_Obj_Circle::Render()
+{
+	m_pGDIRenderer->RenderEllipse(m_pPhysicsBody->GetPosition(), m_color, m_pPhysicsBody->GetScale());
 }

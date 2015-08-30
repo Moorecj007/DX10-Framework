@@ -1,0 +1,37 @@
+/*
+* Bachelor of Software Engineering
+* Media Design School
+* Auckland
+* New Zealand
+*
+* (c) 2005 - 2015 Media Design School
+*
+* File Name : Physics_Body_2D.cpp
+* Description : A body that holds all physics information for a 2D object
+* Author :	Callan Moore
+* Mail :	Callan.Moore@mediadesign.school.nz
+*/
+
+// This Include
+#include "Physics_Body_2D.h"
+
+Physics_Body_2D::Physics_Body_2D(b2Body* _pBody, v2float _scale, float _pixelsPerMeter)
+{
+	m_pBody = _pBody;
+	m_scale = _scale;
+	m_pixelsPerMeter = _pixelsPerMeter;
+}
+
+Physics_Body_2D::~Physics_Body_2D()
+{
+}
+
+v2float Physics_Body_2D::GetPosition()
+{
+	b2Vec2 bodyPos = m_pBody->GetPosition();
+	v2float pos;
+	pos.x = bodyPos.x * m_pixelsPerMeter;
+	pos.y = bodyPos.y * m_pixelsPerMeter;
+
+	return pos;
+}

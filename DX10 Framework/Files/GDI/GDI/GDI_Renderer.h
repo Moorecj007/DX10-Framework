@@ -23,7 +23,7 @@
 // Local Includes
 #include "GDI_Backbuffer.h"
 
-class CGDI_Renderer
+class GDI_Renderer
 {
 public:
 
@@ -31,13 +31,13 @@ public:
 	* CGDI_Renderer: Default Constructor for GDI Renderer class
 	* @author: Callan Moore
 	********************/
-	CGDI_Renderer();
+	GDI_Renderer();
 
 	/***********************
 	* ~CGDI_Renderer: Default Destructor for GDI Renderer class
 	* @author: Callan Moore
 	********************/
-	~CGDI_Renderer();
+	~GDI_Renderer();
 
 	/***********************
 	* Initialise: Initialise the GDI Renderer for use
@@ -51,14 +51,24 @@ public:
 	bool Initialise(HWND _hWnd, HINSTANCE _hInstance, int _clientWidth, int _clientHeight);
 	
 	/***********************
-	* Render: Render a given "Object"
+	* Render: Render a given polygon
 	* @author: Callan Moore
 	* @parameter: _pPoints: Point list in clockwise order
-	* @parameter: _color: color to fill the object with
-	* @parameter: _size: How many points in the object
+	* @parameter: _color: color to fill the polygon with
+	* @parameter: _size: How many points in the polygon
 	* @return: void
 	********************/
-	void Render(POINT* _pPoints, COLORREF _color, int _size);
+	void RenderPolygon(POINT* _pPoints, COLORREF _color, int _size);
+
+	/***********************
+	* RenderEllipse: Render a given ellipse
+	* @author: Callan Moore
+	* @parameter: _center: position of the Center of the Ellipse
+	* @parameter: _color: Color to fill the Ellipse with
+	* @parameter: _scale: Scale of the Ellipse
+	* @return: void
+	********************/
+	void RenderEllipse(v2float _center, COLORREF _color, v2float _scale);
 	
 	/***********************
 	* BeginRender: Clear and prepare the Backbuffer for input
