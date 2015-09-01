@@ -58,7 +58,7 @@ public:
 	* @parameter: _size: How many points in the polygon
 	* @return: void
 	********************/
-	void RenderPolygon(POINT* _pPoints, COLORREF _color, int _size);
+	void RenderPolygon(v2float* _pPoints, COLORREF _color, int _size);
 
 	/***********************
 	* RenderEllipse: Render a given ellipse
@@ -69,6 +69,16 @@ public:
 	* @return: void
 	********************/
 	void RenderEllipse(v2float _center, COLORREF _color, v2float _scale);
+
+	/***********************
+	* RenderLine: Render a Line
+	* @author: Callan Moore
+	* @parameter: v2float _posA: Starting position
+	* @parameter: v2float _posB: Ending position
+	* @parameter: COLORREF _color: Color for the line
+	* @return: void
+	********************/
+	void RenderLine(v2float _posA, v2float _posB, COLORREF _color);
 	
 	/***********************
 	* BeginRender: Clear and prepare the Backbuffer for input

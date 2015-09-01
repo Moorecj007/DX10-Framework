@@ -206,46 +206,64 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 
 		// Initialise the Physics system
 		m_pPhysics2D = new Physics_2D();
-		VALIDATE(m_pPhysics2D->Initialise(20.0f));
+		VALIDATE(m_pPhysics2D->Initialise(40.0f));
 	
 		// Initialise the Objects
-		Physics_Body_2D* tempBody;
+		Physics_Body_2D* pTempBody;
 		TPhysicsProperties physProps;
 
-		m_pQuad = new GDI_Obj_Quad(m_pGDIRenderer);
-		physProps.movable = true;
-		physProps.pos = { 600, 500 };
-		physProps.scale = { 220, 10 };
+		GDI_Obj_Generic* m_pBackground = new GDI_Obj_Quad(m_pGDIRenderer);
+		physProps.pos = { 0, 0 };
+		physProps.scale = { 2000, 2000 };
+		physProps.density = 0.0f;
+		physProps.friction = 0.0f;
+		physProps.restitution = 0.0f;
+		physProps.collisionType = CT_BACKGROUND;
+		physProps.collideWith = 0;
+		physProps.angle = DegreesToRadians(0.0f);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject_Quad(physProps);
+		VALIDATE(m_pBackground->Initialise(pTempBody, 0xFFFFFF));
+		m_staticObjects.push_back(m_pBackground);
+
+		GDI_Obj_Generic* m_pQuad = new GDI_Obj_Polygon(m_pGDIRenderer);
+		v2float* pPoints = new v2float[4];
+		pPoints[0] = { -100.0f, -25.0f};
+		pPoints[1] = {  100.0f, -25.0f };
+		pPoints[2] = {  100.0f,  25.0f };
+		pPoints[3] = { -100.0f,  25.0f };
+		physProps.pPoints = pPoints;
+		physProps.size = 4;
+		physProps.pos = { 500, 500 };
 		physProps.density = 1.0f;
 		physProps.friction = 0.3f;
 		physProps.restitution = 0.0f;
+		physProps.collisionType = CT_DYNAMIC;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
 		physProps.angle = DegreesToRadians(0.0f);
-		tempBody = m_pPhysics2D->CreatePhysicsObject_Quad(physProps);
-		VALIDATE(m_pQuad->Initialise(tempBody, 0xFF0000));
+		pTempBody = m_pPhysics2D->CreatePhysicsPolygon(physProps);
+		VALIDATE(m_pQuad->Initialise(pTempBody, 0xFF0000));
+		m_dynamicObjects.push_back(m_pQuad);
 
-		m_pQuad2 = new GDI_Obj_Quad(m_pGDIRenderer);
-		physProps.movable = false;
-		physProps.pos = { 0, 500 };
-		physProps.scale = { 1000, 10 };
+		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pQuad->GetPhysicsBody(), { 405, 500 }, false);
+		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pQuad->GetPhysicsBody(), { 595, 500 }, false);
+
+		GDI_Obj_Generic* m_pCircle = new GDI_Obj_Circle(m_pGDIRenderer);
+		physProps.pos = { 500, 300 };
+		physProps.scale = { 50, 50 };
 		physProps.density = 1.0f;
-		physProps.friction = 0.0f;
+		physProps.friction = 0.3f;
 		physProps.restitution = 0.0f;
+		physProps.collisionType = CT_DYNAMIC;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
 		physProps.angle = DegreesToRadians(0.0f);
-		tempBody = m_pPhysics2D->CreatePhysicsObject_Quad(physProps);
-		VALIDATE(m_pQuad2->Initialise(tempBody, 0x00FF00));
+		pTempBody = m_pPhysics2D->CreatePhysicsObject_Circle(physProps);
+		VALIDATE(m_pCircle->Initialise(pTempBody, 0x0000FF));
+		m_dynamicObjects.push_back(m_pCircle);
 
-		m_pPhysics2D->CreateRopeJoint(m_pQuad->GetPhysicsBody(), m_pQuad2->GetPhysicsBody(), { 495, 500 }, { 495, 450 });
-
-		//m_pQuad3 = new GDI_Obj_Circle(m_pGDIRenderer);
-		//physProps.movable = true;
-		//physProps.pos = { 505, 300 };
-		//physProps.scale = { 50, 50 };
-		//physProps.density = 1.0f;
-		//physProps.friction = 0.3f;
-		//physProps.restitution = 0.0f;
-		//physProps.angle = DegreesToRadians(0.0f);
-		//tempBody = m_pPhysics2D->CreatePhysicsObject_Circle(physProps);
-		//VALIDATE(m_pQuad3->Initialise(tempBody, 0x0000FF));
+		//GDI_Line* m_pLine = new GDI_Line(m_pGDIRenderer);
+		//Physics_Joint_2D* pRopeJoint = m_pPhysics2D->CreateRopeJoint(m_pBackground->GetPhysicsBody(), m_pQuad->GetPhysicsBody(), { 495, 0 }, { 0, 0 }, true);
+		//VALIDATE(m_pLine->Initialise(pRopeJoint, 0xFFFF00));
+		//m_lines.push_back(m_pLine)
 	}
 
 	m_online = true;
@@ -280,9 +298,26 @@ void Application::ShutDown()
 	ReleasePtr(m_pCubeMesh);
 	ReleasePtr(m_pCube);
 
-	ReleasePtr(m_pQuad);
-	ReleasePtr(m_pQuad2);
-	ReleasePtr(m_pQuad3);
+	// Delete all GDI static objects
+	for (UINT i = 0; i < m_staticObjects.size(); i++)
+	{
+		ReleasePtr(m_staticObjects[i]);
+	}
+	// Delete all GDI dynamic objects
+	for (UINT i = 0; i < m_dynamicObjects.size(); i++)
+	{
+		ReleasePtr(m_dynamicObjects[i]);
+	}
+	// Delete all GDI breakable objects
+	for (UINT i = 0; i < m_breakableObjects.size(); i++)
+	{
+		ReleasePtr(m_breakableObjects[i]);
+	}
+	// Delete all GDI Lines
+	for (UINT i = 0; i < m_lines.size(); i++)
+	{
+		ReleasePtr(m_lines[i]);
+	}
 
 	ReleasePtr(m_pPhysics2D);
 
@@ -337,9 +372,54 @@ void Application::Process(float _dt)
 	{
 		m_pPhysics2D->Process();
 
-		m_pQuad->Process(_dt);
-		m_pQuad2->Process(_dt);
-		//m_pQuad3->Process(_dt);
+		// Process all static objects
+		for (UINT i = 0; i < m_staticObjects.size(); i++)
+		{
+			m_staticObjects[i]->Process(_dt);
+		}
+		// Process all dynamic objects
+		for (UINT i = 0; i < m_dynamicObjects.size(); i++)
+		{
+			m_dynamicObjects[i]->Process(_dt);
+		}
+		// Process all breakable objects
+		for (UINT i = 0; i < m_breakableObjects.size(); i++)
+		{
+			m_breakableObjects[i]->Process(_dt);
+		}
+		// Process all lines
+		for (UINT i = 0; i < m_lines.size(); i++)
+		{
+			m_lines[i]->Process(_dt);
+		}
+
+
+		std::vector<UINT> brokenIndices;
+		std::vector<GDI_Obj_Generic*> createdObjects;
+		//Physics_Body_2D* createdA;
+		//Physics_Body_2D* createdB;
+		for (UINT i = 0; i < m_breakableObjects.size(); i++)
+		{
+			for (UINT j = 0; j < m_breakableObjects.size(); j++)
+			{
+				if (i != j)
+				{
+					//bool broken = m_pPhysics2D->DetectBreaks(	m_breakableObjects[i]->GetPhysicsBody(),
+					//											m_breakableObjects[j]->GetPhysicsBody(),
+					//											createdA, createdB);
+					//if (broken == true)
+					//{
+					//	brokenIndices.push_back(i);
+					//
+					//	//createdA->
+					//	//createdObjects.push_back(createdA);
+					//	//createdObjects.push_back(createdB);
+					//}
+				}
+				
+			}
+		}
+
 	}
 }
 
@@ -360,9 +440,26 @@ void Application::Draw()
 	{
 		m_pGDIRenderer->BeginRender();
 
-		m_pQuad->Render();
-		m_pQuad2->Render();
-		//m_pQuad3->Render();
+		// Render all static objects
+		for (UINT i = 0; i < m_staticObjects.size(); i++)
+		{
+			m_staticObjects[i]->Render();
+		}
+		// Render all dynamic objects
+		for (UINT i = 0; i < m_dynamicObjects.size(); i++)
+		{
+			m_dynamicObjects[i]->Render();
+		}
+		// Render all breakable objects
+		for (UINT i = 0; i < m_breakableObjects.size(); i++)
+		{
+			m_breakableObjects[i]->Render();
+		}
+		// Render all lines
+		for (UINT i = 0; i < m_lines.size(); i++)
+		{
+			m_lines[i]->Render();
+		}
 
 		m_pGDIRenderer->EndRender();
 	}

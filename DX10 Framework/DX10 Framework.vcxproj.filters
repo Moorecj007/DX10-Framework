@@ -165,6 +165,15 @@
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Circle.h">
       <Filter>Header Files\GDI\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Files\Physics\2D Physics\Physics_Joint_2D.h">
+      <Filter>Header Files\Physics\2D Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\GDI\GDI\GDI_Line.h">
+      <Filter>Header Files\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Polygon.h">
+      <Filter>Header Files\GDI\Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
@@ -225,6 +234,15 @@
       <Filter>Source Files\GDI\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Triangle.cpp">
+      <Filter>Source Files\GDI\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Physics\2D Physics\Physics_Joint_2D.cpp">
+      <Filter>Source Files\Physics\2D Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\GDI\GDI\GDI_Line.cpp">
+      <Filter>Source Files\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Polygon.cpp">
       <Filter>Source Files\GDI\Objects</Filter>
     </ClCompile>
   </ItemGroup>

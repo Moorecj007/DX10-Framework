@@ -30,7 +30,6 @@ public:
 	/***********************
 	* GDI_Obj_Generic: Constructor for GDI Generic Object class
 	* @author: Callan Moore
-	* @parameter: _pGDIRenderer: GDI renderer for this object
 	********************/
 	GDI_Obj_Generic();
 
@@ -81,13 +80,13 @@ protected:
 	* @parameter: _pos: Center of the object containing the point
 	* @return: void
 	********************/
-	virtual void CalcRotation(POINT* _point, float _angle, v2float _pos);
+	virtual void CalcRotation(v2float* _point, float _angle, v2float _pos);
 
 protected:
 
 	GDI_Renderer* m_pGDIRenderer;
 
-	POINT* m_points;
+	v2float* m_points;
 	COLORREF m_color;
 	int m_size;
 

@@ -21,12 +21,14 @@
 
 #include "GDI\GDI_Renderer.h"
 #include "GDI\GDI_Backbuffer.h"
+#include "GDI\GDI_Line.h"
 
 // Objects
 #include "GDI\Objects\GDI_Obj_Generic.h"
 #include "GDI\Objects\GDI_Obj_Quad.h"
 #include "GDI\Objects\GDI_Obj_Triangle.h"
 #include "GDI\Objects\GDI_Obj_Circle.h"
+#include "GDI\Objects\GDI_Obj_Polygon.h"
 
 
 #endif	// __GDI_H__

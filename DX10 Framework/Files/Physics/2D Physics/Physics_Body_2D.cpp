@@ -22,6 +22,14 @@ Physics_Body_2D::Physics_Body_2D(b2Body* _pBody, v2float _scale, float _pixelsPe
 	m_pixelsPerMeter = _pixelsPerMeter;
 }
 
+Physics_Body_2D::Physics_Body_2D(b2Body* _pBody, v2float* _pPoints, UINT _size, float _pixelsPerMeter)
+{
+	m_pBody = _pBody;
+	m_pPoints = _pPoints;
+	m_size = _size;
+	m_pixelsPerMeter = _pixelsPerMeter;
+}
+
 Physics_Body_2D::~Physics_Body_2D()
 {
 }

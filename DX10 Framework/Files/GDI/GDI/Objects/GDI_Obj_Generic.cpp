@@ -26,13 +26,13 @@ GDI_Obj_Generic::~GDI_Obj_Generic()
 	ReleasePtrArray(m_points);
 }
 
-void GDI_Obj_Generic::CalcRotation(POINT* _point, float _angle, v2float _pos)
+void GDI_Obj_Generic::CalcRotation(v2float* _point, float _angle, v2float _pos)
 {
 	// Translate the point to origin
 	(*_point).x = (*_point).x - (LONG)_pos.x;
 	(*_point).y = (*_point).y - (LONG)_pos.y;
 
-	POINT pt;
+	v2float pt;
 	pt.x = (LONG)((*_point).x * cos(_angle) - (*_point).y * sin(_angle));
 	pt.y = (LONG)((*_point).y * cos(_angle) + (*_point).x * sin(_angle));
 

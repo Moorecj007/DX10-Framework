@@ -113,13 +113,16 @@
     <ClCompile Include="Files\DX10\DX10\Objects\DX10_Obj_LitTex.cpp" />
     <ClCompile Include="Files\DX10\DX10\Systems\DX10_StaticBuffer.cpp" />
     <ClCompile Include="Files\GDI\GDI\GDI_Backbuffer.cpp" />
+    <ClCompile Include="Files\GDI\GDI\GDI_Line.cpp" />
     <ClCompile Include="Files\GDI\GDI\GDI_Renderer.cpp" />
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Circle.cpp" />
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Generic.cpp" />
+    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Polygon.cpp" />
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Quad.cpp" />
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Triangle.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_2D.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Body_2D.cpp" />
+    <ClCompile Include="Files\Physics\2D Physics\Physics_Joint_2D.cpp" />
     <ClCompile Include="Files\Utility\DirectInput.cpp" />
     <ClCompile Include="Files\Utility\Timer.cpp" />
   </ItemGroup>
@@ -142,13 +145,16 @@
     <ClInclude Include="Files\DX10\DX10\Systems\DX10_StaticBuffer.h" />
     <ClInclude Include="Files\GDI\GDI.h" />
     <ClInclude Include="Files\GDI\GDI\GDI_Backbuffer.h" />
+    <ClInclude Include="Files\GDI\GDI\GDI_Line.h" />
     <ClInclude Include="Files\GDI\GDI\GDI_Renderer.h" />
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Circle.h" />
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Generic.h" />
+    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Polygon.h" />
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Quad.h" />
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Triangle.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_2D.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_Body_2D.h" />
+    <ClInclude Include="Files\Physics\2D Physics\Physics_Joint_2D.h" />
     <ClInclude Include="Files\Utility\DirectInput.h" />
     <ClInclude Include="Files\Utility\Timer.h" />
     <ClInclude Include="Files\Utility\Utilities.h" />

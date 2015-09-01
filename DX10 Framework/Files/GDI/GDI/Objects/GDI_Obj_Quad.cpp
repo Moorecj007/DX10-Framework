@@ -33,7 +33,7 @@ bool GDI_Obj_Quad::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color)
 	m_size = 4;
 
 	// Create a new array of points
-	m_points = new POINT[m_size];
+	m_points = new v2float[m_size];
 
 	return true;
 }

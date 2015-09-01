@@ -36,6 +36,9 @@ public:
 	********************/
 	Physics_Body_2D(b2Body* _pBody, v2float _scale, float _pixelsPerMeter);
 
+	// TO DO
+	Physics_Body_2D(b2Body* _pBody, v2float* _pPoints, UINT _size, float _pixelsPerMeter);
+
 	/***********************
 	* ~Physics_Body_2D: Default Destructor for Physics Body 2D class
 	* @author: Callan Moore
@@ -52,7 +55,7 @@ public:
 	/***********************
 	* GetScale: Retrieve the Scale of the Body
 	* @author: Callan Moore
-	* @return: v2float: The scale as a float vector 2D
+	* @return: v2float: The scale as a float 2D vector 
 	********************/
 	v2float GetScale() { return m_scale * m_pixelsPerMeter; };
 
@@ -70,9 +73,18 @@ public:
 	********************/
 	b2Body* GetBody() { return m_pBody; };
 
+	// TO DO
+	UINT GetSize() { return m_size; };
+
+	v2float* GetPoints() { return m_pPoints; };
+	// TO DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// Return the points based on world space
+
 private:
 	b2Body* m_pBody;
 	v2float m_scale;
 	float m_pixelsPerMeter;
+	UINT m_size;
+	v2float* m_pPoints;
 };
 #endif	// __PHYSICS_BODY_2D_H__

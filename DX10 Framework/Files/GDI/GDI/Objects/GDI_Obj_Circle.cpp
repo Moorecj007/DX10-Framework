@@ -22,6 +22,7 @@ GDI_Obj_Circle::GDI_Obj_Circle(GDI_Renderer* _pGDIRenderer)
 
 GDI_Obj_Circle::~GDI_Obj_Circle()
 {
+	ReleasePtrArray(m_points);
 }
 
 bool GDI_Obj_Circle::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color)
@@ -32,7 +33,7 @@ bool GDI_Obj_Circle::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color)
 	m_size = 4;
 
 	// Create a new array of points
-	m_points = new POINT[m_size];
+	m_points = new v2float[m_size];
 
 	return true;
 }
