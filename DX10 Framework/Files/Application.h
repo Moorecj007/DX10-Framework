@@ -25,7 +25,7 @@
 #include "Utility\Timer.h"
 #include "DX10\DX10.h"
 #include "GDI\GDI.h"
-#include "Physics\2D Physics\Physics_2D.h"
+#include "Physics\Physics_2D.h"
 
 class Application
 {
@@ -181,7 +181,7 @@ private:
 	DX10_Shader_LitTex* m_pShader_LitTex;
 
 	// Physics
-	Physics_2D* m_pPhysics2D;
+	PhysicsWorld_2D* m_pPhysics2D;
 
 };
 

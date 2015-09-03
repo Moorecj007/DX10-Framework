@@ -65,10 +65,10 @@ public:
 	* @author: Callan Moore
 	* @parameter: _center: position of the Center of the Ellipse
 	* @parameter: _color: Color to fill the Ellipse with
-	* @parameter: _scale: Scale of the Ellipse
+	* @parameter: _radius: Radius of the Ellipse
 	* @return: void
 	********************/
-	void RenderEllipse(v2float _center, COLORREF _color, v2float _scale);
+	void RenderEllipse(v2float _center, COLORREF _color, float _radius);
 
 	/***********************
 	* RenderLine: Render a Line

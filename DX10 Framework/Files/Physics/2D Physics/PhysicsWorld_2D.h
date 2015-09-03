@@ -6,7 +6,7 @@
 *
 * (c) 2005 - 2015 Media Design School
 *
-* File Name : Physics_2D.h
+* File Name : PhysicsWorld_2D.h
 * Description : Simulates all 2D physics for the application
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
@@ -14,20 +14,17 @@
 
 // Inclusion Guards
 #pragma once
-#ifndef __2D_PHYSICS_H__
-#define __2D_PHYSICS_H__
-
-// Library Includes
-#pragma comment(lib, "Box2D.lib")
-#include <Box2D.h>
+#ifndef __PHYSICSWORLD_2D_H__
+#define __PHYSICSWORLD_2D_H__
 
 // Local Includes
 #include "Physics_Utilities.h"
 #include "Physics_Body_2D.h"
+#include "Physics_Rope_2D.h"
 #include "Physics_Joint_2D.h"
 #include "Physics_Break_Listener.h"
 
-class Physics_2D
+class PhysicsWorld_2D
 {
 public:
 
@@ -35,13 +32,13 @@ public:
 	* C2D_Physics: Default Constructor for 2D Physics class
 	* @author: Callan Moore
 	********************/
-	Physics_2D();
+	PhysicsWorld_2D();
 
 	/***********************
 	* ~C2D_Physics: Default Destructor for 2D Physics class
 	* @author: Callan Moore
 	********************/
-	~Physics_2D();
+	~PhysicsWorld_2D();
 
 	/***********************
 	* Initialise: Initialise the Physics 2D simulator
@@ -59,12 +56,12 @@ public:
 	void Process();
 
 	/***********************
-	* CreatePhysicsObject_Quad: Create a Physics body for a 2D Quad
+	* CreatePhysicsObject: Create a Physics body for a 2D Object. 
 	* @author: Callan Moore
 	* @parameter: _props: Properties for the Physics object
 	* @return: Physics_Body_2D*: Physics Body for a 2D object
 	********************/
-	Physics_Body_2D* Physics_2D::CreatePhysicsObject_Quad(TPhysicsProperties _props);
+	Physics_Body_2D* CreatePhysicsObject(TPhysicsProperties _props);
 
 	/***********************
 	* CreatePhysicsPolygon: Create a Physics body for a 2D Polygon
@@ -72,23 +69,15 @@ public:
 	* @parameter: _props: Properties for the Physics object
 	* @return: Physics_Body_2D*: Physics Body for a 2D object
 	********************/
-	Physics_Body_2D* Physics_2D::CreatePhysicsPolygon(TPhysicsProperties _props);
+	Physics_Body_2D* CreatePhysicsPolygon(TPhysicsProperties _props);
 
 	/***********************
-	* CreatePhysicsObject_Tri: Create a Physics body for a 2D Triangle
+	* CreatePhysicsCircle: Create a Physics body for a 2D Circle
 	* @author: Callan Moore
 	* @parameter: _props: Properties for the Physics object
 	* @return: Physics_Body_2D*: Physics Body for a 2D object
 	********************/
-	Physics_Body_2D* Physics_2D::CreatePhysicsObject_Tri(TPhysicsProperties _props);
-
-	/***********************
-	* CreatePhysicsObject_Circle: Create a Physics body for a 2D Circle
-	* @author: Callan Moore
-	* @parameter: _props: Properties for the Physics object
-	* @return: Physics_Body_2D*: Physics Body for a 2D object
-	********************/
-	Physics_Body_2D* Physics_2D::CreatePhysicsObject_Circle(TPhysicsProperties _props);
+	Physics_Body_2D* CreatePhysicsCircle(TPhysicsProperties _props);
 	
 	/***********************
 	* CreateResoluteJoint: Creates a Resolute Joint between two physics objects
@@ -111,7 +100,10 @@ public:
 	* @parameter: _collide: Can the two connect bodies collide with each other
 	* @return: Physics_Joint_2D*: Reference to the created Joint
 	********************/
-	Physics_Joint_2D* CreateRopeJoint(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, bool _collide);
+	//Physics_Joint_2D* CreateRopeJoint(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, bool _collide);
+
+	// TO DO
+	Physics_Rope_2D*  CreateRope(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, COLORREF _color);
 
 	// TO DO
 	std::vector<Physics_Body_2D*>* BreakObject(Physics_Body_2D* _body);
@@ -129,7 +121,7 @@ private:
 	float m_pixelsPerMeter;
 };
 
-#endif	// __2D_PHYSICS_H__
+#endif	// __PHYSICSWORLD_2D_H__
 
 
 

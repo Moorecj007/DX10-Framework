@@ -70,17 +70,17 @@ void GDI_Renderer::RenderPolygon(v2float* _pPoints, COLORREF _color, int _size)
 	ReleasePtr(pPoints);
 }
 
-void GDI_Renderer::RenderEllipse(v2float _center, COLORREF _color, v2float _scale)
+void GDI_Renderer::RenderEllipse(v2float _center, COLORREF _color, float _radius)
 {
 	HDC hdc = m_pBackBuffer->GetBFDC();
 
 	HBRUSH brush = CreateSolidBrush(_color);
 	SelectObject(hdc, brush);
 
-	int ellipseLeft = (int)(_center.x - _scale.x / 2.0f);
-	int ellipseTop = (int)(_center.y - _scale.y / 2.0f);
-	int ellipseRight = (int)(_center.x + _scale.x / 2.0f);
-	int ellipseBottom = (int)(_center.y + _scale.y / 2.0f);
+	int ellipseLeft = (int)(_center.x - _radius);
+	int ellipseTop = (int)(_center.y - _radius);
+	int ellipseRight = (int)(_center.x + _radius);
+	int ellipseBottom = (int)(_center.y + _radius);
 
 	// Draw the Object with a solid fill color
 	Ellipse(hdc, ellipseLeft, ellipseTop, ellipseRight, ellipseBottom);

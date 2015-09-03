@@ -17,6 +17,10 @@
 #ifndef __PHYSICS_UTILITIES_H__
 #define __PHYSICS_UTILITIES_H__
 
+// Library Includes
+#pragma comment(lib, "Box2D.lib")
+#include <Box2D.h>
+
 // Local Includes
 #include "../../Utility/Utilities.h"
 
@@ -26,10 +30,13 @@
 ********************/
 struct TPhysicsProperties
 {
+	bool circleObject;
+	float radius;
+
 	v2float* pPoints;
 	UINT size;
+
 	v2float	pos;
-	v2float scale;
 	float density;
 	float friction;
 	float restitution;
@@ -38,6 +45,10 @@ struct TPhysicsProperties
 	UINT16 collideWith;
 };
 
+/***********************
+* TBreakProperties: Properties struct for an object that needs to break
+* @author: Callan Moore
+********************/
 struct TBreakProperties
 {
 	bool broken;
@@ -45,7 +56,10 @@ struct TBreakProperties
 	v2float impactVelocity;
 };
 
-// enum
+/***********************
+* eCollisionType: enum for collision types
+* @author: Callan Moore
+********************/
 enum eCollisionType
 {
 	CT_BACKGROUND = 0x0001,

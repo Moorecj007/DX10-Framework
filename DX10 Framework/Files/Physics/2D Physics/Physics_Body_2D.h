@@ -28,16 +28,16 @@ class Physics_Body_2D
 public:
 
 	/***********************
-	* Physics_Body_2D: Constructor for Physics Body 2D class
+	* Physics_Body_2D: Constructor for Physics Body 2D for a circle object
 	* @author: Callan Moore
 	* @parameter: _pBody: The Box2D physics body to govern this objects physics interactions
-	* @parameter: _scale: Scale of the object (width and height)
+	* @parameter: _radius: Radius of the circle
 	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
 	********************/
-	Physics_Body_2D(b2Body* _pBody, v2float _scale, float _pixelsPerMeter);
+	Physics_Body_2D(b2Body* _pBody, float _radius, float _pixelsPerMeter);
 
 	/***********************
-	* Physics_Body_2D: Constructor for Physics Body 2D class
+	* Physics_Body_2D: Constructor for Physics Body 2D for a polygon object
 	* @author: Callan Moore
 	* @parameter: _pBody: The Box2D physics body to govern this objects physics interactions
 	* @parameter: _pPoints: The points for the body to be created from
@@ -51,27 +51,6 @@ public:
 	* @author: Callan Moore
 	********************/
 	~Physics_Body_2D();
-	
-	/***********************
-	* GetPosition: Retrieve the position of the Body
-	* @author: Callan Moore
-	* @return: v2float: The position as a float vector 2D
-	********************/
-	v2float GetPosition();
-	
-	/***********************
-	* GetScale: Retrieve the Scale of the Body
-	* @author: Callan Moore
-	* @return: v2float: The scale as a float 2D vector 
-	********************/
-	v2float GetScale() { return m_scale * m_pixelsPerMeter; };
-
-	/***********************
-	* GetAngle: Retrieve the rotation angle of the Body
-	* @author: Callan Moore
-	* @return: float: Rotation angle of the Body
-	********************/
-	float GetAngle() { return m_pBody->GetAngle(); };
 
 	/***********************
 	* GetBody: Retrieve the Box2D body of this object
@@ -79,13 +58,20 @@ public:
 	* @return: b2Body*: The Box2d Body of the physics object
 	********************/
 	b2Body* GetBody() { return m_pBody; };
-
+	
 	/***********************
-	* GetSize: Retrieve the size of the body array of points
+	* GetBreakProperties: Retrieve the Break properties of the body
 	* @author: Callan Moore
-	* @return: UINT: Amount of points for the body 
+	* @return: TBreakProperties*: The break properties of the body
 	********************/
-	UINT GetSize() { return m_size; };
+	TBreakProperties* GetBreakProperties() { return &m_breakProps; };
+	
+	/***********************
+	* GetRadius: Retrieve the radius for a circle body
+	* @author: Callan Moore
+	* @return: float: The radius of the circle
+	********************/
+	float GetRadius() { return m_radius * m_pixelsPerMeter; };
 
 	/***********************
 	* GetPoints: Retrieve the array of points that make up the body
@@ -94,18 +80,45 @@ public:
 	********************/
 	v2float* GetPoints() { return m_pPoints; };
 
-	// TO DO
-	TBreakProperties* GetBreakProperties() { return &m_breakProps; };
+	/***********************
+	* GetSize: Retrieve the size of the body array of points
+	* @author: Callan Moore
+	* @return: UINT: Amount of points for the body
+	********************/
+	UINT GetSize() { return m_size; };
+	
+	/***********************
+	* GetPosition: Retrieve the position of the Body
+	* @author: Callan Moore
+	* @return: v2float: The position as a float vector 2D
+	********************/
+	v2float GetPosition();
 
-	// TO DO
+	/***********************
+	* GetAngle: Retrieve the rotation angle of the Body
+	* @author: Callan Moore
+	* @return: float: Rotation angle of the Body
+	********************/
+	float GetAngle() { return m_pBody->GetAngle(); };
+	
+	/***********************
+	* SetBreakProperties: Set a new Break properties structure for the Body
+	* @author: Callan Moore
+	* @parameter: _breakProps: The new Break properties structure
+	* @return: void
+	********************/
 	void SetBreakProperties(TBreakProperties _breakProps) { m_breakProps = _breakProps; };
 
 private:
 	b2Body* m_pBody;
-	v2float m_scale;
-	float m_pixelsPerMeter;
-	UINT m_size;
-	v2float* m_pPoints;
 	TBreakProperties m_breakProps;
+	float m_pixelsPerMeter;
+
+	// Circle Properties
+	float m_radius;
+
+	// Polygon Properties
+	v2float* m_pPoints;
+	UINT m_size;	
 };
 #endif	// __PHYSICS_BODY_2D_H__

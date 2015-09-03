@@ -25,6 +25,7 @@ Physics_Break_Listener::~Physics_Break_Listener()
 
 void Physics_Break_Listener::BeginContact(b2Contact* _contact)
 {
+	// TO DO - COMMENT THE SHIT OUT OF THIS
 
 	int numPoints = _contact->GetManifold()->pointCount;
 	b2Vec2* collisionPoint;
@@ -66,7 +67,6 @@ void Physics_Break_Listener::BeginContact(b2Contact* _contact)
 	breakProps.pCollisionWorldPoints = pPoints;
 	breakProps.impactVelocity = impactVelocity;
 	pPhysicsBody->SetBreakProperties(breakProps);
-
 }
 
 void Physics_Break_Listener::EndContact(b2Contact* _contact)

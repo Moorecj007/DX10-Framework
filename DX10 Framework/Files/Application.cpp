@@ -205,58 +205,80 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		VALIDATE(m_pGDIRenderer->Initialise(m_hWnd, _hInstance, m_clientWidth, m_clientHeight));
 
 		// Initialise the Physics system
-		m_pPhysics2D = new Physics_2D();
+		m_pPhysics2D = new PhysicsWorld_2D();
 		VALIDATE(m_pPhysics2D->Initialise(40.0f));
 	
 		// Initialise the Objects
 		Physics_Body_2D* pTempBody;
 		TPhysicsProperties physProps;
+		v2float* pPoints;
+		GDI_Obj_Generic* m_pTempObject;
 
-		GDI_Obj_Generic* m_pBackground = new GDI_Obj_Quad(m_pGDIRenderer);
+		GDI_Obj_Generic* m_pBackground = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
+		pPoints[0] = { -1000.0f, -1000.0f };
+		pPoints[1] = { 1000.0f, -1000.0f };
+		pPoints[2] = { 1000.0f, 1000.0f };
+		pPoints[3] = { -1000.0f, 1000.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
+		physProps.pPoints = pPoints;
+		physProps.size = 4;
 		physProps.pos = { 0, 0 };
-		physProps.scale = { 2000, 2000 };
-		physProps.density = 0.0f;
-		physProps.friction = 0.0f;
-		physProps.restitution = 0.0f;
 		physProps.collisionType = CT_BACKGROUND;
-		physProps.collideWith = 0;
-		physProps.angle = DegreesToRadians(0.0f);
-		pTempBody = m_pPhysics2D->CreatePhysicsObject_Quad(physProps);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
 		VALIDATE(m_pBackground->Initialise(pTempBody, 0xFFFFFF));
 		m_staticObjects.push_back(m_pBackground);
 
-		GDI_Obj_Generic* m_pQuad = new GDI_Obj_Polygon(m_pGDIRenderer);
-		v2float* pPoints = new v2float[4];
+		m_pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
 		pPoints[0] = { -100.0f, -25.0f};
 		pPoints[1] = {  100.0f, -25.0f };
 		pPoints[2] = {  100.0f,  25.0f };
 		pPoints[3] = { -100.0f,  25.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
 		physProps.pPoints = pPoints;
 		physProps.size = 4;
 		physProps.pos = { 500, 500 };
 		physProps.density = 1.0f;
 		physProps.friction = 0.3f;
-		physProps.restitution = 0.0f;
 		physProps.collisionType = CT_BREAKABLE;
 		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
-		physProps.angle = DegreesToRadians(0.0f);
-		pTempBody = m_pPhysics2D->CreatePhysicsPolygon(physProps);
-		VALIDATE(m_pQuad->Initialise(pTempBody, 0xFF0000));
-		m_breakableObjects.push_back(m_pQuad);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
+		VALIDATE(m_pTempObject->Initialise(pTempBody, 0xFF0000));
+		m_breakableObjects.push_back(m_pTempObject);
 
-		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pQuad->GetPhysicsBody(), { 405, 500 }, false);
-		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pQuad->GetPhysicsBody(), { 595, 500 }, false);
+		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pTempObject->GetPhysicsBody(), { 405, 500 }, false);
+		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pTempObject->GetPhysicsBody(), { 595, 500 }, false);
+
+		m_pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
+		pPoints[0] = { -20.0f, 20.0f };
+		pPoints[1] = { 0.0f, -15.0f };
+		pPoints[2] = { 20.0f, 20.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
+		physProps.pPoints = pPoints;
+		physProps.size = 3;
+		physProps.pos = { 500, 700 };
+		physProps.friction = 0.3f;
+		physProps.collisionType = CT_STATIC;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
+		VALIDATE(m_pTempObject->Initialise(pTempBody, 0xFF0000));
+		m_breakableObjects.push_back(m_pTempObject);
 
 		GDI_Obj_Generic* m_pCircle = new GDI_Obj_Circle(m_pGDIRenderer);
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = true;
 		physProps.pos = { 500, 300 };
-		physProps.scale = { 50, 50 };
+		physProps.radius = 25.0f;
 		physProps.density = 1.0f;
 		physProps.friction = 0.3f;
-		physProps.restitution = 0.0f;
 		physProps.collisionType = CT_DYNAMIC;
 		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
-		physProps.angle = DegreesToRadians(0.0f);
-		pTempBody = m_pPhysics2D->CreatePhysicsObject_Circle(physProps);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
 		VALIDATE(m_pCircle->Initialise(pTempBody, 0x0000FF));
 		m_dynamicObjects.push_back(m_pCircle);
 
@@ -267,6 +289,8 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	}
 
 	m_online = true;
+
+	// Initialise all time keeping variables to default (zero) state
 	m_pTimer = new Timer();
 	m_pTimer->Reset();
 	m_fps = 0;

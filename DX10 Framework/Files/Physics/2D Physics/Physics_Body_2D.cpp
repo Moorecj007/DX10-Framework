@@ -15,10 +15,10 @@
 // This Include
 #include "Physics_Body_2D.h"
 
-Physics_Body_2D::Physics_Body_2D(b2Body* _pBody, v2float _scale, float _pixelsPerMeter)
+Physics_Body_2D::Physics_Body_2D(b2Body* _pBody, float _radius, float _pixelsPerMeter)
 {
 	m_pBody = _pBody;
-	m_scale = _scale;
+	m_radius = _radius;
 	m_pixelsPerMeter = _pixelsPerMeter;
 	m_pPoints = 0;
 
