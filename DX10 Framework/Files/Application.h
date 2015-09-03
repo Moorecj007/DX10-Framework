@@ -154,8 +154,8 @@ private:
 	// Timer Variables
 	Timer* m_pTimer;
 	float m_deltaTick;
-	int m_fps; // TO DO
-	float m_fpsTimer; // TO DO
+	int m_fps;
+	float m_fpsTimer; 
 
 	// Input Variables
 	bool* m_pKeyDown;

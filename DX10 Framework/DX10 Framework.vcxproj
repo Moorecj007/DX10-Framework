@@ -122,6 +122,7 @@
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Triangle.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_2D.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Body_2D.cpp" />
+    <ClCompile Include="Files\Physics\2D Physics\Physics_Break_Listener.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Joint_2D.cpp" />
     <ClCompile Include="Files\Utility\DirectInput.cpp" />
     <ClCompile Include="Files\Utility\Timer.cpp" />
@@ -154,7 +155,9 @@
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Triangle.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_2D.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_Body_2D.h" />
+    <ClInclude Include="Files\Physics\2D Physics\Physics_Break_Listener.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_Joint_2D.h" />
+    <ClInclude Include="Files\Physics\2D Physics\Physics_Utilities.h" />
     <ClInclude Include="Files\Utility\DirectInput.h" />
     <ClInclude Include="Files\Utility\Timer.h" />
     <ClInclude Include="Files\Utility\Utilities.h" />

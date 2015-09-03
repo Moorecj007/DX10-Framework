@@ -70,6 +70,13 @@ public:
 	********************/
 	Physics_Body_2D* GetPhysicsBody() { return m_pPhysicsBody; };
 
+	/***********************
+	* GetColor: Retrieve the Color of the Object
+	* @author: Callan Moore
+	* @return: COLORREF: The color of the object
+	********************/
+	virtual COLORREF GetColor()	{ return m_color; };
+
 protected:
 
 	/***********************

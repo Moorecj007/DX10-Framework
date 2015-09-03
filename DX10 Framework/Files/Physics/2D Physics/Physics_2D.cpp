@@ -44,6 +44,9 @@ bool Physics_2D::Initialise(float _pixelsPerMeter)
 	}
 	m_pWorld->SetAllowSleeping(m_allowSleep);
 
+	b2ContactListener* pBreakListener = new Physics_Break_Listener();
+	m_pWorld->SetContactListener(pBreakListener);
+
 	return true;
 }
 
@@ -135,6 +138,7 @@ Physics_Body_2D* Physics_2D::CreatePhysicsPolygon(TPhysicsProperties _props)
 	body->CreateFixture(&fixtureDef);
 
 	Physics_Body_2D* pPhysicsBody = new Physics_Body_2D(body, _props.pPoints, _props.size, m_pixelsPerMeter);
+	body->SetUserData(pPhysicsBody);
 
 	ReleasePtr(pPts);
 	return pPhysicsBody;
@@ -215,7 +219,6 @@ Physics_Body_2D* Physics_2D::CreatePhysicsObject_Circle(TPhysicsProperties _prop
 		bodyDef.type = b2_dynamicBody;
 		fixtureDef.density = _props.density;
 	}
-
 	bodyDef.position.Set(convertPos.x, convertPos.y);
 	bodyDef.angle = _props.angle;
 	body = m_pWorld->CreateBody(&bodyDef);
@@ -231,6 +234,7 @@ Physics_Body_2D* Physics_2D::CreatePhysicsObject_Circle(TPhysicsProperties _prop
 	body->CreateFixture(&fixtureDef);
 
 	Physics_Body_2D* pPhysicsBody = new Physics_Body_2D(body, convertScale, m_pixelsPerMeter);
+	body->SetUserData(pPhysicsBody);
 	return pPhysicsBody;
 }
 
@@ -268,3 +272,16 @@ Physics_Joint_2D* Physics_2D::CreateRopeJoint(Physics_Body_2D* _bodyA, Physics_B
 	Physics_Joint_2D* pPhysicsJoint = new Physics_Joint_2D(pJoint, m_pixelsPerMeter);
 	return pPhysicsJoint;
 }
+
+std::vector<Physics_Body_2D*>* Physics_2D::BreakObject(Physics_Body_2D* _body)
+{
+	v2float* points = _body->GetPoints();
+	UINT size = _body->GetSize();
+
+
+}
+
+
+
+
+

@@ -45,20 +45,20 @@ void GDI_Obj_Circle::Process(float _dt)
 	float angle = m_pPhysicsBody->GetAngle();
 
 	// Top Left point
-	m_points[0].x = (LONG)(pos.x - (scale.x / 2.0f));
-	m_points[0].y = (LONG)(pos.y - (scale.y / 2.0f));
+	m_points[0].x = (pos.x - (scale.x / 2.0f));
+	m_points[0].y = (pos.y - (scale.y / 2.0f));
 
 	// Top Right point
-	m_points[1].x = (LONG)(pos.x + (scale.x / 2.0f));
-	m_points[1].y = (LONG)(pos.y - (scale.y / 2.0f));
+	m_points[1].x = (pos.x + (scale.x / 2.0f));
+	m_points[1].y = (pos.y - (scale.y / 2.0f));
 
 	// Bottom Right point
-	m_points[2].x = (LONG)(pos.x + (scale.x / 2.0f));
-	m_points[2].y = (LONG)(pos.y + (scale.y / 2.0f));
+	m_points[2].x = (pos.x + (scale.x / 2.0f));
+	m_points[2].y = (pos.y + (scale.y / 2.0f));
 
 	// Bottom Left point
-	m_points[3].x = (LONG)(pos.x - (scale.x / 2.0f));
-	m_points[3].y = (LONG)(pos.y + (scale.y / 2.0f));
+	m_points[3].x = (pos.x - (scale.x / 2.0f));
+	m_points[3].y = (pos.y + (scale.y / 2.0f));
 
 	// Calculate the Rotation
 	for (int i = 0; i < m_size; i++)

@@ -237,12 +237,12 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		physProps.density = 1.0f;
 		physProps.friction = 0.3f;
 		physProps.restitution = 0.0f;
-		physProps.collisionType = CT_DYNAMIC;
+		physProps.collisionType = CT_BREAKABLE;
 		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
 		physProps.angle = DegreesToRadians(0.0f);
 		pTempBody = m_pPhysics2D->CreatePhysicsPolygon(physProps);
 		VALIDATE(m_pQuad->Initialise(pTempBody, 0xFF0000));
-		m_dynamicObjects.push_back(m_pQuad);
+		m_breakableObjects.push_back(m_pQuad);
 
 		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pQuad->GetPhysicsBody(), { 405, 500 }, false);
 		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pQuad->GetPhysicsBody(), { 595, 500 }, false);
@@ -385,39 +385,25 @@ void Application::Process(float _dt)
 		// Process all breakable objects
 		for (UINT i = 0; i < m_breakableObjects.size(); i++)
 		{
+			TBreakProperties* breakProps =  m_breakableObjects[i]->GetPhysicsBody()->GetBreakProperties();
+
+			if (breakProps->broken == true)
+			{
+				std::vector<Physics_Body_2D*>* pNewBodies = m_pPhysics2D->BreakObject(m_breakableObjects[i]->GetPhysicsBody());
+
+				// TO DO
+				// Destroy this object
+				// Create new objects
+
+				breakProps->broken = false;
+			}
+
 			m_breakableObjects[i]->Process(_dt);
 		}
 		// Process all lines
 		for (UINT i = 0; i < m_lines.size(); i++)
 		{
 			m_lines[i]->Process(_dt);
-		}
-
-
-		std::vector<UINT> brokenIndices;
-		std::vector<GDI_Obj_Generic*> createdObjects;
-		//Physics_Body_2D* createdA;
-		//Physics_Body_2D* createdB;
-		for (UINT i = 0; i < m_breakableObjects.size(); i++)
-		{
-			for (UINT j = 0; j < m_breakableObjects.size(); j++)
-			{
-				if (i != j)
-				{
-					//bool broken = m_pPhysics2D->DetectBreaks(	m_breakableObjects[i]->GetPhysicsBody(),
-					//											m_breakableObjects[j]->GetPhysicsBody(),
-					//											createdA, createdB);
-					//if (broken == true)
-					//{
-					//	brokenIndices.push_back(i);
-					//
-					//	//createdA->
-					//	//createdObjects.push_back(createdA);
-					//	//createdObjects.push_back(createdB);
-					//}
-				}
-				
-			}
 		}
 
 	}

@@ -22,32 +22,10 @@
 #include <Box2D.h>
 
 // Local Includes
-#include "../../Utility/Utilities.h"
+#include "Physics_Utilities.h"
 #include "Physics_Body_2D.h"
 #include "Physics_Joint_2D.h"
-
-// Struct
-struct TPhysicsProperties
-{
-	v2float* pPoints;
-	UINT size;
-	v2float	pos;
-	v2float scale;
-	float density;
-	float friction;
-	float restitution;
-	float angle;
-	UINT16 collisionType;
-	UINT16 collideWith;
-};
-
-enum eCollisionType
-{
-	CT_BACKGROUND = 0x0001,
-	CT_STATIC = 0x0002,
-	CT_DYNAMIC = 0x0004,
-	CT_BREAKABLE = 0x0008,
-};
+#include "Physics_Break_Listener.h"
 
 class Physics_2D
 {
@@ -136,7 +114,7 @@ public:
 	Physics_Joint_2D* CreateRopeJoint(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, bool _collide);
 
 	// TO DO
-	bool DetectBreaks(Physics_Body_2D* _breakable, Physics_Body_2D* _other, Physics_Body_2D* _createdA, Physics_Body_2D* _createdB);
+	std::vector<Physics_Body_2D*>* BreakObject(Physics_Body_2D* _body);
 
 private:
 

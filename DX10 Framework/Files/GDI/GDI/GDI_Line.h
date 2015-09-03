@@ -29,7 +29,7 @@ public:
 	/***********************
 	* GDI_Line: Constructor for GDI Line class
 	* @author: Callan Moore
-	* @parameter: _pGDI_Renderer: GDi Renderer for this line
+	* @parameter: _pGDI_Renderer: GDI Renderer for this line
 	********************/
 	GDI_Line(GDI_Renderer* _pGDI_Renderer);
 
@@ -39,16 +39,38 @@ public:
 	********************/
 	~GDI_Line();
 
-	// TO DO
+	/***********************
+	* Initialise: Initialise a line using a physics joint
+	* @author: Callan Moore
+	* @parameter: _pJoint: Physics Rope Joint
+	* @parameter: _color: Color for the Line
+	* @return: bool: Successful or not
+	********************/
 	bool Initialise(Physics_Joint_2D* _pJoint, COLORREF _color);
 
-	// TO DO
+	/***********************
+	* Initialise: Initialise a line using points on the screen
+	* @author: Callan Moore
+	* @parameter: _posA: The first point for the line
+	* @parameter: _posA: The second point for the line
+	* @parameter: _color: Color for the Line
+	* @return: bool: Successful or not
+	********************/
 	bool Initialise(v2float _posA, v2float _posB, COLORREF _color);
 
-	// TO DO
+	/***********************
+	* Process: Process any changes to the line for the current frame
+	* @author: Callan Moore
+	* @parameter: _dt; The current delta tick
+	* @return: void
+	********************/
 	void Process(float _dt);
 
-	// TO DO
+	/***********************
+	* Render: Draw the line to the screen
+	* @author: Callan Moore
+	* @return: void
+	********************/
 	void Render();
 
 private:

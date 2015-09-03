@@ -43,7 +43,7 @@ void GDI_Obj_Polygon::Process(float _dt)
 	UINT size = m_pPhysicsBody->GetSize();
 	float angle = m_pPhysicsBody->GetAngle();
 
-	for (int i = 0; i < m_pPhysicsBody->GetSize(); i++)
+	for (UINT i = 0; i < m_pPhysicsBody->GetSize(); i++)
 	{
 		m_points[i] = m_pPhysicsBody->GetPoints()[i];
 	}

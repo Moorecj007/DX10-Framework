@@ -21,7 +21,7 @@
 #include <Box2D.h>
 
 // Local Includes
-#include "../../Utility/Utilities.h"
+#include "Physics_Utilities.h"
 
 class Physics_Body_2D
 {
@@ -36,7 +36,14 @@ public:
 	********************/
 	Physics_Body_2D(b2Body* _pBody, v2float _scale, float _pixelsPerMeter);
 
-	// TO DO
+	/***********************
+	* Physics_Body_2D: Constructor for Physics Body 2D class
+	* @author: Callan Moore
+	* @parameter: _pBody: The Box2D physics body to govern this objects physics interactions
+	* @parameter: _pPoints: The points for the body to be created from
+	* @parameter: _size: Size of the array of points
+	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
+	********************/
 	Physics_Body_2D(b2Body* _pBody, v2float* _pPoints, UINT _size, float _pixelsPerMeter);
 
 	/***********************
@@ -73,12 +80,25 @@ public:
 	********************/
 	b2Body* GetBody() { return m_pBody; };
 
-	// TO DO
+	/***********************
+	* GetSize: Retrieve the size of the body array of points
+	* @author: Callan Moore
+	* @return: UINT: Amount of points for the body 
+	********************/
 	UINT GetSize() { return m_size; };
 
+	/***********************
+	* GetPoints: Retrieve the array of points that make up the body
+	* @author: Callan Moore
+	* @return: v2float*: The array of points
+	********************/
 	v2float* GetPoints() { return m_pPoints; };
-	// TO DO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// Return the points based on world space
+
+	// TO DO
+	TBreakProperties* GetBreakProperties() { return &m_breakProps; };
+
+	// TO DO
+	void SetBreakProperties(TBreakProperties _breakProps) { m_breakProps = _breakProps; };
 
 private:
 	b2Body* m_pBody;
@@ -86,5 +106,6 @@ private:
 	float m_pixelsPerMeter;
 	UINT m_size;
 	v2float* m_pPoints;
+	TBreakProperties m_breakProps;
 };
 #endif	// __PHYSICS_BODY_2D_H__

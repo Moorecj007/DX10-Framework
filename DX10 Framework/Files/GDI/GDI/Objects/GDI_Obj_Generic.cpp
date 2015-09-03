@@ -29,15 +29,15 @@ GDI_Obj_Generic::~GDI_Obj_Generic()
 void GDI_Obj_Generic::CalcRotation(v2float* _point, float _angle, v2float _pos)
 {
 	// Translate the point to origin
-	(*_point).x = (*_point).x - (LONG)_pos.x;
-	(*_point).y = (*_point).y - (LONG)_pos.y;
+	(*_point).x = (*_point).x - _pos.x;
+	(*_point).y = (*_point).y - _pos.y;
 
 	v2float pt;
-	pt.x = (LONG)((*_point).x * cos(_angle) - (*_point).y * sin(_angle));
-	pt.y = (LONG)((*_point).y * cos(_angle) + (*_point).x * sin(_angle));
+	pt.x = ((*_point).x * cos(_angle) - (*_point).y * sin(_angle));
+	pt.y = ((*_point).y * cos(_angle) + (*_point).x * sin(_angle));
 
-	(*_point).x = pt.x + (LONG)_pos.x;
-	(*_point).y = pt.y + (LONG)_pos.y;
+	(*_point).x = pt.x + _pos.x;
+	(*_point).y = pt.y + _pos.y;
 }
 
 void GDI_Obj_Generic::Render()
