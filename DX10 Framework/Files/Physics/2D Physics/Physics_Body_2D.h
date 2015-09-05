@@ -30,21 +30,23 @@ public:
 	/***********************
 	* Physics_Body_2D: Constructor for Physics Body 2D for a circle object
 	* @author: Callan Moore
+	* @parameter: _pPhysWorld: The physics world that holds this body
 	* @parameter: _pBody: The Box2D physics body to govern this objects physics interactions
 	* @parameter: _radius: Radius of the circle
 	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
 	********************/
-	Physics_Body_2D(b2Body* _pBody, float _radius, float _pixelsPerMeter);
+	Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, float _radius, float _pixelsPerMeter);
 
 	/***********************
 	* Physics_Body_2D: Constructor for Physics Body 2D for a polygon object
 	* @author: Callan Moore
+	* @parameter: _pPhysWorld: The physics world that holds this body
 	* @parameter: _pBody: The Box2D physics body to govern this objects physics interactions
 	* @parameter: _pPoints: The points for the body to be created from
 	* @parameter: _size: Size of the array of points
 	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
 	********************/
-	Physics_Body_2D(b2Body* _pBody, v2float* _pPoints, UINT _size, float _pixelsPerMeter);
+	Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, TPhysicsProperties _physProps, float _pixelsPerMeter);
 
 	/***********************
 	* ~Physics_Body_2D: Default Destructor for Physics Body 2D class
@@ -100,6 +102,13 @@ public:
 	* @return: float: Rotation angle of the Body
 	********************/
 	float GetAngle() { return m_pBody->GetAngle(); };
+
+	/***********************
+	* GetPhysicsProperties: Retrieve the physics properties struct of the body
+	* @author: Callan Moore
+	* @return: TPhysicsProperties: The physics properties structure of the body
+	********************/
+	TPhysicsProperties GetPhysicsProperties() { return m_physProps; };
 	
 	/***********************
 	* SetBreakProperties: Set a new Break properties structure for the Body
@@ -110,9 +119,11 @@ public:
 	void SetBreakProperties(TBreakProperties _breakProps) { m_breakProps = _breakProps; };
 
 private:
+	b2World* m_pPhysWorld;
 	b2Body* m_pBody;
 	TBreakProperties m_breakProps;
 	float m_pixelsPerMeter;
+	TPhysicsProperties m_physProps;
 
 	// Circle Properties
 	float m_radius;

@@ -169,9 +169,13 @@ private:
 
 	// Objects
 	DX10_Obj_Generic* m_pCube;
+	GDI_Obj_Generic* m_pBackground;
 	std::vector<GDI_Obj_Generic*> m_staticObjects;
 	std::vector<GDI_Obj_Generic*> m_dynamicObjects;
 	std::vector<GDI_Obj_Generic*> m_breakableObjects;
+	std::vector<GDI_Obj_Group*> m_groupObjects;
+	std::vector<GDI_Pulley*> m_pulleyObjects;
+	std::vector<GDI_Spring*> m_springObjects;
 	std::vector<GDI_Line*> m_lines;
 
 	// Meshes

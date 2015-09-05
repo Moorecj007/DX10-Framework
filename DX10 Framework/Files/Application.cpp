@@ -214,7 +214,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		v2float* pPoints;
 		GDI_Obj_Generic* m_pTempObject;
 
-		GDI_Obj_Generic* m_pBackground = new GDI_Obj_Polygon(m_pGDIRenderer);
+		m_pBackground = new GDI_Obj_Polygon(m_pGDIRenderer);
 		pPoints = new v2float[4];
 		pPoints[0] = { -1000.0f, -1000.0f };
 		pPoints[1] = { 1000.0f, -1000.0f };
@@ -228,7 +228,6 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		physProps.collisionType = CT_BACKGROUND;
 		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
 		VALIDATE(m_pBackground->Initialise(pTempBody, 0xFFFFFF));
-		m_staticObjects.push_back(m_pBackground);
 
 		m_pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
 		pPoints = new v2float[4];
@@ -244,7 +243,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		physProps.density = 1.0f;
 		physProps.friction = 0.3f;
 		physProps.collisionType = CT_BREAKABLE;
-		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC);
 		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
 		VALIDATE(m_pTempObject->Initialise(pTempBody, 0xFF0000));
 		m_breakableObjects.push_back(m_pTempObject);
@@ -253,7 +252,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pTempObject->GetPhysicsBody(), { 595, 500 }, false);
 
 		m_pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
-		pPoints = new v2float[4];
+		pPoints = new v2float[3];
 		pPoints[0] = { -20.0f, 20.0f };
 		pPoints[1] = { 0.0f, -15.0f };
 		pPoints[2] = { 20.0f, 20.0f };
@@ -261,13 +260,42 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		physProps.circleObject = false;
 		physProps.pPoints = pPoints;
 		physProps.size = 3;
-		physProps.pos = { 500, 700 };
+		physProps.pos = { 500, 600 };
+		physProps.density = 300.0f;
 		physProps.friction = 0.3f;
-		physProps.collisionType = CT_STATIC;
+		physProps.collisionType = CT_DYNAMIC;
 		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
 		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
 		VALIDATE(m_pTempObject->Initialise(pTempBody, 0xFF0000));
+		m_dynamicObjects.push_back(m_pTempObject);
+
+		GDI_Line* m_pLine = new GDI_Line(m_pGDIRenderer);
+		Physics_Rope_2D* pRopeJoint = m_pPhysics2D->CreateDistanceJoint(m_pBackground->GetPhysicsBody(), m_pTempObject->GetPhysicsBody(), { 300, 500 }, { 0, 0 }, false);
+		VALIDATE(m_pLine->Initialise(pRopeJoint, 0xFFFF00));
+		m_lines.push_back(m_pLine);
+
+		m_pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
+		pPoints[0] = { -25.0f, -100.0f };
+		pPoints[1] = { 25.0f, -100.0f };
+		pPoints[2] = { 25.0f, 100.0f };
+		pPoints[3] = { -25.0f, 100.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
+		physProps.pPoints = pPoints;
+		physProps.size = 4;
+		physProps.pos = { 200, 700 };
+		physProps.density = 1.0f;
+		physProps.friction = 0.3f;
+		//physProps.angle = DegreesToRadians(90.0f);
+		physProps.collisionType = CT_BREAKABLE;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
+		VALIDATE(m_pTempObject->Initialise(pTempBody, 0xFF0000));
 		m_breakableObjects.push_back(m_pTempObject);
+
+		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pTempObject->GetPhysicsBody(), { 405, 500 }, false);
+		m_pPhysics2D->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), m_pTempObject->GetPhysicsBody(), { 595, 500 }, false);
 
 		GDI_Obj_Generic* m_pCircle = new GDI_Obj_Circle(m_pGDIRenderer);
 		ZeroMemory(&physProps, sizeof(physProps));
@@ -282,10 +310,116 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		VALIDATE(m_pCircle->Initialise(pTempBody, 0x0000FF));
 		m_dynamicObjects.push_back(m_pCircle);
 
-		//GDI_Line* m_pLine = new GDI_Line(m_pGDIRenderer);
-		//Physics_Joint_2D* pRopeJoint = m_pPhysics2D->CreateRopeJoint(m_pBackground->GetPhysicsBody(), m_pQuad->GetPhysicsBody(), { 495, 0 }, { 0, 0 }, true);
-		//VALIDATE(m_pLine->Initialise(pRopeJoint, 0xFFFF00));
-		//m_lines.push_back(m_pLine)
+		// BETTER ROPE JOINT - currently not working
+		//std::vector<Physics_Body_2D*>* pRopeBodies = m_pPhysics2D->CreateRope(m_pBackground->GetPhysicsBody(), pTempBody, { 500, 500 }, { 0, 0 }, 0xFF00FF);
+		//GDI_Obj_Group* pGroupObj = new GDI_Obj_Group();
+		//VALIDATE(pGroupObj->Initialise(m_pGDIRenderer, pRopeBodies, 0xFF00FF));
+		//m_groupObjects.push_back(pGroupObj);
+
+		GDI_Obj_Polygon* pPulleyPolyA = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
+		pPoints[0] = { -20.0f, -20.0f };
+		pPoints[1] = { 20.0f, -20.0f };
+		pPoints[2] = { 20.0f, 20.0f };
+		pPoints[3] = { -20.0f, 20.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
+		physProps.pPoints = pPoints;
+		physProps.size = 4;
+		physProps.pos = { 700, 200 };
+		physProps.density = 1.0f;
+		physProps.friction = 0.3f;
+		physProps.collisionType = CT_DYNAMIC;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
+		VALIDATE(pPulleyPolyA->Initialise(pTempBody, 0xFF0000));
+		m_dynamicObjects.push_back(pPulleyPolyA);
+
+		GDI_Obj_Polygon* pPulleyPolyB = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
+		pPoints[0] = { -20.0f, -20.0f };
+		pPoints[1] = { 20.0f, -20.0f };
+		pPoints[2] = { 20.0f, 20.0f };
+		pPoints[3] = { -20.0f, 20.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
+		physProps.pPoints = pPoints;
+		physProps.size = 4;
+		physProps.pos = { 900, 200 };
+		physProps.density = 1.1f;
+		physProps.friction = 0.3f;
+		physProps.collisionType = CT_DYNAMIC;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
+		VALIDATE(pPulleyPolyB->Initialise(pTempBody, 0xFF0000));
+		m_dynamicObjects.push_back(pPulleyPolyB);
+
+		Physics_Pulley_2D* pTempPhysPulley = m_pPhysics2D->CreatePulley(pPulleyPolyA->GetPhysicsBody(), pPulleyPolyB->GetPhysicsBody(), { 0, -20 }, { 0, -20 }, { 700, 100 }, { 900, 100 });
+		GDI_Pulley* pTempPulley = new GDI_Pulley(m_pGDIRenderer, m_pPhysics2D);
+		VALIDATE(pTempPulley->Initialise(pTempPhysPulley, 0x000000));
+		m_pulleyObjects.push_back(pTempPulley);
+
+		m_pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
+		pPoints[0] = { -20.0f, -20.0f };
+		pPoints[1] = { 20.0f, -20.0f };
+		pPoints[2] = { 20.0f, 20.0f };
+		pPoints[3] = { -20.0f, 20.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
+		physProps.pPoints = pPoints;
+		physProps.size = 4;
+		physProps.pos = { 750, 500 };
+		physProps.density = 10.0f;
+		physProps.friction = 0.3f;
+		physProps.collisionType = CT_DYNAMIC;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
+		VALIDATE(m_pTempObject->Initialise(pTempBody, 0x00FFFF));
+		m_dynamicObjects.push_back(m_pTempObject);
+		
+		m_pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
+		pPoints[0] = { -100.0f, -5.0f };
+		pPoints[1] = { 100.0f, -5.0f };
+		pPoints[2] = { 100.0f, 5.0f };
+		pPoints[3] = { -100.0f, 5.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
+		physProps.pPoints = pPoints;
+		physProps.size = 4;
+		physProps.pos = { 500, 800 };
+		physProps.density = 2.0f;
+		physProps.friction = 0.3f;
+		physProps.collisionType = CT_DYNAMIC;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
+		VALIDATE(m_pTempObject->Initialise(pTempBody, 0xFF0000));
+		m_dynamicObjects.push_back(m_pTempObject);
+
+		GDI_Spring* pSpring = new GDI_Spring(m_pGDIRenderer);
+		Physics_Spring_2D* pPhysSpring = m_pPhysics2D->CreateSpring(m_pBackground->GetPhysicsBody(), pTempBody, { 500, 900 }, { 0, 0 }, 600.0f);
+		VALIDATE(pSpring->Initialise(pPhysSpring, 0x00FFFF));
+		m_springObjects.push_back(pSpring);
+
+		m_pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
+		pPoints = new v2float[4];
+		pPoints[0] = { -100.0f, -5.0f };
+		pPoints[1] = { 100.0f, -5.0f };
+		pPoints[2] = { 100.0f, 5.0f };
+		pPoints[3] = { -100.0f, 5.0f };
+		ZeroMemory(&physProps, sizeof(physProps));
+		physProps.circleObject = false;
+		physProps.pPoints = pPoints;
+		physProps.size = 4;
+		physProps.pos = { 800, 850 };
+		physProps.density = 2.0f;
+		physProps.friction = 0.3f;
+		physProps.collisionType = CT_STATIC;
+		physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+		pTempBody = m_pPhysics2D->CreatePhysicsObject(physProps);
+		VALIDATE(m_pTempObject->Initialise(pTempBody, 0xFF0000));
+		m_staticObjects.push_back(m_pTempObject);
 	}
 
 	m_online = true;
@@ -322,6 +456,7 @@ void Application::ShutDown()
 	ReleasePtr(m_pCubeMesh);
 	ReleasePtr(m_pCube);
 
+	ReleasePtr(m_pBackground);
 	// Delete all GDI static objects
 	for (UINT i = 0; i < m_staticObjects.size(); i++)
 	{
@@ -336,6 +471,21 @@ void Application::ShutDown()
 	for (UINT i = 0; i < m_breakableObjects.size(); i++)
 	{
 		ReleasePtr(m_breakableObjects[i]);
+	}
+	// Delete all GDI Group Objects
+	for (UINT i = 0; i < m_groupObjects.size(); i++)
+	{
+		ReleasePtr(m_groupObjects[i]);
+	}
+	// Delete all GDI Pulley Objects
+	for (UINT i = 0; i < m_pulleyObjects.size(); i++)
+	{
+		ReleasePtr(m_pulleyObjects[i]);
+	}
+	// Delete all GDI Spring Objects
+	for (UINT i = 0; i < m_springObjects.size(); i++)
+	{
+		ReleasePtr(m_springObjects[i]);
 	}
 	// Delete all GDI Lines
 	for (UINT i = 0; i < m_lines.size(); i++)
@@ -396,6 +546,17 @@ void Application::Process(float _dt)
 	{
 		m_pPhysics2D->Process();
 
+		m_pBackground->Process(_dt);
+		// Process all lines
+		for (UINT i = 0; i < m_lines.size(); i++)
+		{
+			m_lines[i]->Process(_dt);
+		}
+		// Process all Pulleys
+		for (UINT i = 0; i < m_pulleyObjects.size(); i++)
+		{
+			m_pulleyObjects[i]->Process(_dt);
+		}
 		// Process all static objects
 		for (UINT i = 0; i < m_staticObjects.size(); i++)
 		{
@@ -406,30 +567,57 @@ void Application::Process(float _dt)
 		{
 			m_dynamicObjects[i]->Process(_dt);
 		}
+		// Process all Group objects
+		for (UINT i = 0; i < m_groupObjects.size(); i++)
+		{
+			m_groupObjects[i]->Process(_dt);
+		}
+		// Process all Springs
+		for (UINT i = 0; i < m_springObjects.size(); i++)
+		{
+			m_springObjects[i]->Process(_dt);
+		}
+
+		std::vector<UINT> deletedObjectIndices;
+		std::vector<GDI_Obj_Generic*> createdObjects;
+
 		// Process all breakable objects
 		for (UINT i = 0; i < m_breakableObjects.size(); i++)
 		{
+			m_breakableObjects[i]->Process(_dt);
 			TBreakProperties* breakProps =  m_breakableObjects[i]->GetPhysicsBody()->GetBreakProperties();
 
 			if (breakProps->broken == true)
 			{
 				std::vector<Physics_Body_2D*>* pNewBodies = m_pPhysics2D->BreakObject(m_breakableObjects[i]->GetPhysicsBody());
 
-				// TO DO
-				// Destroy this object
-				// Create new objects
+				COLORREF color = m_breakableObjects[i]->GetColor();
+				deletedObjectIndices.push_back(i);
+				
+				for (UINT newIndex = 0; newIndex < pNewBodies->size(); newIndex++)
+				{
+					GDI_Obj_Generic* pTempObject = new GDI_Obj_Polygon(m_pGDIRenderer);
+					pTempObject->Initialise((*pNewBodies)[newIndex], color);
+					createdObjects.push_back(pTempObject);
+				}
 
-				breakProps->broken = false;
+				ReleasePtr(pNewBodies);
 			}
-
-			m_breakableObjects[i]->Process(_dt);
 		}
-		// Process all lines
-		for (UINT i = 0; i < m_lines.size(); i++)
+
+		if (deletedObjectIndices.size() > 0)
 		{
-			m_lines[i]->Process(_dt);
+			for (int i = (int)deletedObjectIndices.size() - 1; i >= 0; i--)
+			{
+				ReleasePtr(m_breakableObjects[i]);
+				m_breakableObjects.erase(m_breakableObjects.begin() + i);
+			}
+			for (UINT i = 0; i < createdObjects.size(); i++)
+			{
+				m_dynamicObjects.push_back(createdObjects[i]);
+			}
 		}
-
+		
 	}
 }
 
@@ -450,6 +638,17 @@ void Application::Draw()
 	{
 		m_pGDIRenderer->BeginRender();
 
+		m_pBackground->Render();
+		// Render all lines
+		for (UINT i = 0; i < m_lines.size(); i++)
+		{
+			m_lines[i]->Render();
+		}
+		// Render all Pulley objects
+		for (UINT i = 0; i < m_pulleyObjects.size(); i++)
+		{
+			m_pulleyObjects[i]->Render();
+		}
 		// Render all static objects
 		for (UINT i = 0; i < m_staticObjects.size(); i++)
 		{
@@ -460,16 +659,22 @@ void Application::Draw()
 		{
 			m_dynamicObjects[i]->Render();
 		}
+		// Render all group objects
+		for (UINT i = 0; i < m_groupObjects.size(); i++)
+		{
+			m_groupObjects[i]->Render();
+		}	
+		// Render all Spring objects
+		for (UINT i = 0; i < m_springObjects.size(); i++)
+		{
+			m_springObjects[i]->Render();
+		}
 		// Render all breakable objects
 		for (UINT i = 0; i < m_breakableObjects.size(); i++)
 		{
 			m_breakableObjects[i]->Render();
 		}
-		// Render all lines
-		for (UINT i = 0; i < m_lines.size(); i++)
-		{
-			m_lines[i]->Render();
-		}
+		
 
 		m_pGDIRenderer->EndRender();
 	}

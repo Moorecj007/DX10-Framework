@@ -27,46 +27,50 @@ void Physics_Break_Listener::BeginContact(b2Contact* _contact)
 {
 	// TO DO - COMMENT THE SHIT OUT OF THIS
 
-	int numPoints = _contact->GetManifold()->pointCount;
-	b2Vec2* collisionPoint;
-
-	b2WorldManifold worldmanifold;
-	_contact->GetWorldManifold(&worldmanifold);
-	collisionPoint = worldmanifold.points;
-
-	v2float* pPoints = new v2float[numPoints];
-	for (int i = 0; i < numPoints; i++)
+	if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE
+		|| _contact->GetFixtureB()->GetFilterData().categoryBits == CT_BREAKABLE)
 	{
-		pPoints[i] = { collisionPoint[i].x, collisionPoint[i].y };
+		int numPoints = _contact->GetManifold()->pointCount;
+		b2Vec2* collisionPoint;
+
+		b2WorldManifold worldmanifold;
+		_contact->GetWorldManifold(&worldmanifold);
+		collisionPoint = worldmanifold.points;
+
+		v2float* pPoints = new v2float[numPoints];
+		for (int i = 0; i < numPoints; i++)
+		{
+			pPoints[i] = { collisionPoint[i].x, collisionPoint[i].y };
+		}
+
+		b2Vec2 velocityA = _contact->GetFixtureA()->GetBody()->GetLinearVelocityFromWorldPoint(collisionPoint[0]);
+		b2Vec2 velocityB = _contact->GetFixtureB()->GetBody()->GetLinearVelocityFromWorldPoint(collisionPoint[0]);
+
+		Physics_Body_2D* pPhysicsBody = 0;
+		v2float impactVelocity;
+
+
+		if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE)
+		{
+			b2Vec2 b2ImpactVelocity = velocityA - velocityB;
+			impactVelocity = { b2ImpactVelocity.x, b2ImpactVelocity.y };
+
+			pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureA()->GetBody()->GetUserData());
+		}
+
+		if (_contact->GetFixtureB()->GetFilterData().categoryBits == CT_BREAKABLE)
+		{
+			b2Vec2 b2ImpactVelocity = velocityB - velocityA;
+			impactVelocity = { b2ImpactVelocity.x, b2ImpactVelocity.y };
+
+			pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureB()->GetBody()->GetUserData());
+		}
+		TBreakProperties breakProps;
+		breakProps.broken = true;
+		breakProps.pCollisionWorldPoints = pPoints;
+		breakProps.impactVelocity = impactVelocity;
+		pPhysicsBody->SetBreakProperties(breakProps);
 	}
-
-	b2Vec2 velocityA = _contact->GetFixtureA()->GetBody()->GetLinearVelocityFromWorldPoint(collisionPoint[0]);
-	b2Vec2 velocityB = _contact->GetFixtureB()->GetBody()->GetLinearVelocityFromWorldPoint(collisionPoint[0]);
-
-	Physics_Body_2D* pPhysicsBody = 0;
-	v2float impactVelocity;
-
-
-	if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE)
-	{	
-		b2Vec2 b2ImpactVelocity = velocityA - velocityB;
-		impactVelocity = { b2ImpactVelocity.x, b2ImpactVelocity.y };
-
-		pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureA()->GetBody()->GetUserData());
-	}
-
-	if (_contact->GetFixtureB()->GetFilterData().categoryBits == CT_BREAKABLE)
-	{
-		b2Vec2 b2ImpactVelocity = velocityB - velocityA;
-		impactVelocity = { b2ImpactVelocity.x, b2ImpactVelocity.y };
-
-		pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureB()->GetBody()->GetUserData());
-	}
-	TBreakProperties breakProps;
-	breakProps.broken = true;
-	breakProps.pCollisionWorldPoints = pPoints;
-	breakProps.impactVelocity = impactVelocity;
-	pPhysicsBody->SetBreakProperties(breakProps);
 }
 
 void Physics_Break_Listener::EndContact(b2Contact* _contact)

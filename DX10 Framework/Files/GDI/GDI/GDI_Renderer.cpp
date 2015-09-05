@@ -90,7 +90,7 @@ void GDI_Renderer::RenderEllipse(v2float _center, COLORREF _color, float _radius
 	HPEN hLinePen;
 
 	// Draw a black outline onto the object
-	hLinePen = CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
+	hLinePen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
 
 	Ellipse(hdc, ellipseLeft, ellipseTop, ellipseRight, ellipseBottom);
@@ -106,12 +106,12 @@ void GDI_Renderer::RenderLine(v2float _posA, v2float _posB, COLORREF _color)
 	HPEN hLinePen;
 
 	// Draw a black outline onto the object
-	hLinePen = CreatePen(PS_SOLID, 3, _color);
+	hLinePen = CreatePen(PS_SOLID, 4, _color);
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
 
-	LineTo(hdc, (int)_posA.x, (int)_posA.y);
-	MoveToEx(hdc, (int)_posB.x, (int)_posB.y, NULL);
-
+	MoveToEx(hdc, (int)_posA.x, (int)_posA.y, NULL);
+	LineTo(hdc, (int)_posB.x, (int)_posB.y);
+	
 	SelectObject(hdc, hPenOld);
 	DeleteObject(hLinePen);
 }

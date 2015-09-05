@@ -26,5 +26,8 @@
 #include "GDI\Objects\GDI_Obj_Generic.h"
 #include "GDI\Objects\GDI_Obj_Circle.h"
 #include "GDI\Objects\GDI_Obj_Polygon.h"
+#include "GDI\Objects\GDI_Obj_Group.h"
+#include "GDI\Objects\GDI_Pulley.h"
+#include "GDI\Objects\GDI_Spring.h"
 
 #endif	// __GDI_H__

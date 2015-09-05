@@ -19,7 +19,7 @@
 
 // Local Includes
 #include "../../Utility/Utilities.h"
-#include "../../Physics/2D Physics/Physics_Joint_2D.h"
+#include "../../Physics/2D Physics/Physics_Rope_2D.h"
 #include "GDI_Renderer.h"
 
 class GDI_Line
@@ -46,7 +46,7 @@ public:
 	* @parameter: _color: Color for the Line
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(Physics_Joint_2D* _pJoint, COLORREF _color);
+	bool Initialise(Physics_Rope_2D* _pJoint, COLORREF _color);
 
 	/***********************
 	* Initialise: Initialise a line using points on the screen
@@ -75,7 +75,7 @@ public:
 
 private:
 	GDI_Renderer* m_pGDI_Renderer;
-	Physics_Joint_2D* m_pJoint;
+	Physics_Rope_2D* m_pJoint;
 	v2float m_posA;
 	v2float m_posB;
 	COLORREF m_color;

@@ -26,7 +26,7 @@ GDI_Line::~GDI_Line()
 	ReleasePtr(m_pJoint);
 }
 
-bool GDI_Line::Initialise(Physics_Joint_2D* _pJoint, COLORREF _color)
+bool GDI_Line::Initialise(Physics_Rope_2D* _pJoint, COLORREF _color)
 {
 	// Check if the Joint is valid
 	if (_pJoint == 0)

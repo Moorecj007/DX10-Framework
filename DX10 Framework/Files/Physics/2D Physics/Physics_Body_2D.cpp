@@ -15,8 +15,9 @@
 // This Include
 #include "Physics_Body_2D.h"
 
-Physics_Body_2D::Physics_Body_2D(b2Body* _pBody, float _radius, float _pixelsPerMeter)
+Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, float _radius, float _pixelsPerMeter)
 {
+	m_pPhysWorld = _pPhysWorld;
 	m_pBody = _pBody;
 	m_radius = _radius;
 	m_pixelsPerMeter = _pixelsPerMeter;
@@ -25,18 +26,21 @@ Physics_Body_2D::Physics_Body_2D(b2Body* _pBody, float _radius, float _pixelsPer
 	ZeroMemory(&m_breakProps, sizeof(m_breakProps));
 }
 
-Physics_Body_2D::Physics_Body_2D(b2Body* _pBody, v2float* _pPoints, UINT _size, float _pixelsPerMeter)
+Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, TPhysicsProperties _physProps, float _pixelsPerMeter)
 {
+	m_pPhysWorld = _pPhysWorld;
 	m_pBody = _pBody;
-	m_pPoints = _pPoints;
-	m_size = _size;
+	m_pPoints = _physProps.pPoints;
+	m_size = _physProps.size;
 	m_pixelsPerMeter = _pixelsPerMeter;
+	m_physProps = _physProps;
 
 	ZeroMemory(&m_breakProps, sizeof(m_breakProps));
 }
 
 Physics_Body_2D::~Physics_Body_2D()
 {
+	m_pPhysWorld->DestroyBody(GetBody());
 	ReleasePtrArray(m_pPoints);
 }
 
