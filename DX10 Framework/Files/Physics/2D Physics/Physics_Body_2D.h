@@ -62,11 +62,11 @@ public:
 	b2Body* GetBody() { return m_pBody; };
 	
 	/***********************
-	* GetBreakProperties: Retrieve the Break properties of the body
+	* GetCollisionProperties: Retrieve the Collision properties of the body
 	* @author: Callan Moore
-	* @return: TBreakProperties*: The break properties of the body
+	* @return: TCollsionProperties*: The collison properties of the body
 	********************/
-	TBreakProperties* GetBreakProperties() { return &m_breakProps; };
+	TCollisionProperties* GetCollisionProperties() { return &m_collisionProps; };
 	
 	/***********************
 	* GetRadius: Retrieve the radius for a circle body
@@ -111,17 +111,17 @@ public:
 	TPhysicsProperties GetPhysicsProperties() { return m_physProps; };
 	
 	/***********************
-	* SetBreakProperties: Set a new Break properties structure for the Body
+	* SetCollisionProperties: Set a new Collision properties structure for the Body
 	* @author: Callan Moore
-	* @parameter: _breakProps: The new Break properties structure
+	* @parameter: _collisionProps: The new collision properties structure
 	* @return: void
 	********************/
-	void SetBreakProperties(TBreakProperties _breakProps) { m_breakProps = _breakProps; };
+	void SetCollisionProperties(TCollisionProperties _collisionProps) { m_collisionProps = _collisionProps; };
 
 private:
 	b2World* m_pPhysWorld;
 	b2Body* m_pBody;
-	TBreakProperties m_breakProps;
+	TCollisionProperties m_collisionProps;
 	float m_pixelsPerMeter;
 	TPhysicsProperties m_physProps;
 

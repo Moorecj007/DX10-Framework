@@ -35,6 +35,7 @@
 
 // Library Includes
 #include <windows.h>
+#include <windowsx.h>
 #include <math.h>
 #include <string>
 #include <vector>
@@ -430,6 +431,100 @@ struct v3float
 };
 
 /***********************
+* OnLineSegment: Checks if a point is on the given line segment
+* @author: Callan Moore
+* @parameter: _linePtA: First point of the line
+* @parameter: _linePtB: Second point of the line
+* @parameter: _point: Point to check if it lies on the line segment
+* @return: bool: True if the point is on the line, false otherwise
+********************/
+inline bool OnLineSegment(v2float _linePtA, v2float _linePtB, v2float _point)
+{
+	if (_linePtB.x <= max(_linePtA.x, _point.x) && _linePtB.x >= min(_linePtA.x, _point.x) &&
+		_linePtB.y <= max(_linePtA.y, _point.y) && _linePtB.y >= min(_linePtA.y, _point.y))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+/***********************
+* Orientation: Determines the orientation of a line and a point
+* @author: Callan Moore
+* @parameter: _linePtA: First point on the line
+* @parameter: _linePtB: second point on the line
+* @parameter: _point: Point of the second line to cross reference
+* @return: int: Value to represent the orientation of the 3 points
+********************/
+inline int Orientation(v2float _linePtA, v2float _linePtB, v2float _point)
+{
+	// 0 -> All points are co linear
+	// 1 -> Clockwise orientation
+	// 2 -> Counterclockwise orientation
+
+	float val = (_linePtB.y - _linePtA.y) * (_point.x - _linePtB.x) - (_linePtB.x - _linePtA.x) * (_point.y - _linePtB.y);
+
+	if (val == 0)
+	{
+		return 0;  // co linear
+	}
+
+	return (val > 0) ? 1 : 2;
+}
+
+/***********************
+* CheckLinesIntersect: Checks whether two line segments intersect
+* @author: Callan Moore
+* @parameter: _line1PtA: First point on line 1
+* @parameter: _line1PtB: Second point on line 1
+* @parameter: _line2PtA: First point on line 2
+* @parameter: _line2PtB: Second point on line 2
+* @return: bool: True if the line segments intersect
+********************/
+inline bool CheckLinesIntersect(v2float _line1PtA, v2float _line1PtB, v2float _line2PtA, v2float _line2PtB)
+{
+	// Find the four orientations needed for general and special cases
+	int orientation1 = Orientation(_line1PtA, _line1PtB, _line2PtA);
+	int orientation2 = Orientation(_line1PtA, _line1PtB, _line2PtB);
+	int orientation3 = Orientation(_line2PtA, _line2PtB, _line1PtA);
+	int orientation4 = Orientation(_line2PtA, _line2PtB, _line1PtB);
+
+	// General case
+	if (orientation1 != orientation2 && orientation3 != orientation4)
+	{
+		return true;
+	}
+
+	// Special Cases
+	// _line1PtA, _line1PtB and _line2PtA are co linear and _line2PtA lies on segment Line1
+	if (orientation1 == 0 && OnLineSegment(_line1PtA, _line2PtA, _line1PtB))
+	{
+		return true;
+	}
+
+	// _line1PtA, _line1PtB and _line2PtA are co linear and _line2PtB lies on segment Line1
+	if (orientation2 == 0 && OnLineSegment(_line1PtA, _line2PtB, _line1PtB))
+	{
+		return true;
+	}
+
+	// _line2PtA, _line2PtB and _line1PtA are co linear and _line1PtA lies on segment Line2
+	if (orientation3 == 0 && OnLineSegment(_line2PtA, _line1PtA, _line2PtB))
+	{
+		return true;
+	}
+
+	// _line2PtA, _line2PtB and _line1PtB are co linear and _line1PtB lies on segment Line2
+	if (orientation4 == 0 && OnLineSegment(_line2PtA, _line1PtB, _line2PtB))
+	{
+		return true;
+	}
+
+	return false; // No situation does the line segments intersect
+}
+
+/***********************
 * DegreesToRadians: Converts degrees to radians
 * @author: Callan Moore
 * @parameter: _degrees: Angle in Degrees to convert
@@ -449,6 +544,18 @@ inline float DegreesToRadians(float _degrees)
 inline float RadiansToDegrees(float _radians)
 {
 	return (180.0f * _radians / float(M_PI));
+}
+
+// Color constants
+namespace colorRef
+{
+	const COLORREF BLACK(RGB(0, 0, 0));
+	const COLORREF WHITE(RGB(255, 255, 255));
+	const COLORREF RED(RGB(255, 0, 0));
+	const COLORREF GREEN(RGB(0, 255, 0));
+	const COLORREF BLUE(RGB(0, 0, 255));
+	const COLORREF YELLOW(RGB(255, 255, 0));
+	const COLORREF PURPLE(RGB(255, 0, 255));
 }
 
 #endif // __UTILITIES_H__

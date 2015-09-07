@@ -25,11 +25,12 @@ GDI_Obj_Circle::~GDI_Obj_Circle()
 	ReleasePtrArray(m_points);
 }
 
-bool GDI_Obj_Circle::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color)
+bool GDI_Obj_Circle::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _colorFill, COLORREF _colorOutline)
 {
 	// Assign Member variables
 	m_pPhysicsBody = _pPhysicsBody;
-	m_color = _color;
+	m_colorFill = _colorFill;
+	m_colorOutline = _colorOutline;
 
 	// Create a new array of points
 	m_points = 0;
@@ -44,5 +45,5 @@ void GDI_Obj_Circle::Process(float _dt)
 
 void GDI_Obj_Circle::Render()
 {
-	m_pGDIRenderer->RenderEllipse(m_pPhysicsBody->GetPosition(), m_color, m_pPhysicsBody->GetRadius());
+	m_pGDIRenderer->RenderEllipse(m_pPhysicsBody->GetPosition(), m_colorFill, m_colorOutline, m_pPhysicsBody->GetRadius());
 }

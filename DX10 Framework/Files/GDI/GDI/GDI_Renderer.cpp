@@ -38,7 +38,7 @@ bool GDI_Renderer::Initialise(HWND _hWnd, HINSTANCE _hInstance, int _clientWidth
 	return true;
 }
 
-void GDI_Renderer::RenderPolygon(v2float* _pPoints, COLORREF _color, int _size)
+void GDI_Renderer::RenderPolygon(v2float* _pPoints, COLORREF _colorFill, COLORREF _colorOutline, int _size)
 {
 	HDC hdc = m_pBackBuffer->GetBFDC();
 
@@ -48,7 +48,7 @@ void GDI_Renderer::RenderPolygon(v2float* _pPoints, COLORREF _color, int _size)
 		pPoints[i] = { (LONG)_pPoints[i].x, (LONG)_pPoints[i].y };
 	}
 
-	HBRUSH brush = CreateSolidBrush(_color);
+	HBRUSH brush = CreateSolidBrush(_colorFill);
 	SelectObject(hdc, brush);
 
 	// Draw the Object with a solid fill color
@@ -59,7 +59,7 @@ void GDI_Renderer::RenderPolygon(v2float* _pPoints, COLORREF _color, int _size)
 	HPEN hLinePen;
 
 	// Draw a black outline onto the object
-	hLinePen = CreatePen(PS_SOLID, 3, RGB(0, 0, 0));
+	hLinePen = CreatePen(PS_SOLID, 3, _colorOutline);
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
 
 	Polygon(hdc, pPoints, _size);
@@ -70,11 +70,11 @@ void GDI_Renderer::RenderPolygon(v2float* _pPoints, COLORREF _color, int _size)
 	ReleasePtr(pPoints);
 }
 
-void GDI_Renderer::RenderEllipse(v2float _center, COLORREF _color, float _radius)
+void GDI_Renderer::RenderEllipse(v2float _center, COLORREF _colorFill, COLORREF _colorOutline, float _radius)
 {
 	HDC hdc = m_pBackBuffer->GetBFDC();
 
-	HBRUSH brush = CreateSolidBrush(_color);
+	HBRUSH brush = CreateSolidBrush(_colorFill);
 	SelectObject(hdc, brush);
 
 	int ellipseLeft = (int)(_center.x - _radius);
@@ -90,7 +90,7 @@ void GDI_Renderer::RenderEllipse(v2float _center, COLORREF _color, float _radius
 	HPEN hLinePen;
 
 	// Draw a black outline onto the object
-	hLinePen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+	hLinePen = CreatePen(PS_SOLID, 2, _colorOutline);
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
 
 	Ellipse(hdc, ellipseLeft, ellipseTop, ellipseRight, ellipseBottom);
@@ -105,7 +105,6 @@ void GDI_Renderer::RenderLine(v2float _posA, v2float _posB, COLORREF _color)
 	HPEN hPenOld;
 	HPEN hLinePen;
 
-	// Draw a black outline onto the object
 	hLinePen = CreatePen(PS_SOLID, 4, _color);
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
 

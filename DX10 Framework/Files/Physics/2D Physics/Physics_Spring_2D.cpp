@@ -15,12 +15,15 @@
 // This Include
 #include "Physics_Spring_2D.h"
 
-Physics_Spring_2D::Physics_Spring_2D(b2MotorJoint* _pMotorJoint, float _pixelsPerMeter)
+Physics_Spring_2D::Physics_Spring_2D(b2World* _physWorld, b2MotorJoint* _pMotorJoint, float _pixelsPerMeter)
 {
+	m_physWorld = _physWorld;
 	m_pMotorJoint = _pMotorJoint;
 	m_pixelsPerMeter = _pixelsPerMeter;
 }
 
 Physics_Spring_2D::~Physics_Spring_2D()
 {
+	m_physWorld->DestroyJoint(m_pMotorJoint);
+	m_pMotorJoint = 0;
 }

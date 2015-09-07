@@ -21,7 +21,7 @@
 #include <Box2D.h>
 
 // Local Includes
-#include "../../Utility/Utilities.h"
+#include "Physics_Utilities.h"
 
 class Physics_Rope_2D
 {
@@ -30,10 +30,11 @@ public:
 	/***********************
 	* Physics_Rope_2D: Constructor for 2D Physics Rope class
 	* @author: Callan Moore
+	* @parameter: _pPhysWorld: The physics world this object belongs to
 	* @parameter: _pJoint: The Box2D physics joint to govern this objects physics interactions
 	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
 	********************/
-	Physics_Rope_2D(b2Joint* _pJoint, float _pixelsPerMeter);
+	Physics_Rope_2D(b2World* _pPhysWorld, b2Joint* _pJoint, float _pixelsPerMeter);
 
 	/***********************
 	* ~Physics_Rope_2D: Default Destructor for 2D Physics Rope class
@@ -56,6 +57,7 @@ public:
 	v2float GetAnchorB();
 
 private:
+	b2World* m_pPhysWorld;
 	b2Joint* m_pJoint;
 	float m_pixelsPerMeter;
 };

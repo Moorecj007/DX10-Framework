@@ -41,10 +41,11 @@ public:
 	* Initialise: Initialise the Circle for use
 	* @author: Callan Moore
 	* @parameter: _pPhysicsBody: The physics body to govern this objects physics interactions
-	* @parameter: _color: Color of the Circle
+	* @parameter: _colorFill: Color to fill the circle with
+	* @parameter: _colorOutline: Color of the outline for the circle
 	* @return: bool: Successful or not
 	********************/
-	virtual bool Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color);
+	virtual bool Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _colorFill, COLORREF _colorOutline);
 
 	/***********************
 	* Process: Process the new frame and update the Circle Object

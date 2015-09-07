@@ -43,10 +43,11 @@ public:
 	* Initialise: Initialise the Object for use
 	* @author: Callan Moore
 	* @parameter: _pPhysicsBody: The physics body to govern this objects physics interactions
-	* @parameter: _color: Color of the Quad
+	* @parameter: _colorFill: Color of the objects fill
+	* @parameter: _colorOutline: Color of the objects outline
 	* @return: bool: Successful or not
 	********************/
-	virtual bool Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color) = 0;
+	virtual bool Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _colorFill, COLORREF _colorOutline) = 0;
 
 	/***********************
 	* Process: Process the new frame and update the Object
@@ -71,11 +72,18 @@ public:
 	Physics_Body_2D* GetPhysicsBody() { return m_pPhysicsBody; };
 
 	/***********************
-	* GetColor: Retrieve the Color of the Object
+	* GetColorFill: Retrieve the Color of the Objects fill
 	* @author: Callan Moore
-	* @return: COLORREF: The color of the object
+	* @return: COLORREF: The color of the objects fill 
 	********************/
-	virtual COLORREF GetColor()	{ return m_color; };
+	virtual COLORREF GetColorFill()	{ return m_colorFill; };
+
+	/***********************
+	* GetColorOutline: Retrieve the Color of the Objects outline
+	* @author: Callan Moore
+	* @return: COLORREF: The color of the objects Outline
+	********************/
+	virtual COLORREF GetColorOutline()	{ return m_colorOutline; };
 
 protected:
 
@@ -94,7 +102,8 @@ protected:
 	GDI_Renderer* m_pGDIRenderer;
 
 	v2float* m_points;
-	COLORREF m_color;
+	COLORREF m_colorFill;
+	COLORREF m_colorOutline;
 	int m_size;
 
 	// Physics

@@ -41,12 +41,13 @@ public:
 	/***********************
 	* Initialise: Initialise the group object
 	* @author: Callan Moore
-	*@parameter: _pGDI_Renderer : GDI Renderer for this object
+	* @parameter: _pGDI_Renderer : GDI Renderer for this object
 	* @parameter: _pPhysBodies: All the Physics bodies for the object
-	* @parameter: _color: Color for all objects within the group
+	* @parameter: _color: Color for all objects fill within the group
+	* @parameter: _color: Color for all objects outline within the group
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(GDI_Renderer* _pGDI_Renderer, std::vector<Physics_Body_2D*>* _pPhysBodies, COLORREF _color);
+	bool Initialise(GDI_Renderer* _pGDI_Renderer, std::vector<Physics_Body_2D*>* _pPhysBodies, COLORREF _colorFill, COLORREF _colorOutline);
 	
 	/***********************
 	* Process: Process the object group

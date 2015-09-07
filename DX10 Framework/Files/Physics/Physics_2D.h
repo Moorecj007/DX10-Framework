@@ -18,12 +18,12 @@
 #define __PHYSICS_2D_H__
 
 // Physics 2D Includes
-#include "2D Physics/PhysicsWorld_2D.h"
+#include "2D Physics/Physics_World_2D.h"
 #include "2D Physics/Physics_Utilities.h"
 #include "2D Physics/Physics_Body_2D.h"
 #include "2D Physics/Physics_Rope_2D.h"
 #include "2D Physics/Physics_Pulley_2D.h"
 #include "2D Physics/Physics_Spring_2D.h"
-#include "2D Physics/Physics_Break_Listener.h"
+#include "2D Physics/Physics_Collision_Listener.h"
 
 #endif	// __PHYSICS_2D_H__

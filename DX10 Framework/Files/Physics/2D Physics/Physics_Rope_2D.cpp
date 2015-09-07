@@ -15,14 +15,17 @@
 // This Include
 #include "Physics_Rope_2D.h"
 
-Physics_Rope_2D::Physics_Rope_2D(b2Joint* _pJoint, float _pixelsPerMeter)
+Physics_Rope_2D::Physics_Rope_2D(b2World* _pPhysWorld, b2Joint* _pJoint, float _pixelsPerMeter)
 {
+	m_pPhysWorld = _pPhysWorld;
 	m_pJoint = _pJoint;
 	m_pixelsPerMeter = _pixelsPerMeter;
 }
 
 Physics_Rope_2D::~Physics_Rope_2D()
 {
+	m_pPhysWorld->DestroyJoint(m_pJoint);
+	m_pJoint = 0;
 }
 
 v2float Physics_Rope_2D::GetAnchorA()

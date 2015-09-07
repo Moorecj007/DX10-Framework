@@ -48,8 +48,20 @@ public:
 	********************/
 	bool Initialise(Physics_Spring_2D* _pSpring, COLORREF _color);
 
-	// TO DO
+	
+	/***********************
+	* Process: Process and update the Spring Object
+	* @author: Callan Moore
+	* @parameter: _dt: The current delta tick
+	* @return: void
+	********************/
 	void Process(float _dt);
+	
+	/***********************
+	* Render: Render the spring to the screen
+	* @author: Callan Moore
+	* @return: void
+	********************/
 	void Render();
 
 private:

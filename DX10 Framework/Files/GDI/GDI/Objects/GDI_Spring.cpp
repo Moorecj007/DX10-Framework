@@ -29,6 +29,7 @@ bool GDI_Spring::Initialise(Physics_Spring_2D* _pSpring, COLORREF _color)
 {
 	if (_pSpring == 0)
 	{
+		// Spring pointer is invalid
 		return false;
 	}
 	m_pSpring = _pSpring;

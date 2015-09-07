@@ -20,7 +20,7 @@
 // GDI Includes
 #include "GDI\GDI_Renderer.h"
 #include "GDI\GDI_Backbuffer.h"
-#include "GDI\GDI_Line.h"
+#include "GDI\GDI_Rope.h"
 
 // Objects
 #include "GDI\Objects\GDI_Obj_Generic.h"

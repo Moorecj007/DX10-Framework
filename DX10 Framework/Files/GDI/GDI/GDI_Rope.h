@@ -22,7 +22,7 @@
 #include "../../Physics/2D Physics/Physics_Rope_2D.h"
 #include "GDI_Renderer.h"
 
-class GDI_Line
+class GDI_Rope
 {
 public:
 
@@ -31,22 +31,22 @@ public:
 	* @author: Callan Moore
 	* @parameter: _pGDI_Renderer: GDI Renderer for this line
 	********************/
-	GDI_Line(GDI_Renderer* _pGDI_Renderer);
+	GDI_Rope(GDI_Renderer* _pGDI_Renderer);
 
 	/***********************
 	* ~GDI_Line: Destructor for GDI Line class
 	* @author: Callan Moore
 	********************/
-	~GDI_Line();
+	~GDI_Rope();
 
 	/***********************
 	* Initialise: Initialise a line using a physics joint
 	* @author: Callan Moore
-	* @parameter: _pJoint: Physics Rope Joint
+	* @parameter: _pPhysRope: Physics Rope Joint
 	* @parameter: _color: Color for the Line
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(Physics_Rope_2D* _pJoint, COLORREF _color);
+	bool Initialise(Physics_Rope_2D* _pPhysRope, COLORREF _color);
 
 	/***********************
 	* Initialise: Initialise a line using points on the screen
@@ -73,9 +73,23 @@ public:
 	********************/
 	void Render();
 
+	/***********************
+	* GetPositionA: Retrieve the first position of the rope line
+	* @author: Callan Moore
+	* @return: v2float: The world space coordinate of the rope position
+	********************/
+	v2float GetPositionA() { return m_posA; };
+	
+	/***********************
+	* GetPositionB: Retrieve the second position of the rope line
+	* @author: Callan Moore
+	* @return: v2float: The world space coordinate of the rope position
+	********************/
+	v2float GetPositionB() { return m_posB; };
+
 private:
 	GDI_Renderer* m_pGDI_Renderer;
-	Physics_Rope_2D* m_pJoint;
+	Physics_Rope_2D* m_pPhysRope;
 	v2float m_posA;
 	v2float m_posB;
 	COLORREF m_color;

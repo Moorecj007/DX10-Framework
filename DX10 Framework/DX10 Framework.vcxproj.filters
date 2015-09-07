@@ -79,6 +79,12 @@
     <Filter Include="Header Files\DX10\Shaders">
       <UniqueIdentifier>{b4d3c7e4-c102-46cd-b922-cb8e7f260829}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Levels">
+      <UniqueIdentifier>{5bec2c67-b7e1-4270-b007-24a9a283a640}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Levels">
+      <UniqueIdentifier>{53e2a44d-5ec2-4d84-ba82-2344067f050b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Application.h">
@@ -156,22 +162,13 @@
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Circle.h">
       <Filter>Header Files\GDI\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Files\GDI\GDI\GDI_Line.h">
-      <Filter>Header Files\GDI</Filter>
-    </ClInclude>
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Polygon.h">
       <Filter>Header Files\GDI\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Break_Listener.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
     <ClInclude Include="Files\Physics\2D Physics\Physics_Utilities.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
     <ClInclude Include="Files\Physics\Physics_2D.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\PhysicsWorld_2D.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
     <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Group.h">
@@ -190,6 +187,33 @@
       <Filter>Header Files\GDI\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Files\Physics\2D Physics\Physics_Spring_2D.h">
+      <Filter>Header Files\Physics\2D Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\GDI\GDI\GDI_Rope.h">
+      <Filter>Header Files\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Levels\Levels.h">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Levels\Levels\Level_01.h">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Levels\Levels\Level_02.h">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Levels\Levels\Level_03.h">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Levels\Levels\Level_Generic.h">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Levels\Levels\Level_Testing.h">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Physics\2D Physics\Physics_World_2D.h">
+      <Filter>Header Files\Physics\2D Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Physics\2D Physics\Physics_Collision_Listener.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
   </ItemGroup>
@@ -245,17 +269,8 @@
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Generic.cpp">
       <Filter>Source Files\GDI\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Files\GDI\GDI\GDI_Line.cpp">
-      <Filter>Source Files\GDI</Filter>
-    </ClCompile>
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Polygon.cpp">
       <Filter>Source Files\GDI\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Break_Listener.cpp">
-      <Filter>Source Files\Physics\2D Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Physics\2D Physics\PhysicsWorld_2D.cpp">
-      <Filter>Source Files\Physics\2D Physics</Filter>
     </ClCompile>
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Group.cpp">
       <Filter>Source Files\GDI\Objects</Filter>
@@ -274,6 +289,30 @@
     </ClCompile>
     <ClCompile Include="Files\GDI\GDI\Objects\GDI_Spring.cpp">
       <Filter>Source Files\GDI\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\GDI\GDI\GDI_Rope.cpp">
+      <Filter>Source Files\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Levels\Levels\Level_01.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Levels\Levels\Level_02.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Levels\Levels\Level_03.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Levels\Levels\Level_Generic.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Levels\Levels\Level_Testing.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Physics\2D Physics\Physics_World_2D.cpp">
+      <Filter>Source Files\Physics\2D Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Physics\2D Physics\Physics_Collision_Listener.cpp">
+      <Filter>Source Files\Physics\2D Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -13,34 +13,34 @@
 */
 
 // This Include
-#include "GDI_Line.h"
+#include "GDI_Rope.h"
 
-GDI_Line::GDI_Line(GDI_Renderer* _pGDI_Renderer)
+GDI_Rope::GDI_Rope(GDI_Renderer* _pGDI_Renderer)
 {
 	m_pGDI_Renderer = _pGDI_Renderer;
-	m_pJoint = 0;
+	m_pPhysRope = 0;
 }
 
-GDI_Line::~GDI_Line()
+GDI_Rope::~GDI_Rope()
 {
-	ReleasePtr(m_pJoint);
+	ReleasePtr(m_pPhysRope);
 }
 
-bool GDI_Line::Initialise(Physics_Rope_2D* _pJoint, COLORREF _color)
+bool GDI_Rope::Initialise(Physics_Rope_2D* _pPhysRope, COLORREF _color)
 {
 	// Check if the Joint is valid
-	if (_pJoint == 0)
+	if (_pPhysRope == 0)
 	{
 		return false;
 	}
 
-	m_pJoint = _pJoint;
+	m_pPhysRope = _pPhysRope;
 	m_color = _color;
 
 	return true;
 }
 
-bool GDI_Line::Initialise(v2float _posA, v2float _posB, COLORREF _color)
+bool GDI_Rope::Initialise(v2float _posA, v2float _posB, COLORREF _color)
 {
 	m_posA = _posA;
 	m_posB = _posB;
@@ -49,16 +49,16 @@ bool GDI_Line::Initialise(v2float _posA, v2float _posB, COLORREF _color)
 	return true;
 }
 
-void GDI_Line::Process(float _dt)
+void GDI_Rope::Process(float _dt)
 {
-	if (m_pJoint != 0)
+	if (m_pPhysRope != 0)
 	{
-		m_posA = m_pJoint->GetAnchorA();
-		m_posB = m_pJoint->GetAnchorB();
+		m_posA = m_pPhysRope->GetAnchorA();
+		m_posB = m_pPhysRope->GetAnchorB();
 	}
 }
 
-void GDI_Line::Render()
+void GDI_Rope::Render()
 {
 	m_pGDI_Renderer->RenderLine(m_posA, m_posB, m_color);
 }

@@ -24,11 +24,12 @@ GDI_Obj_Polygon::~GDI_Obj_Polygon()
 {
 }
 
-bool GDI_Obj_Polygon::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color)
+bool GDI_Obj_Polygon::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _colorFill, COLORREF _colorOutline)
 {
 	// Assign Member variables
 	m_pPhysicsBody = _pPhysicsBody;
-	m_color = _color;
+	m_colorFill = _colorFill;
+	m_colorOutline = _colorOutline;
 	m_size = m_pPhysicsBody->GetSize();
 
 	// Create a new array of points

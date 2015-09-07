@@ -25,7 +25,7 @@
 #include "Utility\Timer.h"
 #include "DX10\DX10.h"
 #include "GDI\GDI.h"
-#include "Physics\Physics_2D.h"
+#include "Levels\Levels.h"
 
 class Application
 {
@@ -59,7 +59,6 @@ public:
 	********************/
 	int Execute();
 
-	// Constructors / Destructors
 	/***********************
 	* GetInstance: Returns the singleton instance of the Application, if it doesn't exist creates it.
 	* @author: Callan Moore
@@ -125,6 +124,20 @@ public:
 	* @return: void
 	********************/
 	void HandleInput();
+	
+	/***********************
+	* CutRope: Call the CutRope function on the current Level
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void CutRope();
+	
+	/***********************
+	* DrawCutLine: Draw the cut line on the client window
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void DrawCutLine();
 
 	/***********************
 	* SetKeyDown: Sets the Key down boolean for input Key
@@ -133,8 +146,31 @@ public:
 	* @parameter: _down: True/false setting
 	* @return: void
 	********************/
-	void SetKeyDown(int _index, bool _down);
+	void SetKeyDown(int _index, bool _down) { m_pKeyDown[_index] = _down; };
 
+	/***********************
+	* SetFirstMousePos: Store the position of the mouse when first clicked
+	* @author: Callan Moore
+	* @parameter: _firstMousePos: Position of the mouse on the client window
+	* @return: void
+	********************/
+	void SetFirstMousePos(v2float _firstMousePos) { m_firstMousePos = _firstMousePos; };
+	
+	/***********************
+	* SetSecondMousePos: Store the position of the mouse when click is released
+	* @author: Callan Moore
+	* @parameter: _secondMousePos: Position of the mouse on the client window
+	* @return: void
+	********************/
+	void SetSecondMousePos(v2float _secondMousePos) { m_secondMousePos = _secondMousePos; };
+
+	/***********************
+	* SetMouseDown: Set the state of the mouse button being clicked
+	* @author: Callan Moore
+	* @parameter: _mouseDown: The new state of the mouse button
+	* @return: void
+	********************/
+	void SetMouseDown(bool _mouseDown) { m_mouseDown = _mouseDown; };
 private:
 	// Preventing copies and extra constructions
 	Application();
@@ -150,6 +186,9 @@ private:
 	int m_clientWidth;
 	int m_clientHeight;
 	bool m_online;
+	v2float m_firstMousePos;
+	v2float m_secondMousePos;
+	bool m_mouseDown;
 	
 	// Timer Variables
 	Timer* m_pTimer;
@@ -169,14 +208,6 @@ private:
 
 	// Objects
 	DX10_Obj_Generic* m_pCube;
-	GDI_Obj_Generic* m_pBackground;
-	std::vector<GDI_Obj_Generic*> m_staticObjects;
-	std::vector<GDI_Obj_Generic*> m_dynamicObjects;
-	std::vector<GDI_Obj_Generic*> m_breakableObjects;
-	std::vector<GDI_Obj_Group*> m_groupObjects;
-	std::vector<GDI_Pulley*> m_pulleyObjects;
-	std::vector<GDI_Spring*> m_springObjects;
-	std::vector<GDI_Line*> m_lines;
 
 	// Meshes
 	DX10_Mesh_Generic* m_pCubeMesh;
@@ -184,9 +215,9 @@ private:
 	// Shaders
 	DX10_Shader_LitTex* m_pShader_LitTex;
 
-	// Physics
-	PhysicsWorld_2D* m_pPhysics2D;
-
+	// Level Pointer
+	Level_Generic* m_pCurrentLevel;
+	eLevelSelection m_levelSelection;
 };
 
 #endif // __APPLICATION_H__

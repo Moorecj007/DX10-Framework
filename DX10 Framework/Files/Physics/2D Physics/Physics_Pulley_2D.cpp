@@ -15,14 +15,17 @@
 // This Include
 #include "Physics_Pulley_2D.h"
 
-Physics_Pulley_2D::Physics_Pulley_2D(b2PulleyJoint* _pJoint, float _pixelsPerMeter)
+Physics_Pulley_2D::Physics_Pulley_2D(b2World* _physWorld, b2PulleyJoint* _pJoint, float _pixelsPerMeter)
 {
+	m_physWorld = _physWorld;
 	m_pPulleyJoint = _pJoint;
 	m_pixelsPerMeter = _pixelsPerMeter;
 }
 
 Physics_Pulley_2D::~Physics_Pulley_2D()
 {
+	m_physWorld->DestroyJoint(m_pPulleyJoint);
+	m_pPulleyJoint = 0;
 }
 
 v2float Physics_Pulley_2D::GetAnchorA()

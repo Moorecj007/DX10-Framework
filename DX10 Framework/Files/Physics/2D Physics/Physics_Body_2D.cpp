@@ -23,7 +23,7 @@ Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, float _ra
 	m_pixelsPerMeter = _pixelsPerMeter;
 	m_pPoints = 0;
 
-	ZeroMemory(&m_breakProps, sizeof(m_breakProps));
+	ZeroMemory(&m_collisionProps, sizeof(m_collisionProps));
 }
 
 Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, TPhysicsProperties _physProps, float _pixelsPerMeter)
@@ -35,7 +35,7 @@ Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, TPhysicsP
 	m_pixelsPerMeter = _pixelsPerMeter;
 	m_physProps = _physProps;
 
-	ZeroMemory(&m_breakProps, sizeof(m_breakProps));
+	ZeroMemory(&m_collisionProps, sizeof(m_collisionProps));
 }
 
 Physics_Body_2D::~Physics_Body_2D()

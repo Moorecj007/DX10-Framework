@@ -67,7 +67,6 @@ const D3DXCOLOR DARK_YELLOW_GREEN(0.1f, 0.48f, 0.19f, 1.0f);
 const D3DXCOLOR DARKBROWN(0.45f, 0.39f, 0.34f, 1.0f);
 
 // Structs
-
 struct Light
 {
 	Light()

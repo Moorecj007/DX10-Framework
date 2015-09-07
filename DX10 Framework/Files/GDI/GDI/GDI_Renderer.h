@@ -54,21 +54,23 @@ public:
 	* Render: Render a given polygon
 	* @author: Callan Moore
 	* @parameter: _pPoints: Point list in clockwise order
-	* @parameter: _color: color to fill the polygon with
+	* @parameter: _colorFill: Color to fill the polygon with
+	* @parameter: _colorOutline: Color to outline the polygon with
 	* @parameter: _size: How many points in the polygon
 	* @return: void
 	********************/
-	void RenderPolygon(v2float* _pPoints, COLORREF _color, int _size);
+	void RenderPolygon(v2float* _pPoints, COLORREF _colorFill, COLORREF _colorOutline, int _size);
 
 	/***********************
 	* RenderEllipse: Render a given ellipse
 	* @author: Callan Moore
 	* @parameter: _center: position of the Center of the Ellipse
-	* @parameter: _color: Color to fill the Ellipse with
+	* @parameter: _colorFill: Color to fill the polygon with
+	* @parameter: _colorOutline: Color to outline the polygon with
 	* @parameter: _radius: Radius of the Ellipse
 	* @return: void
 	********************/
-	void RenderEllipse(v2float _center, COLORREF _color, float _radius);
+	void RenderEllipse(v2float _center, COLORREF _colorFill, COLORREF _colorOutline, float _radius);
 
 	/***********************
 	* RenderLine: Render a Line

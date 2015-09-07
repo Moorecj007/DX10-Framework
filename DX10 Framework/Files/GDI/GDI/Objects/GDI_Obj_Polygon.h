@@ -38,16 +38,17 @@ public:
 	virtual ~GDI_Obj_Polygon();
 
 	/***********************
-	* Initialise: Initialise the Quad for use
+	* Initialise: Initialise the Polygon for use
 	* @author: Callan Moore
 	* @parameter: _pPhysicsBody: The physics body to govern this objects physics interactions
-	* @parameter: _color: Color of the Quad
+	* @parameter: _colorFill: Color of the Polygons Fill
+	* @parameter: _colorOutline: Color of the Polygons Outline
 	* @return: bool: Successful or not
 	********************/
-	virtual bool Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color);
+	virtual bool Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _colorFill, COLORREF _colorOutline);
 
 	/***********************
-	* Process: Process the new frame and update the Quad Object
+	* Process: Process the new frame and update the Polygon Object
 	* @author: Callan Moore
 	* @parameter: _dt: The current Delta Tick
 	* @return: void

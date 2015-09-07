@@ -29,10 +29,11 @@ public:
 	/***********************
 	* Physics_Pulley_2D: Constructor for the Physics Pulley class
 	* @author: Callan Moore
-	* @parameter : _pJoint: The joint that represents the Pulley System
-	* @parameter : _pixelsPerMeter: The conversion rate of meters to screen space
+	* @parameter: _pPhysWorld: The physics world that this object belongs to
+	* @parameter: _pJoint: The joint that represents the Pulley System
+	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
 	********************/
-	Physics_Pulley_2D(b2PulleyJoint* _pJoint, float _pixelsPerMeter);
+	Physics_Pulley_2D(b2World* _pPhysWorld, b2PulleyJoint* _pJoint, float _pixelsPerMeter);
 
 	/***********************
 	* Physics_Pulley_2D: Default Destructor for the Physics Pulley class
@@ -62,13 +63,14 @@ public:
 	v2float GetGroundAnchorA();
 	
 	/***********************
-	* GetGroundAnchorB: Retrieve the ground anchor for the seoond body of the pulley
+	* GetGroundAnchorB: Retrieve the ground anchor for the second body of the pulley
 	* @author: Callan Moore
 	* @return: v2float: The ground anchor for physics body B
 	********************/
 	v2float GetGroundAnchorB();
 
 private:
+	b2World* m_physWorld;
 	b2PulleyJoint* m_pPulleyJoint;
 	float m_pixelsPerMeter;
 };

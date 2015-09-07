@@ -6,7 +6,7 @@
 *
 * (c) 2005 - 2015 Media Design School
 *
-* File Name : PhysicsWorld_2D.h
+* File Name : Physics_World_2D.h
 * Description : Simulates all 2D physics for the application
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
@@ -14,8 +14,8 @@
 
 // Inclusion Guards
 #pragma once
-#ifndef __PHYSICSWORLD_2D_H__
-#define __PHYSICSWORLD_2D_H__
+#ifndef __PHYSICS_WORLD_2D_H__
+#define __PHYSICS_WORLD_2D_H__
 
 // Local Includes
 #include "Physics_Utilities.h"
@@ -23,9 +23,9 @@
 #include "Physics_Rope_2D.h"
 #include "Physics_Pulley_2D.h"
 #include "Physics_Spring_2D.h"
-#include "Physics_Break_Listener.h"
+#include "Physics_Collision_Listener.h"
 
-class PhysicsWorld_2D
+class Physics_World_2D
 {
 public:
 
@@ -33,13 +33,13 @@ public:
 	* C2D_Physics: Default Constructor for 2D Physics class
 	* @author: Callan Moore
 	********************/
-	PhysicsWorld_2D();
+	Physics_World_2D();
 
 	/***********************
 	* ~C2D_Physics: Default Destructor for 2D Physics class
 	* @author: Callan Moore
 	********************/
-	~PhysicsWorld_2D();
+	~Physics_World_2D();
 
 	/***********************
 	* Initialise: Initialise the Physics 2D simulator
@@ -101,7 +101,7 @@ public:
 	* @parameter: _collide: Can the two connect bodies collide with each other
 	* @return: Physics_Joint_2D*: Reference to the created Joint
 	********************/
-	Physics_Rope_2D* CreateDistanceJoint(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, bool _collide);
+	Physics_Rope_2D* CreateRopeJoint(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, bool _collide);
 	
 	/***********************
 	* CreatePulley: Create a Pulley system in the physics world
@@ -115,14 +115,37 @@ public:
 	* @return: Physics_Pulley_2D*: The physics pulley system
 	********************/
 	Physics_Pulley_2D* CreatePulley(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, v2float _worldAnchorA, v2float _worldAnchorB);
-
-	// TO DO
+	
+	/***********************
+	* CreateSpring: Create a spring physics object
+	* @author: Callan Moore
+	* @parameter: _bodyA: Static object to attach the spring to
+	* @parameter: _bodyB: Dynamic object that will act as the spring pad for the spring
+	* @parameter: _relativeAnchorA: Relative anchor point of the static object
+	* @parameter: _relativeAnchorB: relative anchor point of the dynamic object
+	* @parameter: _maxForce: Maximum force of the spring
+	* @return: Physics_Spring_2D*: Reference to the created Physics Spring object
+	********************/
 	Physics_Spring_2D* CreateSpring(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, float _maxForce);
-
-	// TO DO
+	
+	/***********************
+	* CreateRope: Create a Flexible Rope
+	* @author: Callan Moore
+	* @parameter: _bodyA: First Object to connect with a rope
+	* @parameter: _bodyB: Second Object to connect with a rope
+	* @parameter: _relativeAnchorA: Relative anchor point on the first object
+	* @parameter: _relativeAnchorB: Relative anchor point on the second object
+	* @parameter: _color: Color for the rope to be
+	* @return: std::vector<Physics_Body_2D*>*: Reference to the created Rope object
+	********************/
 	std::vector<Physics_Body_2D*>*  CreateRope(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, COLORREF _color);
-
-	// TO DO
+	
+	/***********************
+	* BreakObject: Break an object into smaller pieces of the original object
+	* @author: Callan Moore
+	* @parameter: _body: The original object to break up
+	* @return: std::vector<Physics_Body_2D*>*: List of new created objects
+	********************/
 	std::vector<Physics_Body_2D*>* BreakObject(Physics_Body_2D* _body);
 
 private:
@@ -139,7 +162,7 @@ private:
 	float m_pixelsPerMeter;
 };
 
-#endif	// __PHYSICSWORLD_2D_H__
+#endif	// __PHYSICS_WORLD_2D_H__
 
 
 

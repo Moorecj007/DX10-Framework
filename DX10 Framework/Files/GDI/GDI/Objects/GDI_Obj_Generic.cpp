@@ -42,5 +42,5 @@ void GDI_Obj_Generic::CalcRotation(v2float* _point, float _angle, v2float _pos)
 
 void GDI_Obj_Generic::Render()
 {
-	m_pGDIRenderer->RenderPolygon(m_points, m_color, m_size);
+	m_pGDIRenderer->RenderPolygon(m_points, m_colorFill, m_colorOutline, m_size);
 }

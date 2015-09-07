@@ -15,7 +15,7 @@
 // This Include
 #include "GDI_Pulley.h"
 
-GDI_Pulley::GDI_Pulley(GDI_Renderer* _pGDI_Renderer, PhysicsWorld_2D* _pPhysWorld)
+GDI_Pulley::GDI_Pulley(GDI_Renderer* _pGDI_Renderer, Physics_World_2D* _pPhysWorld)
 {
 	m_pGDI_Renderer = _pGDI_Renderer;
 	m_pPhysWorld = _pPhysWorld;
@@ -51,14 +51,14 @@ bool GDI_Pulley::Initialise(Physics_Pulley_2D* _pJoint, COLORREF _color)
 	pPoints[2] = { 5.0f, 5.0f };
 	pPoints[3] = { -5.0f, 5.0f };
 	ZeroMemory(&physProps, sizeof(physProps));
-	physProps.circleObject = false;
+	physProps.isStatic = true;
 	physProps.pPoints = pPoints;
 	physProps.size = 4;
 	physProps.pos = groundAnchorA;
-	physProps.collisionType = CT_STATIC;
-	physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+	physProps.collisionType = CT_STANDARD;
+	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(m_pStopperA->Initialise(pTempBody, _color));
+	VALIDATE(m_pStopperA->Initialise(pTempBody, _color, _color));
 
 	m_pStopperB = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[4];
@@ -67,14 +67,14 @@ bool GDI_Pulley::Initialise(Physics_Pulley_2D* _pJoint, COLORREF _color)
 	pPoints[2] = { 5.0f, 5.0f };
 	pPoints[3] = { -5.0f, 5.0f };
 	ZeroMemory(&physProps, sizeof(physProps));
-	physProps.circleObject = false;
+	physProps.isStatic = true;
 	physProps.pPoints = pPoints;
 	physProps.size = 4;
 	physProps.pos = groundAnchorB;
-	physProps.collisionType = CT_STATIC;
-	physProps.collideWith = (CT_STATIC | CT_DYNAMIC | CT_BREAKABLE);
+	physProps.collisionType = CT_STANDARD;
+	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(m_pStopperB->Initialise(pTempBody, _color));
+	VALIDATE(m_pStopperB->Initialise(pTempBody, _color, _color));
 
 	return true;
 }

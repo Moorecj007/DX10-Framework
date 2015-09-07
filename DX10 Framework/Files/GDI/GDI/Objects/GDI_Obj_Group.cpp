@@ -24,13 +24,13 @@ GDI_Obj_Group::~GDI_Obj_Group()
 {
 }
 
-bool GDI_Obj_Group::Initialise(GDI_Renderer* _pGDI_Renderer, std::vector<Physics_Body_2D*>* _pPhysBodies, COLORREF _color)
+bool GDI_Obj_Group::Initialise(GDI_Renderer* _pGDI_Renderer, std::vector<Physics_Body_2D*>* _pPhysBodies, COLORREF _colorFill, COLORREF _colorOutline)
 {
 
 	for (UINT i = 0; i < _pPhysBodies->size(); i++)
 	{
 		GDI_Obj_Generic* pTempPoly = new GDI_Obj_Polygon(_pGDI_Renderer);
-		VALIDATE(pTempPoly->Initialise((*_pPhysBodies)[i], _color));
+		VALIDATE(pTempPoly->Initialise((*_pPhysBodies)[i], _colorFill, _colorOutline));
 		m_pObjects->push_back(pTempPoly);
 	}
 

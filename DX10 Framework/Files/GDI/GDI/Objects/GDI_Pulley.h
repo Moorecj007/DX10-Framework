@@ -20,7 +20,7 @@
 // Local Includes
 #include "../GDI_Renderer.h"
 #include "GDI_Obj_Polygon.h"
-#include "../../../Physics/2D Physics/PhysicsWorld_2D.h"
+#include "../../../Physics/2D Physics/Physics_World_2D.h"
 #include "../../../Physics/2D Physics/Physics_Pulley_2D.h"
 #include "../../../Physics/2D Physics/Physics_Utilities.h"
 
@@ -34,7 +34,7 @@ public:
 	* @parameter : _pGDI_Renderer: The renderer for this object
 	* @parameter : _pGDI_Renderer: The renderer for this object
 	********************/
-	GDI_Pulley(GDI_Renderer* _pGDI_Renderer, PhysicsWorld_2D* _pPhysWorld);
+	GDI_Pulley(GDI_Renderer* _pGDI_Renderer, Physics_World_2D* _pPhysWorld);
 
 	/***********************
 	* ~GDI_Pulley: Default Destructor for the Pulley class
@@ -68,7 +68,7 @@ public:
 
 private:
 	GDI_Renderer* m_pGDI_Renderer;
-	PhysicsWorld_2D* m_pPhysWorld;
+	Physics_World_2D* m_pPhysWorld;
 	Physics_Pulley_2D* m_pPulley;
 	COLORREF m_color;
 

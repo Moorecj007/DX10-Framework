@@ -32,6 +32,7 @@ struct TPhysicsProperties
 {
 	bool circleObject;
 	float radius;
+	float dampening;
 
 	v2float* pPoints;
 	UINT size;
@@ -43,17 +44,25 @@ struct TPhysicsProperties
 	float angle;
 	UINT16 collisionType;
 	UINT16 collideWith;
+	bool isStatic;
+	v2float linearVelocity;
 };
 
 /***********************
-* TBreakProperties: Properties struct for an object that needs to break
+* TCollisionProperties: Properties struct for an object that needs to break
 * @author: Callan Moore
 ********************/
-struct TBreakProperties
+struct TCollisionProperties
 {
-	bool broken;
+	// Object is Breaking
+	bool isBreaking;
 	v2float* pCollisionWorldPoints;
-	v2float impactVelocity;
+	v2float impactVelocity;	
+	v2float linearVelocity;
+
+	// Win/Loss conditions
+	bool isLevelLost;
+	bool isLevelWon;
 };
 
 /***********************
@@ -62,10 +71,12 @@ struct TBreakProperties
 ********************/
 enum eCollisionType
 {
-	CT_BACKGROUND = 0x0001,
-	CT_STATIC = 0x0002,
-	CT_DYNAMIC = 0x0004,
-	CT_BREAKABLE = 0x0008,
+	CT_BACKGROUND	= 1,
+	CT_STANDARD		= 2,
+	CT_GEM			= 4,
+	CT_WINZONE		= 8,
+	CT_ENEMY		= 16,
+	CT_BREAKABLE	= 32
 };
 
 #endif	// __PHYSICS_UTILITIES_H__
