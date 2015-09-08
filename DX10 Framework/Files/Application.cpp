@@ -222,9 +222,9 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		m_pGDIRenderer = new GDI_Renderer();
 		VALIDATE(m_pGDIRenderer->Initialise(m_hWnd, _hInstance, m_clientWidth, m_clientHeight));
 
-		m_pCurrentLevel = new Level_03(m_pGDIRenderer, m_clientWidth, m_clientHeight);
+		m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
 		m_pCurrentLevel->ContructLevel();
-		m_levelSelection = LS_LEVEL03;
+		m_levelSelection = LS_LEVEL01;
 	}
 
 	m_online = true;
@@ -313,7 +313,40 @@ void Application::Process(float _dt)
 
 	if (m_pGDIRenderer != 0)
 	{
-		m_pCurrentLevel->Process(_dt);
+		if (m_pCurrentLevel->Process(_dt) == true)
+		{
+			switch (m_levelSelection)
+			{
+				case LS_LEVEL01:
+				{
+					m_pCurrentLevel->DestroyLevel();
+					ReleasePtr(m_pCurrentLevel);
+					m_pCurrentLevel = new Level_02(m_pGDIRenderer, m_clientWidth, m_clientHeight);
+					m_pCurrentLevel->ContructLevel();
+					m_levelSelection = LS_LEVEL02;
+				}
+				break;
+				case LS_LEVEL02:
+				{
+					m_pCurrentLevel->DestroyLevel();
+					ReleasePtr(m_pCurrentLevel);
+					m_pCurrentLevel = new Level_03(m_pGDIRenderer, m_clientWidth, m_clientHeight);
+					m_pCurrentLevel->ContructLevel();
+					m_levelSelection = LS_LEVEL03;
+				}
+				break;
+				case LS_LEVEL03:
+				{
+					m_pCurrentLevel->DestroyLevel();
+					ReleasePtr(m_pCurrentLevel);
+					m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
+					m_pCurrentLevel->ContructLevel();
+					m_levelSelection = LS_LEVEL01;
+				}
+				break;
+
+			}
+		}
 	}
 }
 

@@ -73,9 +73,9 @@ public:
 	* Process: Process the next frame for the level
 	* @author: Callan Moore
 	* @parameter: _dt: The current Delta tick
-	* @return: void
+	* @return: bool: True if the level is completed during this process
 	********************/
-	virtual void Process(float _dt);
+	virtual bool Process(float _dt);
 	
 	/***********************
 	* Render: Render the Level to the client window
@@ -110,7 +110,8 @@ protected:
 	std::vector<GDI_Obj_Generic*>* m_pObjDynamics;
 	std::vector<GDI_Obj_Generic*>* m_pObjBreakables;
 
-	std::vector<GDI_Rope*>* m_pObjRopes;
+	std::vector<GDI_Rope*>* m_pRopes_Cuttable;
+	std::vector<GDI_Rope*>* m_pRopes_Unbreakable;
 	std::vector<GDI_Pulley*>* m_pObjPulleys;
 	std::vector<GDI_Spring*>* m_pObjSprings;
 };

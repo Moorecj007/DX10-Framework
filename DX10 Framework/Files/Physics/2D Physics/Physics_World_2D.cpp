@@ -159,7 +159,7 @@ Physics_Body_2D* Physics_World_2D::CreatePhysicsCircle(TPhysicsProperties _props
 	// Set the body definition structure
 	bodyDef.position.Set(convertPos.x, convertPos.y);
 	bodyDef.angle = _props.angle;
-	bodyDef.angularDamping = _props.dampening;
+	bodyDef.angularDamping = _props.damping;
 	body = m_pWorld->CreateBody(&bodyDef);
 
 	// Create a circle shape
@@ -272,8 +272,9 @@ Physics_Spring_2D* Physics_World_2D::CreateSpring(Physics_Body_2D* _bodyA, Physi
 	prismaticJointDef.bodyB = _bodyB->GetBody();
 	prismaticJointDef.localAnchorA = { _relativeAnchorA.x / m_pixelsPerMeter, _relativeAnchorA.y / m_pixelsPerMeter };
 	prismaticJointDef.localAnchorB = { _relativeAnchorB.x / m_pixelsPerMeter, _relativeAnchorB.y / m_pixelsPerMeter };
-	
+	prismaticJointDef.referenceAngle = (_bodyB->GetAngle() - _bodyA->GetAngle());
 	prismaticJointDef.localAxisA = { worldAnchorA.x - worldAnchorB.x, worldAnchorA.y - worldAnchorB.y };
+	prismaticJointDef.localAxisA.Normalize();
 	b2PrismaticJoint* pPrismaticJoint = (b2PrismaticJoint*)m_pWorld->CreateJoint(&prismaticJointDef);
 
 	// Create a Physics spring object and save the joint

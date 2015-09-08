@@ -31,7 +31,7 @@ bool Level_Testing::ContructLevel()
 	m_pObjStatics = new std::vector < GDI_Obj_Generic* > ;
 	m_pObjDynamics = new std::vector < GDI_Obj_Generic* > ;
 	m_pObjBreakables = new std::vector < GDI_Obj_Generic* > ;
-	m_pObjRopes = new std::vector < GDI_Rope* > ;
+	m_pRopes_Cuttable = new std::vector < GDI_Rope* > ;
 	m_pObjPulleys = new std::vector < GDI_Pulley* > ;
 	m_pObjSprings = new std::vector < GDI_Spring* > ;
 
@@ -110,7 +110,7 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_BREAKABLE;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjBreakables->push_back(pTempObject);
 
 	m_pPhysWorld->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), pTempObject->GetPhysicsBody(), { 405, 500 }, false);
@@ -131,13 +131,13 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
 	GDI_Rope* pRope = new GDI_Rope(m_pGDI_Renderer);
 	Physics_Rope_2D* pRopeJoint = m_pPhysWorld->CreateRopeJoint(m_pBackground->GetPhysicsBody(), pTempObject->GetPhysicsBody(), { 300, 500 }, { 0, 0 }, false);
 	VALIDATE(pRope->Initialise(pRopeJoint, colorRef::RED));
-	m_pObjRopes->push_back(pRope);
+	m_pRopes_Cuttable->push_back(pRope);
 
 	pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[4];
@@ -156,7 +156,7 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_BREAKABLE;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjBreakables->push_back(pTempObject);
 
 	m_pPhysWorld->CreateRevoluteJoint(m_pBackground->GetPhysicsBody(), pTempObject->GetPhysicsBody(), { 405, 500 }, false);
@@ -175,12 +175,6 @@ bool Level_Testing::ContructLevel()
 	VALIDATE(m_pCircle->Initialise(pTempBody, colorRef::YELLOW, colorRef::BLACK));
 	m_pObjDynamics->push_back(m_pCircle);
 
-	// BETTER ROPE JOINT - currently not working
-	//std::vector<Physics_Body_2D*>* pRopeBodies = m_pPhysics2D->CreateRope(m_pBackground->GetPhysicsBody(), pTempBody, { 500, 500 }, { 0, 0 }, 0xFF00FF);
-	//GDI_Obj_Group* pGroupObj = new GDI_Obj_Group();
-	//VALIDATE(pGroupObj->Initialise(m_pGDIRenderer, pRopeBodies, 0xFF00FF));
-	//m_groupObjects.push_back(pGroupObj);
-
 	GDI_Obj_Polygon* pPulleyPolyA = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[4];
 	pPoints[0] = { -20.0f, -20.0f };
@@ -197,7 +191,7 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pPulleyPolyA->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(pPulleyPolyA->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(pPulleyPolyA);
 
 	GDI_Obj_Polygon* pPulleyPolyB = new GDI_Obj_Polygon(m_pGDI_Renderer);
@@ -216,7 +210,7 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pPulleyPolyB->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(pPulleyPolyB->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(pPulleyPolyB);
 
 	Physics_Pulley_2D* pTempPhysPulley = m_pPhysWorld->CreatePulley(pPulleyPolyA->GetPhysicsBody(), pPulleyPolyB->GetPhysicsBody(), { 0, -20 }, { 0, -20 }, { 700, 100 }, { 900, 100 });
@@ -240,7 +234,7 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
 	pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
@@ -259,7 +253,7 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
 	pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
@@ -315,7 +309,7 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(m_pCircle->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(m_pCircle->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(m_pCircle);
 
 	pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
@@ -335,7 +329,7 @@ bool Level_Testing::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLUE, colorRef::BLACK));
+	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjStatics->push_back(pTempObject);
 
 	return true;

@@ -32,7 +32,7 @@ struct TPhysicsProperties
 {
 	bool circleObject;
 	float radius;
-	float dampening;
+	float damping;
 
 	v2float* pPoints;
 	UINT size;
