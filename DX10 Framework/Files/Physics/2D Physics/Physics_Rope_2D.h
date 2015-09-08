@@ -60,6 +60,8 @@ private:
 	b2World* m_pPhysWorld;
 	b2Joint* m_pJoint;
 	float m_pixelsPerMeter;
+	v2float m_anchorA;
+	v2float m_anchorB;
 };
 #endif// __PHYSICS_JOINT_2D_H__
 

@@ -123,10 +123,12 @@ public:
 	* @parameter: _bodyB: Dynamic object that will act as the spring pad for the spring
 	* @parameter: _relativeAnchorA: Relative anchor point of the static object
 	* @parameter: _relativeAnchorB: relative anchor point of the dynamic object
-	* @parameter: _maxForce: Maximum force of the spring
+	* @parameter: _freq: Frequency of the spring in hz
+	* @parameter: _damping: Damping of the spring to determine oscillation amount
+	* @parameter: _extraDist: Extra Distance to create a compressed spring
 	* @return: Physics_Spring_2D*: Reference to the created Physics Spring object
 	********************/
-	Physics_Spring_2D* CreateSpring(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, float _maxForce);
+	Physics_Spring_2D* CreateSpring(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, float _freq, float _damping, float _extraDist = 0.0f);
 	
 	/***********************
 	* CreateRope: Create a Flexible Rope

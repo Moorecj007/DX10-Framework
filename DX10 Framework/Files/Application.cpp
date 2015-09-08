@@ -261,6 +261,7 @@ void Application::ShutDown()
 	ReleasePtr(m_pCubeMesh);
 	ReleasePtr(m_pCube);
 
+	m_pCurrentLevel->DestroyLevel();
 	ReleasePtr(m_pCurrentLevel);
 
 	// Delete and free the memory from the Renderer
@@ -420,6 +421,39 @@ void Application::HandleInput()
 		if (m_pKeyDown[0x52])	// R Key
 		{
 			m_pCurrentLevel->ResetLevel();
+		}
+
+		if (m_pKeyDown[VK_F1])
+		{
+			m_pCurrentLevel->DestroyLevel();
+			ReleasePtr(m_pCurrentLevel);
+			m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
+			m_pCurrentLevel->ContructLevel();
+			m_levelSelection = LS_LEVEL01;
+		}
+		if (m_pKeyDown[VK_F2])
+		{
+			m_pCurrentLevel->DestroyLevel();
+			ReleasePtr(m_pCurrentLevel);
+			m_pCurrentLevel = new Level_02(m_pGDIRenderer, m_clientWidth, m_clientHeight);
+			m_pCurrentLevel->ContructLevel();
+			m_levelSelection = LS_LEVEL02;
+		}
+		if (m_pKeyDown[VK_F3])
+		{
+			m_pCurrentLevel->DestroyLevel();
+			ReleasePtr(m_pCurrentLevel);
+			m_pCurrentLevel = new Level_03(m_pGDIRenderer, m_clientWidth, m_clientHeight);
+			m_pCurrentLevel->ContructLevel();
+			m_levelSelection = LS_LEVEL03;
+		}
+		if (m_pKeyDown[VK_F4])
+		{
+			m_pCurrentLevel->DestroyLevel();
+			ReleasePtr(m_pCurrentLevel);
+			m_pCurrentLevel = new Level_Testing(m_pGDIRenderer, m_clientWidth, m_clientHeight);
+			m_pCurrentLevel->ContructLevel();
+			m_levelSelection = LS_LEVELTESTING;
 		}
 	}
 }

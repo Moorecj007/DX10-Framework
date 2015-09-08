@@ -242,15 +242,29 @@ Physics_Pulley_2D* Physics_World_2D::CreatePulley(Physics_Body_2D* _bodyA, Physi
 	return pPhysicsJoint;	
 }
 
-Physics_Spring_2D* Physics_World_2D::CreateSpring(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, float _maxForce)
+Physics_Spring_2D* Physics_World_2D::CreateSpring(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, float _freq, float _damping, float _extraDist)
 {
 	// Create a motor joint to make an object return to its original position
-	b2MotorJointDef motorJointDef;
-	motorJointDef.Initialize(_bodyB->GetBody(), _bodyA->GetBody());
-	motorJointDef.maxForce = _maxForce;
-	motorJointDef.maxTorque = 10000.0f;
-	b2MotorJoint* pMotorJoint = (b2MotorJoint*)m_pWorld->CreateJoint(&motorJointDef);
-	b2Vec2 vec = pMotorJoint->GetLinearOffset();
+	//b2MotorJointDef motorJointDef;
+	//motorJointDef.Initialize(_bodyB->GetBody(), _bodyA->GetBody());
+	//motorJointDef.maxForce = _maxForce;
+	//motorJointDef.maxTorque = 10000.0f;
+	//b2MotorJoint* pMotorJoint = (b2MotorJoint*)m_pWorld->CreateJoint(&motorJointDef);
+	//b2Vec2 vec = pMotorJoint->GetLinearOffset();
+
+	b2Vec2 worldAnchorA = _bodyA->GetBody()->GetWorldPoint({ _relativeAnchorA.x / m_pixelsPerMeter, _relativeAnchorA.y / m_pixelsPerMeter });
+	b2Vec2 worldAnchorB = _bodyB->GetBody()->GetWorldPoint({ _relativeAnchorB.x / m_pixelsPerMeter, _relativeAnchorB.y / m_pixelsPerMeter });
+
+	b2DistanceJointDef distJointDef;
+	distJointDef.frequencyHz = _freq;
+	distJointDef.dampingRatio = _damping;
+	distJointDef.bodyA = _bodyA->GetBody();
+	distJointDef.bodyB = _bodyB->GetBody();
+	distJointDef.length = (worldAnchorA - worldAnchorB).Length() + (_extraDist / m_pixelsPerMeter);
+	distJointDef.localAnchorA = { _relativeAnchorA.x / m_pixelsPerMeter, _relativeAnchorA.y / m_pixelsPerMeter };
+	distJointDef.localAnchorB = { _relativeAnchorB.x / m_pixelsPerMeter, _relativeAnchorB.y / m_pixelsPerMeter };
+	distJointDef.collideConnected = false;
+	b2DistanceJoint* pDistJoint = (b2DistanceJoint*)m_pWorld->CreateJoint(&distJointDef);
 
 	// Create a prismatic joint to constrain the spring to one axis of movement
 	b2PrismaticJointDef prismaticJointDef;
@@ -259,15 +273,13 @@ Physics_Spring_2D* Physics_World_2D::CreateSpring(Physics_Body_2D* _bodyA, Physi
 	prismaticJointDef.localAnchorA = { _relativeAnchorA.x / m_pixelsPerMeter, _relativeAnchorA.y / m_pixelsPerMeter };
 	prismaticJointDef.localAnchorB = { _relativeAnchorB.x / m_pixelsPerMeter, _relativeAnchorB.y / m_pixelsPerMeter };
 	
-	b2Vec2 worldAnchorA = _bodyA->GetBody()->GetWorldPoint({ _relativeAnchorA.x / m_pixelsPerMeter, _relativeAnchorA.y / m_pixelsPerMeter });
-	b2Vec2 worldAnchorB = _bodyB->GetBody()->GetWorldPoint({ _relativeAnchorB.x / m_pixelsPerMeter, _relativeAnchorB.y / m_pixelsPerMeter });
-
 	prismaticJointDef.localAxisA = { worldAnchorA.x - worldAnchorB.x, worldAnchorA.y - worldAnchorB.y };
 	b2PrismaticJoint* pPrismaticJoint = (b2PrismaticJoint*)m_pWorld->CreateJoint(&prismaticJointDef);
 
 	// Create a Physics spring object and save the joint
-	Physics_Spring_2D* pSpring = new Physics_Spring_2D(m_pWorld, pMotorJoint, m_pixelsPerMeter);
-	return pSpring;
+	//Physics_Spring_2D* pSpring = new Physics_Spring_2D(m_pWorld, pMotorJoint, m_pixelsPerMeter);
+	//return pSpring;
+	return 0;
 }
 
 std::vector<Physics_Body_2D*>* Physics_World_2D::CreateRope(Physics_Body_2D* _physBodyA, Physics_Body_2D* _physBodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, COLORREF _color)

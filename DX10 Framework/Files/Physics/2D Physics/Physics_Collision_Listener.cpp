@@ -26,8 +26,8 @@ Physics_Collision_Listener::~Physics_Collision_Listener()
 void Physics_Collision_Listener::BeginContact(b2Contact* _contact)
 {
 	// Check if at least one of the colliding objects is breakable
-	if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE
-		|| _contact->GetFixtureB()->GetFilterData().categoryBits == CT_BREAKABLE)
+	if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE || _contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE_ENEMY
+		|| _contact->GetFixtureB()->GetFilterData().categoryBits == CT_BREAKABLE || _contact->GetFixtureB()->GetFilterData().categoryBits == CT_BREAKABLE_ENEMY)
 	{
 		ResolveBreak(_contact);
 	}
@@ -96,6 +96,7 @@ void Physics_Collision_Listener::ResolveBreak(b2Contact* _contact)
 	Physics_Body_2D* pPhysicsBody = 0;
 	v2float impactVelocity;
 	b2Vec2 linearVelocity;
+	float impactSpeed;
 
 	// Set the break properties of the first object if its breakable
 	if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE)
@@ -103,16 +104,25 @@ void Physics_Collision_Listener::ResolveBreak(b2Contact* _contact)
 		// Calculate the impact velocity of the other object
 		b2Vec2 b2ImpactVelocity = velocityA - velocityB;
 		impactVelocity = { b2ImpactVelocity.x, b2ImpactVelocity.y };
+		impactSpeed = impactVelocity.Magnitude();
 
-		pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureA()->GetBody()->GetUserData());
-		linearVelocity = _contact->GetFixtureA()->GetBody()->GetLinearVelocity();
+		if (impactSpeed > 1.0f)
+		{
+			pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureA()->GetBody()->GetUserData());
+			linearVelocity = _contact->GetFixtureA()->GetBody()->GetLinearVelocity();
 
-		TCollisionProperties collisionProps;
-		collisionProps.isBreaking = true;
-		collisionProps.pCollisionWorldPoints = pPoints;
-		collisionProps.impactVelocity = impactVelocity;
-		collisionProps.linearVelocity = { linearVelocity.x, linearVelocity.y };
-		pPhysicsBody->SetCollisionProperties(collisionProps);
+			TCollisionProperties collisionProps;
+			collisionProps.isBreaking = true;
+			collisionProps.pCollisionWorldPoints = pPoints;
+			collisionProps.impactVelocity = impactVelocity;
+			collisionProps.linearVelocity = { linearVelocity.x, linearVelocity.y };
+			pPhysicsBody->SetCollisionProperties(collisionProps);
+		}
+		else
+		{
+			// Delete allocated memory that will not be stored
+			ReleasePtr(pPoints);
+		}
 	}
 
 	// Set the break properties of the second object if its breakable
@@ -121,15 +131,24 @@ void Physics_Collision_Listener::ResolveBreak(b2Contact* _contact)
 		// Calculate the impact velocity of the other object
 		b2Vec2 b2ImpactVelocity = velocityB - velocityA;
 		impactVelocity = { b2ImpactVelocity.x, b2ImpactVelocity.y };
+		impactSpeed = impactVelocity.Magnitude();
 
-		pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureB()->GetBody()->GetUserData());
-		linearVelocity = _contact->GetFixtureB()->GetBody()->GetLinearVelocity();
+		if (impactSpeed > 1.0f)
+		{
+			pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureB()->GetBody()->GetUserData());
+			linearVelocity = _contact->GetFixtureB()->GetBody()->GetLinearVelocity();
 
-		TCollisionProperties collisionProps;
-		collisionProps.isBreaking = true;
-		collisionProps.pCollisionWorldPoints = pPoints;
-		collisionProps.impactVelocity = impactVelocity;
-		collisionProps.linearVelocity = { linearVelocity.x, linearVelocity.y };
-		pPhysicsBody->SetCollisionProperties(collisionProps);
+			TCollisionProperties collisionProps;
+			collisionProps.isBreaking = true;
+			collisionProps.pCollisionWorldPoints = pPoints;
+			collisionProps.impactVelocity = impactVelocity;
+			collisionProps.linearVelocity = { linearVelocity.x, linearVelocity.y };
+			pPhysicsBody->SetCollisionProperties(collisionProps);
+		}
+		else
+		{
+			// Delete allocated memory that will not be stored
+			ReleasePtr(pPoints);
+		}
 	}
 }

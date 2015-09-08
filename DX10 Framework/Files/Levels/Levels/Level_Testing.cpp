@@ -24,7 +24,6 @@ Level_Testing::Level_Testing(GDI_Renderer* _pGDI_Renderer, int _clientWidth, int
 
 Level_Testing::~Level_Testing()
 {
-	DestroyLevel();
 }
 
 bool Level_Testing::ContructLevel()
@@ -49,7 +48,7 @@ bool Level_Testing::ContructLevel()
 	m_pGem = new GDI_Obj_Circle(m_pGDI_Renderer);
 	ZeroMemory(&physProps, sizeof(physProps));
 	physProps.circleObject = true;
-	physProps.pos = { 250, 100 };
+	physProps.pos = { 50, 100 };
 	physProps.radius = 15.0f;
 	physProps.density = 10.0f;
 	physProps.friction = 0.3f;
@@ -283,7 +282,7 @@ bool Level_Testing::ContructLevel()
 	m_pObjDynamics->push_back(pTempObject);
 
 	GDI_Spring* pSpring = new GDI_Spring(m_pGDI_Renderer);
-	Physics_Spring_2D* pPhysSpring = m_pPhysWorld->CreateSpring(m_pBackground->GetPhysicsBody(), pTempBody, { 500, 900 }, { 0, 0 }, 20000.0f);
+	Physics_Spring_2D* pPhysSpring = m_pPhysWorld->CreateSpring(m_pBackground->GetPhysicsBody(), pTempBody, { 500, 900 }, { 0, 0 }, 20.0f, 0.9f);
 	VALIDATE(pSpring->Initialise(pPhysSpring, colorRef::BLACK));
 	m_pObjSprings->push_back(pSpring);
 

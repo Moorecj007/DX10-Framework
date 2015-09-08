@@ -24,7 +24,6 @@ Level_02::Level_02(GDI_Renderer* _pGDI_Renderer, int _clientWidth, int _clientHe
 
 Level_02::~Level_02()
 {
-	DestroyLevel();
 }
 
 bool Level_02::ContructLevel()

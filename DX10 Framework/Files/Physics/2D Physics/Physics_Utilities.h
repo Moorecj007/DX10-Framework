@@ -76,7 +76,8 @@ enum eCollisionType
 	CT_GEM			= 4,
 	CT_WINZONE		= 8,
 	CT_ENEMY		= 16,
-	CT_BREAKABLE	= 32
+	CT_BREAKABLE	= 32,
+	CT_BREAKABLE_ENEMY = 64
 };
 
 #endif	// __PHYSICS_UTILITIES_H__
