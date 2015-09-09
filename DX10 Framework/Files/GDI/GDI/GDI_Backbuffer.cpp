@@ -56,7 +56,7 @@ bool CBackBuffer::Initialise(HWND _hWnd, int _iWidth, int _iHeight)
 
 void CBackBuffer::Clear()
 {
-	HBRUSH hOldBrush = static_cast<HBRUSH>(SelectObject(GetBFDC(), GetStockObject(WHITE_BRUSH)));
+	HBRUSH hOldBrush = static_cast<HBRUSH>(SelectObject(GetBFDC(), GetStockObject(BLACK_BRUSH)));
 	Rectangle(GetBFDC(), 0, 0, GetWidth(), GetHeight());
 	SelectObject(GetBFDC(), hOldBrush);
 }

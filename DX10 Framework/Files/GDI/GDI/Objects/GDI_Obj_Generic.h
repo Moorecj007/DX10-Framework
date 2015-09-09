@@ -28,16 +28,14 @@ class GDI_Obj_Generic
 {
 public:
 	/***********************
-	* GDI_Obj_Generic: Constructor for GDI Generic Object class
-	* @author: Callan Moore
-	********************/
-	GDI_Obj_Generic();
-
-	/***********************
 	* ~GDI_Obj_Generic: Default Destructor for GDI Generic Object class
 	* @author: Callan Moore
 	********************/
-	virtual ~GDI_Obj_Generic();
+	virtual ~GDI_Obj_Generic()
+	{
+		ReleasePtr(m_pPhysicsBody);
+		ReleasePtrArray(m_points);
+	}
 
 	/***********************
 	* Initialise: Initialise the Object for use
@@ -62,7 +60,10 @@ public:
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	virtual void Render();
+	virtual void Render()
+	{
+		m_pGDIRenderer->RenderPolygon(m_points, m_colorFill, m_colorOutline, m_size);
+	}
 	
 	/***********************
 	* GetPhysicsBody: Retrieve the Physics Body if the Object
@@ -76,14 +77,14 @@ public:
 	* @author: Callan Moore
 	* @return: COLORREF: The color of the objects fill 
 	********************/
-	virtual COLORREF GetColorFill()	{ return m_colorFill; };
+	COLORREF GetColorFill()	{ return m_colorFill; };
 
 	/***********************
 	* GetColorOutline: Retrieve the Color of the Objects outline
 	* @author: Callan Moore
 	* @return: COLORREF: The color of the objects Outline
 	********************/
-	virtual COLORREF GetColorOutline()	{ return m_colorOutline; };
+	COLORREF GetColorOutline()	{ return m_colorOutline; };
 
 protected:
 
@@ -95,7 +96,19 @@ protected:
 	* @parameter: _pos: Center of the object containing the point
 	* @return: void
 	********************/
-	virtual void CalcRotation(v2float* _point, float _angle, v2float _pos);
+	void CalcRotation(v2float* _point, float _angle, v2float _pos)
+	{
+		// Translate the point to origin
+		(*_point).x = (*_point).x - _pos.x;
+		(*_point).y = (*_point).y - _pos.y;
+
+		v2float pt;
+		pt.x = ((*_point).x * cos(_angle) - (*_point).y * sin(_angle));
+		pt.y = ((*_point).y * cos(_angle) + (*_point).x * sin(_angle));
+
+		(*_point).x = pt.x + _pos.x;
+		(*_point).y = pt.y + _pos.y;
+	}
 
 protected:
 

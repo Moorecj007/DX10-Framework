@@ -6,8 +6,8 @@
 *
 * (c) 2005 - 2015 Media Design School
 *
-* File Name : GDI_Line.h
-* Description : A line for drawing in GDI
+* File Name : GDI_Obj_Rope.h
+* Description : GDI representation of a rope
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */
@@ -18,26 +18,26 @@
 #define __GDI_LINE_H__
 
 // Local Includes
-#include "../../Utility/Utilities.h"
-#include "../../Physics/2D Physics/Physics_Rope_2D.h"
-#include "GDI_Renderer.h"
+#include "../../../Utility/Utilities.h"
+#include "../../../Physics/2D Physics/Physics_Rope_2D.h"
+#include "../GDI_Renderer.h"
 
-class GDI_Rope
+class GDI_Obj_Rope
 {
 public:
 
 	/***********************
-	* GDI_Line: Constructor for GDI Line class
+	* GDI_Obj_Rope: Constructor for GDI Rope class
 	* @author: Callan Moore
 	* @parameter: _pGDI_Renderer: GDI Renderer for this line
 	********************/
-	GDI_Rope(GDI_Renderer* _pGDI_Renderer);
+	GDI_Obj_Rope(GDI_Renderer* _pGDI_Renderer);
 
 	/***********************
-	* ~GDI_Line: Destructor for GDI Line class
+	* ~GDI_Obj_Rope: Destructor for GDI Rope class
 	* @author: Callan Moore
 	********************/
-	~GDI_Rope();
+	~GDI_Obj_Rope();
 
 	/***********************
 	* Initialise: Initialise a line using a physics joint
@@ -74,16 +74,16 @@ public:
 	void Render();
 
 	/***********************
-	* GetPositionA: Retrieve the first position of the rope line
+	* GetPositionA: Retrieve the first end of the rope line
 	* @author: Callan Moore
-	* @return: v2float: The world space coordinate of the rope position
+	* @return: v2float: The world space coordinate of the ropes position of the first end
 	********************/
 	v2float GetPositionA() { return m_posA; };
 	
 	/***********************
-	* GetPositionB: Retrieve the second position of the rope line
+	* GetPositionB: Retrieve the second end of the rope line
 	* @author: Callan Moore
-	* @return: v2float: The world space coordinate of the rope position
+	* @return: v2float: The world space coordinate of the ropes position of the second end
 	********************/
 	v2float GetPositionB() { return m_posB; };
 

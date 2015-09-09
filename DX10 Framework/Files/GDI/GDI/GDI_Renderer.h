@@ -95,6 +95,18 @@ public:
 	* @return: void
 	********************/
 	void EndRender();
+	
+	/***********************
+	* WriteLine: Write a line of text to the back buffer
+	* @author: Callan Moore
+	* @parameter: _line: Line of Text
+	* @parameter: _startingX: The starting X position of the first character
+	* @parameter: _startingY: The starting Y position of the first character
+	* @parameter: _color: Color of the Text
+	* @parameter: _bkgrndTransparent: Whether to have the background of the text transparent
+	* @return: void
+	********************/
+	void WriteLine(std::string _line, int _startingX, int _startingY, COLORREF _color, bool _bkgrndTransparent = true);
 
 private:
 

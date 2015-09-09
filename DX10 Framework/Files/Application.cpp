@@ -38,7 +38,7 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdL
 	// Create the Application 
 	Application* pApp = Application::GetInstance();
 	
-	if (pApp->CreateWindowApp(clientWidth, clientHeight, _hInstance) == true)
+	if (pApp->CreateWindowApp(clientWidth + 300, clientHeight, _hInstance) == true)
 	{
 		VALIDATE(pApp->Initialise(clientWidth, clientHeight, _hInstance));
 		pApp->Execute();
@@ -220,7 +220,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	{
 		// Initialise the Renderer
 		m_pGDIRenderer = new GDI_Renderer();
-		VALIDATE(m_pGDIRenderer->Initialise(m_hWnd, _hInstance, m_clientWidth, m_clientHeight));
+		VALIDATE(m_pGDIRenderer->Initialise(m_hWnd, _hInstance, m_clientWidth + 300, m_clientHeight));
 
 		m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
 		m_pCurrentLevel->ContructLevel();
@@ -344,8 +344,7 @@ void Application::Process(float _dt)
 					m_levelSelection = LS_LEVEL01;
 				}
 				break;
-
-			}
+			}	// End Switch
 		}
 	}
 }
@@ -373,6 +372,8 @@ void Application::Draw()
 		{
 			DrawCutLine();
 		}
+
+		RenderInstructions();
 
 		m_pGDIRenderer->EndRender();
 	}
@@ -480,14 +481,6 @@ void Application::HandleInput()
 			m_pCurrentLevel->ContructLevel();
 			m_levelSelection = LS_LEVEL03;
 		}
-		if (m_pKeyDown[VK_F4])
-		{
-			m_pCurrentLevel->DestroyLevel();
-			ReleasePtr(m_pCurrentLevel);
-			m_pCurrentLevel = new Level_Testing(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-			m_pCurrentLevel->ContructLevel();
-			m_levelSelection = LS_LEVELTESTING;
-		}
 	}
 }
 
@@ -499,6 +492,42 @@ void Application::CutRope()
 void Application::DrawCutLine()
 {
 	m_pGDIRenderer->RenderLine(m_firstMousePos, m_secondMousePos, colorRef::RED);
+}
+
+void Application::RenderInstructions()
+{
+	int yPos = 0;
+
+	m_pGDIRenderer->WriteLine("INSTRUCTIONS", 1080, Increment(&yPos, 150), colorRef::WHITE);
+	
+	m_pGDIRenderer->WriteLine("Use the Mouse Left click to cut the", 1030, Increment(&yPos, 15), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("purple ropes. Hold down to draw a", 1030, Increment(&yPos, 15), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("cutting line and release to cut.", 1030, Increment(&yPos, 15), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("The aim of each level is to get the", 1030, Increment(&yPos, 30), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("yellow gem to the green win zone.", 1030, Increment(&yPos, 15), colorRef::WHITE);
+
+	m_pGDIRenderer->WriteLine("KEY CODES", 1080, Increment(&yPos, 80), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("[R]     -> Reset current Level", 1030, Increment(&yPos, 15), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("[F1]   -> Skip to Level 01", 1030, Increment(&yPos, 15), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("[F2]   -> Skip to Level 02", 1030, Increment(&yPos, 15), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("[F3]   -> Skip to Level 03", 1030, Increment(&yPos, 15), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("[Esc] -> Quit Game", 1030, Increment(&yPos, 15), colorRef::WHITE);
+
+	m_pGDIRenderer->WriteLine("COLOR LEGEND", 1080, Increment(&yPos, 80), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("Gem", 1030, Increment(&yPos, 15), colorRef::YELLOW);
+	m_pGDIRenderer->WriteLine("Win Zone", 1030, Increment(&yPos, 15), colorRef::GREEN);
+	m_pGDIRenderer->WriteLine("Cuttable Rope", 1030, Increment(&yPos, 15), colorRef::PURPLE);
+	m_pGDIRenderer->WriteLine("Uncuttable Rope", 1030, Increment(&yPos, 15), colorRef::GREY);
+	m_pGDIRenderer->WriteLine("Interactive Object", 1030, Increment(&yPos, 15), colorRef::CYAN);
+	m_pGDIRenderer->WriteLine("Enemy Object", 1030, Increment(&yPos, 15), colorRef::RED);
+	m_pGDIRenderer->WriteLine("Breakable Object", 1030, Increment(&yPos, 15), colorRef::PINK);
+	m_pGDIRenderer->WriteLine("Spring Object", 1030, Increment(&yPos, 15), colorRef::DARKBLUE);
+}
+
+int Application::Increment(int* _value, int _amount)
+{
+	*_value += _amount;
+	return *_value;
 }
 
 

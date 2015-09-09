@@ -26,7 +26,7 @@ class Level_03 :
 public:
 
 	/***********************
-	* Level_02: Default Constructor for Level 03
+	* Level_03:  Constructor for Level 03
 	* @author: Callan Moore
 	* @parameter: _pGDI_Renderer: The Renderer for this level
 	* @parameter: _clientWidth: The Width of the client window

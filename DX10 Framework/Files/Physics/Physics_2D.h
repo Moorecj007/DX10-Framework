@@ -23,7 +23,6 @@
 #include "2D Physics/Physics_Body_2D.h"
 #include "2D Physics/Physics_Rope_2D.h"
 #include "2D Physics/Physics_Pulley_2D.h"
-#include "2D Physics/Physics_Spring_2D.h"
 #include "2D Physics/Physics_Collision_Listener.h"
 
 #endif	// __PHYSICS_2D_H__

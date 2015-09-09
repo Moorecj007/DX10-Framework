@@ -27,8 +27,7 @@ enum eLevelSelection
 	LS_NONE,
 	LS_LEVEL01,
 	LS_LEVEL02,
-	LS_LEVEL03,
-	LS_LEVELTESTING
+	LS_LEVEL03
 };
 
 class Level_Generic
@@ -53,21 +52,21 @@ public:
 	* @author: Callan Moore
 	* @return: bool: Successful or not
 	********************/
-	virtual bool InitialSetup();
+	bool InitialSetup();
 	
 	/***********************
 	* DestroyLevel: Destroy all level objects
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	virtual void DestroyLevel();
+	void DestroyLevel();
 	
 	/***********************
 	* ResetLevel: Reset the level to the beginning
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	virtual void ResetLevel();
+	void ResetLevel();
 	
 	/***********************
 	* Process: Process the next frame for the level
@@ -75,14 +74,14 @@ public:
 	* @parameter: _dt: The current Delta tick
 	* @return: bool: True if the level is completed during this process
 	********************/
-	virtual bool Process(float _dt);
+	bool Process(float _dt);
 	
 	/***********************
 	* Render: Render the Level to the client window
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	virtual void Render();
+	void Render();
 	
 	/***********************
 	* CutRope: Check if the cutting line crosses any ropes and cuts each rope that does
@@ -91,7 +90,7 @@ public:
 	* @parameter: _cutLinePtB: Second point of the cutting line
 	* @return: void
 	********************/
-	virtual void CutRope(v2float _cutLinePtA, v2float _cutLinePtB);
+	void CutRope(v2float _cutLinePtA, v2float _cutLinePtB);
 
 protected:
 	GDI_Renderer* m_pGDI_Renderer;
@@ -110,10 +109,9 @@ protected:
 	std::vector<GDI_Obj_Generic*>* m_pObjDynamics;
 	std::vector<GDI_Obj_Generic*>* m_pObjBreakables;
 
-	std::vector<GDI_Rope*>* m_pRopes_Cuttable;
-	std::vector<GDI_Rope*>* m_pRopes_Unbreakable;
-	std::vector<GDI_Pulley*>* m_pObjPulleys;
-	std::vector<GDI_Spring*>* m_pObjSprings;
+	std::vector<GDI_Obj_Rope*>* m_pRopes_Cuttable;
+	std::vector<GDI_Obj_Rope*>* m_pRopes_Unbreakable;
+	std::vector<GDI_Obj_Pulley*>* m_pObjPulleys;
 };
 #endif	// __LEVEL_GENERIC_H__
 

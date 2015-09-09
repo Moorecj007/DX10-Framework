@@ -23,6 +23,7 @@
 #define ReleasePtr(x) { if(x){ delete x; x = 0;} }
 #define ReleasePtrArray(x) { if(x){ delete[] x; x = 0;} }
 
+// Handy Define to determine that a function was successful
 #if defined(DEBUG) | defined(_DEBUG)
 #define VALIDATE(x) {								\
 	if (!x) {										\
@@ -546,7 +547,7 @@ inline float RadiansToDegrees(float _radians)
 	return (180.0f * _radians / float(M_PI));
 }
 
-// Color constants
+// Color constants in COLORREF formatting
 namespace colorRef
 {
 	const COLORREF BLACK(RGB(0, 0, 0));
@@ -557,7 +558,6 @@ namespace colorRef
 	const COLORREF YELLOW(RGB(255, 255, 0));
 	const COLORREF PURPLE(RGB(128, 0, 128));
 	const COLORREF DARKBLUE(RGB(0, 0, 139));
-
 	const COLORREF GREY(RGB(50, 50, 50));
 	const COLORREF PINK(RGB(199, 21, 133));
 }

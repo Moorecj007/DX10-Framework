@@ -75,10 +75,15 @@ public:
 	void PostSolve(b2Contact* _contact, const b2ContactImpulse* _impulse);
 
 protected:
-	// TO DO
+	
+	/***********************
+	* ResolveBreak: Resolve a collision that results in a broken object
+	* @author: Callan Moore
+	* @parameter: _contact: The details about the collision
+	* @return: void
+	********************/
 	void ResolveBreak(b2Contact* _contact);
-	//void ResolveLoseScenario(b2Contact* _contact);
-	//void ResolveWinScenario(b2Contact* _contact);
+
 };
 
 #endif	// __PHYSICS_COLLISION_LISTENER_H__

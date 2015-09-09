@@ -15,32 +15,17 @@
 // This Include
 #include "GDI_Obj_Generic.h"
 
-GDI_Obj_Generic::GDI_Obj_Generic()
-{
-}
-
-
 GDI_Obj_Generic::~GDI_Obj_Generic()
 {
-	ReleasePtr(m_pPhysicsBody);
-	ReleasePtrArray(m_points);
+	
 }
 
 void GDI_Obj_Generic::CalcRotation(v2float* _point, float _angle, v2float _pos)
 {
-	// Translate the point to origin
-	(*_point).x = (*_point).x - _pos.x;
-	(*_point).y = (*_point).y - _pos.y;
-
-	v2float pt;
-	pt.x = ((*_point).x * cos(_angle) - (*_point).y * sin(_angle));
-	pt.y = ((*_point).y * cos(_angle) + (*_point).x * sin(_angle));
-
-	(*_point).x = pt.x + _pos.x;
-	(*_point).y = pt.y + _pos.y;
+	
 }
 
 void GDI_Obj_Generic::Render()
 {
-	m_pGDIRenderer->RenderPolygon(m_points, m_colorFill, m_colorOutline, m_size);
+	
 }

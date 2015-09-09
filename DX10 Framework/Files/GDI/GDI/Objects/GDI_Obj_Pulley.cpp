@@ -13,22 +13,22 @@
 */
 
 // This Include
-#include "GDI_Pulley.h"
+#include "GDI_Obj_Pulley.h"
 
-GDI_Pulley::GDI_Pulley(GDI_Renderer* _pGDI_Renderer, Physics_World_2D* _pPhysWorld)
+GDI_Obj_Pulley::GDI_Obj_Pulley(GDI_Renderer* _pGDI_Renderer, Physics_World_2D* _pPhysWorld)
 {
 	m_pGDI_Renderer = _pGDI_Renderer;
 	m_pPhysWorld = _pPhysWorld;
 }
 
-GDI_Pulley::~GDI_Pulley()
+GDI_Obj_Pulley::~GDI_Obj_Pulley()
 {
 	ReleasePtr(m_pStopperA);
 	ReleasePtr(m_pStopperB);
 	ReleasePtr(m_pPulley);	
 }
 
-bool GDI_Pulley::Initialise(Physics_Pulley_2D* _pJoint, COLORREF _color)
+bool GDI_Obj_Pulley::Initialise(Physics_Pulley_2D* _pJoint, COLORREF _color)
 {
 	if (_pJoint == 0)
 	{
@@ -79,13 +79,13 @@ bool GDI_Pulley::Initialise(Physics_Pulley_2D* _pJoint, COLORREF _color)
 	return true;
 }
 
-void GDI_Pulley::Process(float _dt)
+void GDI_Obj_Pulley::Process(float _dt)
 {
 	m_pStopperA->Process(_dt);
 	m_pStopperB->Process(_dt);
 }
 
-void GDI_Pulley::Render()
+void GDI_Obj_Pulley::Render()
 {
 	v2float anchorA = m_pPulley->GetAnchorA();
 	v2float anchorB = m_pPulley->GetAnchorB();
@@ -93,7 +93,7 @@ void GDI_Pulley::Render()
 	v2float groundAnchorB = m_pPulley->GetGroundAnchorB();
 
 	m_pGDI_Renderer->RenderLine(anchorA, groundAnchorA, m_color);
-	m_pGDI_Renderer->RenderLine(groundAnchorA, groundAnchorB, m_color);
+	//m_pGDI_Renderer->RenderLine(groundAnchorA, groundAnchorB, m_color);
 	m_pGDI_Renderer->RenderLine(groundAnchorB, anchorB, m_color);
 
 	m_pStopperA->Render();

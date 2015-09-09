@@ -6,7 +6,7 @@
 *
 * (c) 2005 - 2015 Media Design School
 *
-* File Name : GDI_Pulley.h
+* File Name : GDI_Obj_Pulley.h
 * Description : GDI operations for a pulley system
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
@@ -24,23 +24,23 @@
 #include "../../../Physics/2D Physics/Physics_Pulley_2D.h"
 #include "../../../Physics/2D Physics/Physics_Utilities.h"
 
-class GDI_Pulley
+class GDI_Obj_Pulley
 {
 public:
 
 	/***********************
-	* GDI_Pulley: Default Constructor for the Pulley class
+	* GDI_Obj_Pulley: Default Constructor for the Pulley class
 	* @author: Callan Moore
 	* @parameter : _pGDI_Renderer: The renderer for this object
-	* @parameter : _pGDI_Renderer: The renderer for this object
+	* @parameter : _pPhysWorld: The Physics World for this object
 	********************/
-	GDI_Pulley(GDI_Renderer* _pGDI_Renderer, Physics_World_2D* _pPhysWorld);
+	GDI_Obj_Pulley(GDI_Renderer* _pGDI_Renderer, Physics_World_2D* _pPhysWorld);
 
 	/***********************
-	* ~GDI_Pulley: Default Destructor for the Pulley class
+	* ~GDI_Obj_Pulley: Default Destructor for the Pulley class
 	* @author: Callan Moore
 	********************/
-	~GDI_Pulley();
+	~GDI_Obj_Pulley();
 	
 	/***********************
 	* Initialise: Initialise the GDI pulley for use

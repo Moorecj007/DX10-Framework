@@ -17,8 +17,19 @@
 #ifndef __APPLICATION_H__
 #define __APPLICATION_H__
 
-// Initialization
-#include "App_Macro.h"
+// Library Files
+#pragma comment(lib, "Winmm.lib")
+
+// Defines and Macros
+#define WIN32_LEAN_AND_MEAN
+#define WINDOW_CLASS_NAME L"DX10 FRAMEWORK"
+
+#ifdef _DEBUG
+// Visual Leak Detector to be run only if in DEBUG mode
+#pragma comment(lib, "vld.lib")
+#include <vld.h>
+#define D3D_DEBUG_INFO
+#endif // _DEBUG
 
 // Local Includes
 #include "Utility\Utilities.h"
@@ -171,6 +182,23 @@ public:
 	* @return: void
 	********************/
 	void SetMouseDown(bool _mouseDown) { m_mouseDown = _mouseDown; };
+
+	/***********************
+	* RenderInstructions: Render the Game Instructions to the side panel
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void RenderInstructions();
+
+	/***********************
+	* Increment: Increment an input integer by the given amount and return the new value
+	* @author: Callan Moore
+	* @parameter: _value: Value to increment
+	* @parameter: _amount: Increment amount
+	* @return: int: The result of the increment
+	********************/
+	int Increment(int* _value, int _amount);
+
 private:
 	// Preventing copies and extra constructions
 	Application();

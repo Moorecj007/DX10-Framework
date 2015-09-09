@@ -20,14 +20,12 @@
 // GDI Includes
 #include "GDI\GDI_Renderer.h"
 #include "GDI\GDI_Backbuffer.h"
-#include "GDI\GDI_Rope.h"
 
 // Objects
 #include "GDI\Objects\GDI_Obj_Generic.h"
 #include "GDI\Objects\GDI_Obj_Circle.h"
 #include "GDI\Objects\GDI_Obj_Polygon.h"
-#include "GDI\Objects\GDI_Obj_Group.h"
-#include "GDI\Objects\GDI_Pulley.h"
-#include "GDI\Objects\GDI_Spring.h"
+#include "GDI\Objects\GDI_Obj_Pulley.h"
+#include "GDI\Objects\GDI_Obj_Rope.h"
 
 #endif	// __GDI_H__

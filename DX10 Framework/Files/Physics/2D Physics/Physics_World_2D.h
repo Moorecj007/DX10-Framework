@@ -22,7 +22,6 @@
 #include "Physics_Body_2D.h"
 #include "Physics_Rope_2D.h"
 #include "Physics_Pulley_2D.h"
-#include "Physics_Spring_2D.h"
 #include "Physics_Collision_Listener.h"
 
 class Physics_World_2D
@@ -44,10 +43,10 @@ public:
 	/***********************
 	* Initialise: Initialise the Physics 2D simulator
 	* @author: Callan Moore
-	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
+	* @parameter: _metersPerPixel: The conversion rate of meters to screen space
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(float _pixelsPerMeter);
+	bool Initialise(float _metersPerPixel);
 
 	/***********************
 	* Process: Process the Physics world and step the bodies forward by the timestep
@@ -92,16 +91,16 @@ public:
 	void CreateRevoluteJoint(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _jointPos, bool _collide);
 
 	/***********************
-	* CreateRopeJoint: Create a rope joint between to Bodies at the given anchor points (relative to the bodies center)
+	* CreateRope: Create a rope between two Bodies at the given anchor points (relative to the bodies center)
 	* @author: Callan Moore
 	* @parameter: Physics_Body_2D * _bodyA: First Body to rope
 	* @parameter: Physics_Body_2D * _bodyB: Second body to rope
 	* @parameter: v2float _relativeAnchorA: Anchor point on the first body
 	* @parameter: v2float _relativeAnchorB: Anchor point on the second body
 	* @parameter: _collide: Can the two connect bodies collide with each other
-	* @return: Physics_Joint_2D*: Reference to the created Joint
+	* @return: Physics_Rope_2D*: Reference to the created Rope
 	********************/
-	Physics_Rope_2D* CreateRopeJoint(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, bool _collide);
+	Physics_Rope_2D* CreateRope(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, bool _collide);
 	
 	/***********************
 	* CreatePulley: Create a Pulley system in the physics world
@@ -112,12 +111,12 @@ public:
 	* @parameter: _relativeAnchorB: Relative anchor point on the second body
 	* @parameter: _worldAnchorA: Anchor in world space to attach the first body to
 	* @parameter: _worldAnchorB: Anchor in world space to attach the second body to
-	* @return: Physics_Pulley_2D*: The physics pulley system
+	* @return: Physics_Pulley_2D*: Reference to the created Pulley System
 	********************/
 	Physics_Pulley_2D* CreatePulley(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, v2float _worldAnchorA, v2float _worldAnchorB);
 	
 	/***********************
-	* CreateSpring: Create a spring physics object
+	* CreateSpring: Create a spring physics Joint
 	* @author: Callan Moore
 	* @parameter: _bodyA: Static object to attach the spring to
 	* @parameter: _bodyB: Dynamic object that will act as the spring pad for the spring
@@ -126,21 +125,9 @@ public:
 	* @parameter: _freq: Frequency of the spring in hz
 	* @parameter: _damping: Damping of the spring to determine oscillation amount
 	* @parameter: _extraDist: Extra Distance to create a compressed spring
-	* @return: Physics_Spring_2D*: Reference to the created Physics Spring object
+	* @return: void
 	********************/
-	Physics_Spring_2D* CreateSpring(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, float _freq, float _damping, float _extraDist = 0.0f);
-	
-	/***********************
-	* CreateRope: Create a Flexible Rope
-	* @author: Callan Moore
-	* @parameter: _bodyA: First Object to connect with a rope
-	* @parameter: _bodyB: Second Object to connect with a rope
-	* @parameter: _relativeAnchorA: Relative anchor point on the first object
-	* @parameter: _relativeAnchorB: Relative anchor point on the second object
-	* @parameter: _color: Color for the rope to be
-	* @return: std::vector<Physics_Body_2D*>*: Reference to the created Rope object
-	********************/
-	std::vector<Physics_Body_2D*>*  CreateRope(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, COLORREF _color);
+	void CreateSpring(Physics_Body_2D* _bodyA, Physics_Body_2D* _bodyB, v2float _relativeAnchorA, v2float _relativeAnchorB, float _freq, float _damping, float _extraDist = 0.0f);
 	
 	/***********************
 	* BreakObject: Break an object into smaller pieces of the original object
@@ -161,7 +148,7 @@ private:
 	int m_posIterations;
 
 	// Conversion to 2D screen space
-	float m_pixelsPerMeter;
+	float m_metersPerPixel;
 };
 
 #endif	// __PHYSICS_WORLD_2D_H__

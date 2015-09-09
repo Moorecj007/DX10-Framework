@@ -124,3 +124,22 @@ void GDI_Renderer::EndRender()
 {
 	m_pBackBuffer->Present();
 }
+
+void GDI_Renderer::WriteLine(std::string _line, int _startingWidth, int _startingHeight, COLORREF _color, bool _bkgrndTransparent)
+{
+	// Set the Background transparency for the Text
+	if (_bkgrndTransparent == true)
+	{
+		SetBkMode(m_pBackBuffer->GetBFDC(), TRANSPARENT);
+	}
+	else
+	{
+		SetBkMode(m_pBackBuffer->GetBFDC(), OPAQUE);
+	}
+
+	// Set the Text Color
+	SetTextColor(m_pBackBuffer->GetBFDC(), _color);
+
+	// Write the Text
+	TextOutA(m_pBackBuffer->GetBFDC(), _startingWidth, _startingHeight, _line.c_str(), _line.size());	
+}

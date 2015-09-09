@@ -15,24 +15,24 @@
 // This Include
 #include "Physics_Body_2D.h"
 
-Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, float _radius, float _pixelsPerMeter)
+Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, float _radius, float _metersPerPixel)
 {
 	m_pPhysWorld = _pPhysWorld;
 	m_pBody = _pBody;
 	m_radius = _radius;
-	m_pixelsPerMeter = _pixelsPerMeter;
+	m_metersPerPixel = _metersPerPixel;
 	m_pPoints = 0;
 
 	ZeroMemory(&m_collisionProps, sizeof(m_collisionProps));
 }
 
-Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, TPhysicsProperties _physProps, float _pixelsPerMeter)
+Physics_Body_2D::Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, TPhysicsProperties _physProps, float _metersPerPixel)
 {
 	m_pPhysWorld = _pPhysWorld;
 	m_pBody = _pBody;
 	m_pPoints = _physProps.pPoints;
 	m_size = _physProps.size;
-	m_pixelsPerMeter = _pixelsPerMeter;
+	m_metersPerPixel = _metersPerPixel;
 	m_physProps = _physProps;
 
 	ZeroMemory(&m_collisionProps, sizeof(m_collisionProps));
@@ -48,8 +48,8 @@ v2float Physics_Body_2D::GetPosition()
 {
 	b2Vec2 bodyPos = m_pBody->GetPosition();
 	v2float pos;
-	pos.x = bodyPos.x * m_pixelsPerMeter;
-	pos.y = bodyPos.y * m_pixelsPerMeter;
+	pos.x = bodyPos.x * m_metersPerPixel;
+	pos.y = bodyPos.y * m_metersPerPixel;
 
 	return pos;
 }

@@ -33,7 +33,7 @@ bool Level_02::ContructLevel()
 	Physics_Body_2D* pTempBody;
 	GDI_Obj_Generic* pTempObject;
 	Physics_Rope_2D* pPhysRope;
-	GDI_Rope* pRope;
+	GDI_Obj_Rope* pRope;
 
 	VALIDATE(InitialSetup());
 
@@ -171,11 +171,11 @@ bool Level_02::ContructLevel()
 	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLACK, colorRef::BLACK));
 	m_pObjStatics->push_back(pTempObject);
 
-	pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
+	GDI_Obj_Generic* pHingeStatic = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[4];
 	pPoints[0] = { -40.0f, -10.0f };
-	pPoints[1] = { 40.0f, -10.0f };
-	pPoints[2] = { 40.0f, 10.0f };
+	pPoints[1] = { 50.0f, -10.0f };
+	pPoints[2] = { 50.0f, 10.0f };
 	pPoints[3] = { -40.0f, 10.0f };
 	ZeroMemory(&physProps, sizeof(physProps));
 	physProps.isStatic = true;
@@ -186,14 +186,14 @@ bool Level_02::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE | CT_ENEMY);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLACK, colorRef::BLACK));
-	m_pObjStatics->push_back(pTempObject);
+	VALIDATE(pHingeStatic->Initialise(pTempBody, colorRef::BLACK, colorRef::BLACK));
+	m_pObjStatics->push_back(pHingeStatic);
 
-	GDI_Obj_Generic* pHingeStatic = new GDI_Obj_Polygon(m_pGDI_Renderer);
+	pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[3];
-	pPoints[0] = { -50.0f, -50.0f };
-	pPoints[1] = { 50.0f, 50.0f };
-	pPoints[2] = { -50.0f, 50.0f };
+	pPoints[0] = { -500.0f, -500.0f };
+	pPoints[1] = { 500.0f, 500.0f };
+	pPoints[2] = { -500.0f, 500.0f };
 	ZeroMemory(&physProps, sizeof(physProps));
 	physProps.isStatic = true;
 	physProps.pPoints = pPoints;
@@ -203,8 +203,8 @@ bool Level_02::ContructLevel()
 	physProps.collisionType = CT_STANDARD;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE | CT_ENEMY);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pHingeStatic->Initialise(pTempBody, colorRef::BLACK, colorRef::BLACK));
-	m_pObjStatics->push_back(pHingeStatic);
+	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::BLACK, colorRef::BLACK));
+	m_pObjStatics->push_back(pTempObject);
 
 	pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[4];
@@ -241,7 +241,6 @@ bool Level_02::ContructLevel()
 	physProps.pos = { 250, 470 };
 	physProps.collisionType = CT_ENEMY;
 	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE | CT_ENEMY);
-
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
 	VALIDATE(pPulleySystemA->Initialise(pTempBody, colorRef::RED, colorRef::BLACK));
 	m_pObjDynamics->push_back(pPulleySystemA);
@@ -263,8 +262,8 @@ bool Level_02::ContructLevel()
 	VALIDATE(pPulleySystemB->Initialise(pTempBody, colorRef::RED, colorRef::BLACK));
 	m_pObjDynamics->push_back(pPulleySystemB);
 
-	Physics_Pulley_2D* pTempPhysPulley = m_pPhysWorld->CreatePulley(pPulleySystemA->GetPhysicsBody(), pPulleySystemB->GetPhysicsBody(), { 0, -50.0f }, { 0, -50.0f }, { 250, 210 }, { 840, 210 });
-	GDI_Pulley* pTempPulley = new GDI_Pulley(m_pGDI_Renderer, m_pPhysWorld);
+	Physics_Pulley_2D* pTempPhysPulley = m_pPhysWorld->CreatePulley(pPulleySystemA->GetPhysicsBody(), pPulleySystemB->GetPhysicsBody(), { 0, -50.0f }, { 0, -50.0f }, { 250, 210 }, { 840, 550 });
+	GDI_Obj_Pulley* pTempPulley = new GDI_Obj_Pulley(m_pGDI_Renderer, m_pPhysWorld);
 	VALIDATE(pTempPulley->Initialise(pTempPhysPulley, colorRef::GREY));
 	m_pObjPulleys->push_back(pTempPulley);
 
@@ -316,11 +315,9 @@ bool Level_02::ContructLevel()
 	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::DARKBLUE, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
-	Physics_Spring_2D* pPhysSpring = m_pPhysWorld->CreateSpring(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0, 0 }, { 0, 160 }, 3, 0.1f, 100.0f);
-	ReleasePtr(pPhysSpring);
-
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 0.0f, 160.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	m_pPhysWorld->CreateSpring(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0, 0 }, { 0, 160 }, 3, 0.1f, 100.0f);
+	pPhysRope = m_pPhysWorld->CreateRope(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 0.0f, 160.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::PURPLE);
 	m_pRopes_Cuttable->push_back(pRope);
 
@@ -328,30 +325,30 @@ bool Level_02::ContructLevel()
 	Create the Cocked Enemy Spring
 	*/
 
-	pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
-	pPoints = new v2float[4];
-	pPoints[0] = { -10.0f, -30.0f };
-	pPoints[1] = { 10.0f, -30.0f };
-	pPoints[2] = { 10.0f, 30.0f };
-	pPoints[3] = { -10.0f, 30.0f };
-	ZeroMemory(&physProps, sizeof(physProps));
-	physProps.pPoints = pPoints;
-	physProps.size = 4;
-	physProps.density = 10.0f;
-	physProps.pos = { 930.0f, 500.0f };
-	physProps.collisionType = CT_STANDARD;
-	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE | CT_ENEMY);
-	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
-	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::DARKBLUE, colorRef::BLACK));
-	m_pObjDynamics->push_back(pTempObject);
-
-	pPhysSpring = m_pPhysWorld->CreateSpring(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0, 0 }, { 1000, 500 }, 3, 0.1f, 100.0f);
-	ReleasePtr(pPhysSpring);
-
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 1000.0f, 500.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
-	pRope->Initialise(pPhysRope, colorRef::PURPLE);
-	m_pRopes_Cuttable->push_back(pRope);
+	//pTempObject = new GDI_Obj_Polygon(m_pGDI_Renderer);
+	//pPoints = new v2float[4];
+	//pPoints[0] = { -10.0f, -30.0f };
+	//pPoints[1] = { 10.0f, -30.0f };
+	//pPoints[2] = { 10.0f, 30.0f };
+	//pPoints[3] = { -10.0f, 30.0f };
+	//ZeroMemory(&physProps, sizeof(physProps));
+	//physProps.pPoints = pPoints;
+	//physProps.size = 4;
+	//physProps.density = 10.0f;
+	//physProps.pos = { 930.0f, 500.0f };
+	//physProps.collisionType = CT_STANDARD;
+	//physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE | CT_ENEMY);
+	//pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
+	//VALIDATE(pTempObject->Initialise(pTempBody, colorRef::DARKBLUE, colorRef::BLACK));
+	//m_pObjDynamics->push_back(pTempObject);
+	//
+	//pPhysSpring = m_pPhysWorld->CreateSpring(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0, 0 }, { 1000, 500 }, 3, 0.1f, 100.0f);
+	//ReleasePtr(pPhysSpring);
+	//
+	//pPhysRope = m_pPhysWorld->CreateRopeJoint(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 1000.0f, 500.0f }, false);
+	//pRope = new GDI_Rope(m_pGDI_Renderer);
+	//pRope->Initialise(pPhysRope, colorRef::PURPLE);
+	//m_pRopes_Cuttable->push_back(pRope);
 
 	// Enemy ball in cocked spring
 	pTempObject = new GDI_Obj_Circle(m_pGDI_Renderer);
@@ -360,7 +357,8 @@ bool Level_02::ContructLevel()
 	physProps.damping = 15.0f;
 	physProps.radius = 25.0f;
 	physProps.density = 10.0f;
-	physProps.pos = { 890, 505 };
+	//physProps.pos = { 890, 505 };
+	physProps.pos = { 890, 320 };
 	physProps.restitution = 0.0f;
 	physProps.damping = 2.0f;
 	physProps.friction = 0.3f;
@@ -370,8 +368,18 @@ bool Level_02::ContructLevel()
 	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::RED, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
+	pPhysRope = m_pPhysWorld->CreateRope(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 700.0f, 320.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
+	pRope->Initialise(pPhysRope, colorRef::PURPLE);
+	m_pRopes_Cuttable->push_back(pRope);
+
+	pPhysRope = m_pPhysWorld->CreateRope(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 1000.0f, 320.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
+	pRope->Initialise(pPhysRope, colorRef::PURPLE);
+	m_pRopes_Cuttable->push_back(pRope);
+
 	/*
-	Create Hinge joint
+		Create Hinge joint
 	*/
 
 	GDI_Obj_Generic* pHinge = new GDI_Obj_Polygon(m_pGDI_Renderer);
@@ -387,15 +395,15 @@ bool Level_02::ContructLevel()
 	physProps.pos = { 165, 825 };
 	physProps.density = 500.0f;
 	physProps.collisionType = CT_STANDARD;
-	physProps.collideWith = (CT_GEM | CT_BREAKABLE | CT_ENEMY);
+	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE | CT_ENEMY);
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
 	VALIDATE(pHinge->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(pHinge);
 
-	m_pPhysWorld->CreateRevoluteJoint(pHingeStatic->GetPhysicsBody(), pHinge->GetPhysicsBody(), { 220, 825 }, false);
+	m_pPhysWorld->CreateRevoluteJoint(pHinge->GetPhysicsBody(), pHingeStatic->GetPhysicsBody(), { 220, 825 }, false);
 
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pHinge->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { -55.0f, 0.0f }, { 110.0f, 650.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(pHinge->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { -55.0f, 0.0f }, { 110.0f, 650.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::PURPLE);
 	m_pRopes_Cuttable->push_back(pRope);
 

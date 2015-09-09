@@ -31,9 +31,9 @@ public:
 	* @author: Callan Moore
 	* @parameter: _pPhysWorld: The physics world that this object belongs to
 	* @parameter: _pJoint: The joint that represents the Pulley System
-	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
+	* @parameter: _metersPerPixel: The conversion rate of meters to screen space
 	********************/
-	Physics_Pulley_2D(b2World* _pPhysWorld, b2PulleyJoint* _pJoint, float _pixelsPerMeter);
+	Physics_Pulley_2D(b2World* _pPhysWorld, b2PulleyJoint* _pJoint, float _metersPerPixel);
 
 	/***********************
 	* Physics_Pulley_2D: Default Destructor for the Physics Pulley class
@@ -72,7 +72,7 @@ public:
 private:
 	b2World* m_physWorld;
 	b2PulleyJoint* m_pPulleyJoint;
-	float m_pixelsPerMeter;
+	float m_metersPerPixel;
 };
 #endif	// __PHYSICS_PULLEY_H__
 

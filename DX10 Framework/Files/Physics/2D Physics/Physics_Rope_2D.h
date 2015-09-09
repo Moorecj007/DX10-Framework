@@ -14,8 +14,8 @@
 
 // Inclusion Guards
 #pragma once
-#ifndef __PHYSICS_JOINT_2D_H__
-#define __PHYSICS_JOINT_2D_H__
+#ifndef __PHYSICS_ROPE_2D_H__
+#define __PHYSICS_ROPE_2D_H__
 
 // Library Includes
 #include <Box2D.h>
@@ -32,9 +32,9 @@ public:
 	* @author: Callan Moore
 	* @parameter: _pPhysWorld: The physics world this object belongs to
 	* @parameter: _pJoint: The Box2D physics joint to govern this objects physics interactions
-	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
+	* @parameter: _metersPerPixel: The conversion rate of meters to screen space
 	********************/
-	Physics_Rope_2D(b2World* _pPhysWorld, b2Joint* _pJoint, float _pixelsPerMeter);
+	Physics_Rope_2D(b2World* _pPhysWorld, b2Joint* _pJoint, float _metersPerPixel);
 
 	/***********************
 	* ~Physics_Rope_2D: Default Destructor for 2D Physics Rope class
@@ -59,9 +59,10 @@ public:
 private:
 	b2World* m_pPhysWorld;
 	b2Joint* m_pJoint;
-	float m_pixelsPerMeter;
+	float m_metersPerPixel;
+
 	v2float m_anchorA;
 	v2float m_anchorB;
 };
-#endif// __PHYSICS_JOINT_2D_H__
+#endif// __PHYSICS_ROPE_2D_H__
 

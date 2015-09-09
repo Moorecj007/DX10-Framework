@@ -26,10 +26,9 @@ bool Level_Generic::InitialSetup()
 	m_pObjStatics = new std::vector < GDI_Obj_Generic* >;
 	m_pObjDynamics = new std::vector < GDI_Obj_Generic* >;
 	m_pObjBreakables = new std::vector < GDI_Obj_Generic* >;
-	m_pRopes_Cuttable = new std::vector < GDI_Rope* >;
-	m_pRopes_Unbreakable = new std::vector < GDI_Rope* >;
-	m_pObjPulleys = new std::vector < GDI_Pulley* >;
-	m_pObjSprings = new std::vector < GDI_Spring* >;
+	m_pRopes_Cuttable = new std::vector < GDI_Obj_Rope* >;
+	m_pRopes_Unbreakable = new std::vector < GDI_Obj_Rope* >;
+	m_pObjPulleys = new std::vector < GDI_Obj_Pulley* >;
 
 	m_pPhysWorld = new Physics_World_2D();
 	VALIDATE(m_pPhysWorld->Initialise(40.0f));
@@ -43,10 +42,10 @@ bool Level_Generic::InitialSetup()
 	m_pBackground = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	ZeroMemory(&physProps, sizeof(physProps));
 	pPoints = new v2float[4];
-	pPoints[0] = { (float)(-m_clientWidth * 2), (float)(-m_clientHeight * 2) };
-	pPoints[1] = { (float)(m_clientWidth * 2), (float)(-m_clientHeight * 2) };
-	pPoints[2] = { (float)(m_clientWidth * 2), (float)(m_clientHeight * 2) };
-	pPoints[3] = { (float)(-m_clientWidth * 2), (float)(m_clientHeight * 2) };
+	pPoints[0] = { (float)(0), (float)(0) };
+	pPoints[1] = { (float)(m_clientWidth ), (float)(0) };
+	pPoints[2] = { (float)(m_clientWidth), (float)(m_clientHeight) };
+	pPoints[3] = { (float)(0), (float)(m_clientHeight) };
 	physProps.pPoints = pPoints;
 	physProps.isStatic = true;
 	physProps.pos = { 0.0f, 0.0f };
@@ -117,8 +116,8 @@ bool Level_Generic::InitialSetup()
 	GDI_Obj_Generic* pWestWall = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[4];
 	pPoints[0] = { -10.0f, (float)(-m_clientHeight / 2) };
-	pPoints[1] = { 10.0f, (float)(-m_clientHeight / 2) };
-	pPoints[2] = { 10.0f, (float)(m_clientHeight / 2) };
+	pPoints[1] = { 20.0f, (float)(-m_clientHeight / 2) };
+	pPoints[2] = { 20.0f, (float)(m_clientHeight / 2) };
 	pPoints[3] = { -10.0f, (float)(m_clientHeight / 2) };
 	ZeroMemory(&physProps, sizeof(physProps));
 	physProps.isStatic = true;
@@ -155,12 +154,6 @@ void Level_Generic::DestroyLevel()
 		ReleasePtr((*m_pObjPulleys)[i]);
 	}
 	ReleasePtr(m_pObjPulleys);
-	// Delete all GDI Spring Objects
-	for (UINT i = 0; i < m_pObjSprings->size(); i++)
-	{
-		ReleasePtr((*m_pObjSprings)[i]);
-	}
-	ReleasePtr(m_pObjSprings);
 	// Delete all GDI static objects
 	for (UINT i = 0; i < m_pObjStatics->size(); i++)
 	{
@@ -208,7 +201,6 @@ bool Level_Generic::Process(float _dt)
 	}
 	if (collisionProps.isLevelWon == true)
 	{
-		ResetLevel();
 		return true;
 	}
 
@@ -237,11 +229,6 @@ bool Level_Generic::Process(float _dt)
 	for (UINT i = 0; i < m_pObjDynamics->size(); i++)
 	{
 		(*m_pObjDynamics)[i]->Process(_dt);
-	}
-	// Process all Springs
-	for (UINT i = 0; i < m_pObjSprings->size(); i++)
-	{
-		(*m_pObjSprings)[i]->Process(_dt);
 	}
 
 	std::vector<UINT> deletedObjectIndices;
@@ -293,6 +280,8 @@ bool Level_Generic::Process(float _dt)
 			m_pObjDynamics->push_back(createdObjects[i]);
 		}
 	}
+
+	return false;
 }
 
 void Level_Generic::Render()
@@ -324,11 +313,6 @@ void Level_Generic::Render()
 	for (UINT i = 0; i < m_pObjDynamics->size(); i++)
 	{
 		(*m_pObjDynamics)[i]->Render();
-	}
-	// Render all Spring objects
-	for (UINT i = 0; i < m_pObjSprings->size(); i++)
-	{
-		(*m_pObjSprings)[i]->Render();
 	}
 	// Render all breakable objects
 	for (UINT i = 0; i < m_pObjBreakables->size(); i++)

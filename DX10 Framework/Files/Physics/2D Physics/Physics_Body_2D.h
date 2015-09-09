@@ -33,9 +33,9 @@ public:
 	* @parameter: _pPhysWorld: The physics world that holds this body
 	* @parameter: _pBody: The Box2D physics body to govern this objects physics interactions
 	* @parameter: _radius: Radius of the circle
-	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
+	* @parameter: _metersPerPixel: The conversion rate of meters to screen space
 	********************/
-	Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, float _radius, float _pixelsPerMeter);
+	Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, float _radius, float _metersPerPixel);
 
 	/***********************
 	* Physics_Body_2D: Constructor for Physics Body 2D for a polygon object
@@ -44,9 +44,9 @@ public:
 	* @parameter: _pBody: The Box2D physics body to govern this objects physics interactions
 	* @parameter: _pPoints: The points for the body to be created from
 	* @parameter: _size: Size of the array of points
-	* @parameter: _pixelsPerMeter: The conversion rate of meters to screen space
+	* @parameter: _metersPerPixel: The conversion rate of meters to screen space
 	********************/
-	Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, TPhysicsProperties _physProps, float _pixelsPerMeter);
+	Physics_Body_2D(b2World* _pPhysWorld, b2Body* _pBody, TPhysicsProperties _physProps, float _metersPerPixel);
 
 	/***********************
 	* ~Physics_Body_2D: Default Destructor for Physics Body 2D class
@@ -73,7 +73,7 @@ public:
 	* @author: Callan Moore
 	* @return: float: The radius of the circle
 	********************/
-	float GetRadius() { return m_radius * m_pixelsPerMeter; };
+	float GetRadius() { return m_radius * m_metersPerPixel; };
 
 	/***********************
 	* GetPoints: Retrieve the array of points that make up the body
@@ -122,7 +122,7 @@ private:
 	b2World* m_pPhysWorld;
 	b2Body* m_pBody;
 	TCollisionProperties m_collisionProps;
-	float m_pixelsPerMeter;
+	float m_metersPerPixel;
 	TPhysicsProperties m_physProps;
 
 	// Circle Properties

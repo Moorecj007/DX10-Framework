@@ -33,7 +33,7 @@ bool Level_03::ContructLevel()
 	Physics_Body_2D* pTempBody;
 	GDI_Obj_Generic* pTempObject;
 	Physics_Rope_2D* pPhysRope;
-	GDI_Rope* pRope;
+	GDI_Obj_Rope* pRope;
 
 	VALIDATE(InitialSetup());
 
@@ -53,13 +53,13 @@ bool Level_03::ContructLevel()
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
 	VALIDATE(m_pGem->Initialise(pTempBody, colorRef::YELLOW, colorRef::BLACK));
 
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(m_pGem->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 380.0f, 0.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(m_pGem->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 380.0f, 0.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::PURPLE);
 	m_pRopes_Cuttable->push_back(pRope);
 
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(m_pGem->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 30.0f, 0.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(m_pGem->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 30.0f, 0.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::PURPLE);
 	m_pRopes_Cuttable->push_back(pRope);
 
@@ -269,8 +269,8 @@ bool Level_03::ContructLevel()
 	m_pPhysWorld->CreateRevoluteJoint(pLever2->GetPhysicsBody(), pPivot2->GetPhysicsBody(), { 820, 620 }, false);
 
 	// Rope to connect both Levers
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pLever1->GetPhysicsBody(), pLever2->GetPhysicsBody(), { -140.0f, 0.0f }, { -140.0f, 0.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(pLever1->GetPhysicsBody(), pLever2->GetPhysicsBody(), { -140.0f, 0.0f }, { -140.0f, 0.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::PURPLE);
 	m_pRopes_Cuttable->push_back(pRope);
 
@@ -295,11 +295,10 @@ bool Level_03::ContructLevel()
 	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::DARKBLUE, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
-	Physics_Spring_2D* pPhysSpring = m_pPhysWorld->CreateSpring(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0, 0 }, { 910.0f, 1000.0f }, 2, 0.1f, 100.0f);
-	ReleasePtr(pPhysSpring);
+	m_pPhysWorld->CreateSpring(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0, 0 }, { 910.0f, 1000.0f }, 2, 0.1f, 100.0f);
 	
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 910.0f, 1000.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, 0.0f }, { 910.0f, 1000.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::PURPLE);
 	m_pRopes_Cuttable->push_back(pRope);
 
@@ -324,8 +323,8 @@ bool Level_03::ContructLevel()
 	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::RED, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, -20.0f }, { 500.0f, 50.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0.0f, -20.0f }, { 500.0f, 50.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::GREY);
 	m_pRopes_Unbreakable->push_back(pRope);
 
@@ -352,8 +351,7 @@ bool Level_03::ContructLevel()
 	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::DARKBLUE, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
-	pPhysSpring = m_pPhysWorld->CreateSpring(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0, 0 }, { 280.0f, 1000.0f }, 28, 0.9f);
-	ReleasePtr(pPhysSpring);
+	m_pPhysWorld->CreateSpring(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 0, 0 }, { 280.0f, 1000.0f }, 28, 0.9f);
 
 	/*
 		Battering Ram
@@ -377,18 +375,18 @@ bool Level_03::ContructLevel()
 	VALIDATE(pTempObject->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(pTempObject);
 
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { -45.0f, -20.0f }, { 175.0f, 430.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { -45.0f, -20.0f }, { 175.0f, 430.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::GREY);
 	m_pRopes_Unbreakable->push_back(pRope);
 
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 45.0f, -20.0f }, { 265.0f, 430.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { 45.0f, -20.0f }, { 265.0f, 430.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::GREY);
 	m_pRopes_Unbreakable->push_back(pRope);
 
-	pPhysRope = m_pPhysWorld->CreateRopeJoint(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { -45.0f, 0.0f }, { 0.0f, 500.0f }, false);
-	pRope = new GDI_Rope(m_pGDI_Renderer);
+	pPhysRope = m_pPhysWorld->CreateRope(pTempObject->GetPhysicsBody(), m_pBackground->GetPhysicsBody(), { -45.0f, 0.0f }, { 0.0f, 500.0f }, false);
+	pRope = new GDI_Obj_Rope(m_pGDI_Renderer);
 	pRope->Initialise(pPhysRope, colorRef::PURPLE);
 	m_pRopes_Cuttable->push_back(pRope);
 
