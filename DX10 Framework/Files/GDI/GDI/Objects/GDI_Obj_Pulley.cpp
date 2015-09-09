@@ -28,15 +28,20 @@ GDI_Obj_Pulley::~GDI_Obj_Pulley()
 	ReleasePtr(m_pPulley);	
 }
 
-bool GDI_Obj_Pulley::Initialise(Physics_Pulley_2D* _pJoint, COLORREF _color)
+bool GDI_Obj_Pulley::Initialise(Physics_Pulley_2D* pPhysPulley, COLORREF _color)
 {
-	if (_pJoint == 0)
+	if (pPhysPulley == 0)
 	{
+		// Initialise fails if their is no Pulley Joint
 		return false;
 	}
-	m_pPulley = _pJoint;
+
+	// Assign member variables
+	m_pPulley = pPhysPulley;
 	m_color = _color;
 
+
+	// Create two small static objects at the ground anchor points
 	v2float groundAnchorA = m_pPulley->GetGroundAnchorA();
 	v2float groundAnchorB = m_pPulley->GetGroundAnchorB();
 
@@ -44,6 +49,7 @@ bool GDI_Obj_Pulley::Initialise(Physics_Pulley_2D* _pJoint, COLORREF _color)
 	TPhysicsProperties physProps;
 	v2float* pPoints;
 
+	// Static stopper for the first ground anchor above the first pulley object
 	m_pStopperA = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[4];
 	pPoints[0] = { -5.0f, -5.0f };
@@ -60,6 +66,8 @@ bool GDI_Obj_Pulley::Initialise(Physics_Pulley_2D* _pJoint, COLORREF _color)
 	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
 	VALIDATE(m_pStopperA->Initialise(pTempBody, _color, _color));
 
+
+	// Static stopper for the Second ground anchor above the second pulley object
 	m_pStopperB = new GDI_Obj_Polygon(m_pGDI_Renderer);
 	pPoints = new v2float[4];
 	pPoints[0] = { -5.0f, -5.0f };
@@ -92,10 +100,11 @@ void GDI_Obj_Pulley::Render()
 	v2float groundAnchorA = m_pPulley->GetGroundAnchorA();
 	v2float groundAnchorB = m_pPulley->GetGroundAnchorB();
 
+	// Render two lines to show the connection between the pulley object and the corresponding ground anchor
 	m_pGDI_Renderer->RenderLine(anchorA, groundAnchorA, m_color);
-	//m_pGDI_Renderer->RenderLine(groundAnchorA, groundAnchorB, m_color);
 	m_pGDI_Renderer->RenderLine(groundAnchorB, anchorB, m_color);
 
+	// Render both static stopper objects
 	m_pStopperA->Render();
 	m_pStopperB->Render();
 }

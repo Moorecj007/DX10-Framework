@@ -17,6 +17,7 @@
 
 Physics_Pulley_2D::Physics_Pulley_2D(b2World* _physWorld, b2PulleyJoint* _pJoint, float _metersPerPixel)
 {
+	// Assign member variables
 	m_physWorld = _physWorld;
 	m_pPulleyJoint = _pJoint;
 	m_metersPerPixel = _metersPerPixel;

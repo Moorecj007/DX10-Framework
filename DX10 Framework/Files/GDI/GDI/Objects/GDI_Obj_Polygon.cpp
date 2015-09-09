@@ -26,6 +26,12 @@ GDI_Obj_Polygon::~GDI_Obj_Polygon()
 
 bool GDI_Obj_Polygon::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _colorFill, COLORREF _colorOutline)
 {
+	if (_pPhysicsBody == 0)
+	{
+		// Initialise fails if their is no body
+		return false;
+	}
+
 	// Assign Member variables
 	m_pPhysicsBody = _pPhysicsBody;
 	m_colorFill = _colorFill;
@@ -40,10 +46,12 @@ bool GDI_Obj_Polygon::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _color
 
 void GDI_Obj_Polygon::Process(float _dt)
 {
+	// Get Shape information from the Physics Body
 	v2float pos = m_pPhysicsBody->GetPosition();
 	UINT size = m_pPhysicsBody->GetSize();
 	float angle = m_pPhysicsBody->GetAngle();
 
+	// Create a local array of the polygons points
 	for (UINT i = 0; i < m_pPhysicsBody->GetSize(); i++)
 	{
 		m_points[i] = m_pPhysicsBody->GetPoints()[i];

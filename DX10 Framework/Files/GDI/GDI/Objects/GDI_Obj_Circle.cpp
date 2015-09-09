@@ -27,6 +27,13 @@ GDI_Obj_Circle::~GDI_Obj_Circle()
 
 bool GDI_Obj_Circle::Initialise(Physics_Body_2D* _pPhysicsBody, COLORREF _colorFill, COLORREF _colorOutline)
 {
+	
+	if (_pPhysicsBody == 0)
+	{
+		// Initialise fails if their is no body
+		return false;
+	}
+
 	// Assign Member variables
 	m_pPhysicsBody = _pPhysicsBody;
 	m_colorFill = _colorFill;

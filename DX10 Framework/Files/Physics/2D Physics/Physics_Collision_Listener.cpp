@@ -29,10 +29,12 @@ void Physics_Collision_Listener::BeginContact(b2Contact* _contact)
 	if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE || _contact->GetFixtureA()->GetFilterData().categoryBits == CT_BREAKABLE_ENEMY
 		|| _contact->GetFixtureB()->GetFilterData().categoryBits == CT_BREAKABLE || _contact->GetFixtureB()->GetFilterData().categoryBits == CT_BREAKABLE_ENEMY)
 	{
+		// Resolve the breaking of the breakable object
 		ResolveBreak(_contact);
 	}
 	else if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_GEM && _contact->GetFixtureB()->GetFilterData().categoryBits == CT_ENEMY)
 	{
+		// Gem contact enemy. Set loss condition of the gem to true
 		Physics_Body_2D* pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureA()->GetBody()->GetUserData());
 		TCollisionProperties collisionProps = *pPhysicsBody->GetCollisionProperties();
 		collisionProps.isLevelLost = true;
@@ -40,6 +42,7 @@ void Physics_Collision_Listener::BeginContact(b2Contact* _contact)
 	}
 	else if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_ENEMY && _contact->GetFixtureB()->GetFilterData().categoryBits == CT_GEM)
 	{
+		// Gem contact enemy. Set loss condition of the gem to true
 		Physics_Body_2D* pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureB()->GetBody()->GetUserData());
 		TCollisionProperties collisionProps = *pPhysicsBody->GetCollisionProperties();
 		collisionProps.isLevelLost = true;
@@ -47,6 +50,7 @@ void Physics_Collision_Listener::BeginContact(b2Contact* _contact)
 	}
 	else if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_GEM && _contact->GetFixtureB()->GetFilterData().categoryBits == CT_WINZONE)
 	{
+		// Gem contact Win Zone. Set win condition of the gem to true
 		Physics_Body_2D* pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureB()->GetBody()->GetUserData());
 		TCollisionProperties collisionProps = *pPhysicsBody->GetCollisionProperties();
 		collisionProps.isLevelWon = true;
@@ -54,6 +58,7 @@ void Physics_Collision_Listener::BeginContact(b2Contact* _contact)
 	}
 	else if (_contact->GetFixtureA()->GetFilterData().categoryBits == CT_WINZONE && _contact->GetFixtureB()->GetFilterData().categoryBits == CT_GEM)
 	{
+		// Gem contact Win Zone. Set win condition of the gem to true
 		Physics_Body_2D* pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureB()->GetBody()->GetUserData());
 		TCollisionProperties collisionProps = *pPhysicsBody->GetCollisionProperties();
 		collisionProps.isLevelWon = true;
@@ -108,9 +113,11 @@ void Physics_Collision_Listener::ResolveBreak(b2Contact* _contact)
 
 		if (impactSpeed > 1.0f)
 		{
+			// Retrieve the physics body of the object that needs breaking
 			pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureA()->GetBody()->GetUserData());
 			linearVelocity = _contact->GetFixtureA()->GetBody()->GetLinearVelocity();
 
+			// Set the collision properties of the object to be broken
 			TCollisionProperties collisionProps;
 			collisionProps.isBreaking = true;
 			collisionProps.pCollisionWorldPoints = pPoints;
@@ -135,9 +142,11 @@ void Physics_Collision_Listener::ResolveBreak(b2Contact* _contact)
 
 		if (impactSpeed > 1.0f)
 		{
+			// Retrieve the physics body of the object that needs breaking
 			pPhysicsBody = (Physics_Body_2D*)(_contact->GetFixtureB()->GetBody()->GetUserData());
 			linearVelocity = _contact->GetFixtureB()->GetBody()->GetLinearVelocity();
 
+			// Set the collision properties of the object to be broken
 			TCollisionProperties collisionProps;
 			collisionProps.isBreaking = true;
 			collisionProps.pCollisionWorldPoints = pPoints;

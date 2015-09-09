@@ -26,6 +26,7 @@ GDI_Renderer::~GDI_Renderer()
 
 bool GDI_Renderer::Initialise(HWND _hWnd, HINSTANCE _hInstance, int _clientWidth, int _clientHeight)
 {
+	// Assign member variables
 	m_hWnd = _hWnd;
 	m_hInstance = _hInstance;
 	m_clientWidth = _clientWidth;
@@ -33,7 +34,7 @@ bool GDI_Renderer::Initialise(HWND _hWnd, HINSTANCE _hInstance, int _clientWidth
 
 	// Create and Initialise the Backbuffer
 	m_pBackBuffer = new CBackBuffer();
-	m_pBackBuffer->Initialise(m_hWnd, m_clientWidth, m_clientHeight);
+	VALIDATE(m_pBackBuffer->Initialise(m_hWnd, m_clientWidth, m_clientHeight));
 
 	return true;
 }
@@ -42,26 +43,29 @@ void GDI_Renderer::RenderPolygon(v2float* _pPoints, COLORREF _colorFill, COLORRE
 {
 	HDC hdc = m_pBackBuffer->GetBFDC();
 
+	// Convert v2floats into POINTs for use with GDI
 	POINT* pPoints = new POINT[_size];
 	for (int i = 0; i < _size; i++)
 	{
 		pPoints[i] = { (LONG)_pPoints[i].x, (LONG)_pPoints[i].y };
 	}
 
+	// Create a solid brush object with the objects specified color
 	HBRUSH brush = CreateSolidBrush(_colorFill);
 	SelectObject(hdc, brush);
 
-	// Draw the Object with a solid fill color
+	// Draw the object with the solid brush object
 	Polygon(hdc, pPoints, _size);
 	DeleteObject(brush);
 
 	HPEN hPenOld;
 	HPEN hLinePen;
 
-	// Draw a black outline onto the object
+	// Create a pen using the objects specified outline color
 	hLinePen = CreatePen(PS_SOLID, 3, _colorOutline);
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
 
+	// Draw a outline onto the object using the pen
 	Polygon(hdc, pPoints, _size);
 
 	SelectObject(hdc, hPenOld);
@@ -74,25 +78,28 @@ void GDI_Renderer::RenderEllipse(v2float _center, COLORREF _colorFill, COLORREF 
 {
 	HDC hdc = m_pBackBuffer->GetBFDC();
 
+	// Create a solid brush object with the objects specified color
 	HBRUSH brush = CreateSolidBrush(_colorFill);
 	SelectObject(hdc, brush);
 
+	// Create top, bottom, left and right points to define an ellipse from the radius of the ellipse
 	int ellipseLeft = (int)(_center.x - _radius);
 	int ellipseTop = (int)(_center.y - _radius);
 	int ellipseRight = (int)(_center.x + _radius);
 	int ellipseBottom = (int)(_center.y + _radius);
 
-	// Draw the Object with a solid fill color
+	// Draw the object with the solid brush object
 	Ellipse(hdc, ellipseLeft, ellipseTop, ellipseRight, ellipseBottom);
 	DeleteObject(brush);
 
 	HPEN hPenOld;
 	HPEN hLinePen;
 
-	// Draw a black outline onto the object
+	// Create a pen using the objects specified outline color
 	hLinePen = CreatePen(PS_SOLID, 2, _colorOutline);
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
 
+	// Draw a outline onto the object using the pen
 	Ellipse(hdc, ellipseLeft, ellipseTop, ellipseRight, ellipseBottom);
 	
 	SelectObject(hdc, hPenOld);
@@ -105,9 +112,11 @@ void GDI_Renderer::RenderLine(v2float _posA, v2float _posB, COLORREF _color)
 	HPEN hPenOld;
 	HPEN hLinePen;
 
+	// Create a pen using the objects specified outline color
 	hLinePen = CreatePen(PS_SOLID, 4, _color);
 	hPenOld = (HPEN)SelectObject(hdc, hLinePen);
 
+	// Draw a outline onto the object using the pen
 	MoveToEx(hdc, (int)_posA.x, (int)_posA.y, NULL);
 	LineTo(hdc, (int)_posB.x, (int)_posB.y);
 	

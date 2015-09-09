@@ -28,12 +28,13 @@ GDI_Obj_Rope::~GDI_Obj_Rope()
 
 bool GDI_Obj_Rope::Initialise(Physics_Rope_2D* _pPhysRope, COLORREF _color)
 {
-	// Check if the Joint is valid
 	if (_pPhysRope == 0)
 	{
+		// Initialise fails if their is no Rope Joint
 		return false;
 	}
 
+	// Assign Member variables
 	m_pPhysRope = _pPhysRope;
 	m_color = _color;
 
@@ -60,5 +61,6 @@ void GDI_Obj_Rope::Process(float _dt)
 
 void GDI_Obj_Rope::Render()
 {
+	// Render a line to indicate rope joint
 	m_pGDI_Renderer->RenderLine(m_posA, m_posB, m_color);
 }

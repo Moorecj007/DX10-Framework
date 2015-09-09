@@ -17,6 +17,7 @@
 
 Level_02::Level_02(GDI_Renderer* _pGDI_Renderer, int _clientWidth, int _clientHeight)
 {
+	// Assign member variables
 	m_pGDI_Renderer = _pGDI_Renderer;
 	m_clientWidth = _clientWidth;
 	m_clientHeight = _clientHeight;
@@ -28,6 +29,7 @@ Level_02::~Level_02()
 
 bool Level_02::ContructLevel()
 {
+	// Create Temporary points for use in object creation
 	TPhysicsProperties physProps;
 	v2float* pPoints;
 	Physics_Body_2D* pTempBody;

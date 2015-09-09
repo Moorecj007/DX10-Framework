@@ -17,6 +17,7 @@
 
 Physics_World_2D::Physics_World_2D()
 {
+	// Nullify pointers
 	m_pWorld = 0;
 	m_pBreakListener = 0;
 }
@@ -29,6 +30,7 @@ Physics_World_2D::~Physics_World_2D()
 
 bool Physics_World_2D::Initialise(float _metersPerPixel)
 {
+	// Assign member variables
 	m_metersPerPixel = _metersPerPixel;
 
 	// Set the Gravity to earths and allow sleeping on objects given tot the world
@@ -135,7 +137,7 @@ Physics_Body_2D* Physics_World_2D::CreatePhysicsCircle(TPhysicsProperties _props
 {
 	b2Body* body;
 
-	// Convert client space coordinates intp physics world coordinates
+	// Convert client space coordinates into physics world coordinates
 	v2float convertPos = _props.pos / m_metersPerPixel;
 	float convertRadius = _props.radius / m_metersPerPixel;
 

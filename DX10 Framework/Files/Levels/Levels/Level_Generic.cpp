@@ -23,6 +23,7 @@ Level_Generic::~Level_Generic()
 
 bool Level_Generic::InitialSetup()
 {
+	// Create the points for the vectors to store all references to objects in the level
 	m_pObjStatics = new std::vector < GDI_Obj_Generic* >;
 	m_pObjDynamics = new std::vector < GDI_Obj_Generic* >;
 	m_pObjBreakables = new std::vector < GDI_Obj_Generic* >;
@@ -30,9 +31,11 @@ bool Level_Generic::InitialSetup()
 	m_pRopes_Unbreakable = new std::vector < GDI_Obj_Rope* >;
 	m_pObjPulleys = new std::vector < GDI_Obj_Pulley* >;
 
+	// Create the physics world
 	m_pPhysWorld = new Physics_World_2D();
 	VALIDATE(m_pPhysWorld->Initialise(40.0f));
 
+	// Create Temporary points for use in object creation
 	TPhysicsProperties physProps;
 	v2float* pPoints;
 	Physics_Body_2D* pTempBody;
@@ -188,11 +191,11 @@ void Level_Generic::ResetLevel()
 bool Level_Generic::Process(float _dt)
 {
 	m_pPhysWorld->Process();
-
 	m_pBackground->Process(_dt);
 	m_pWinZone->Process(_dt);
 	m_pGem->Process(_dt);
 
+	// Check win and loss conditions on the gem
 	TCollisionProperties collisionProps = *m_pGem->GetPhysicsBody()->GetCollisionProperties();
 	if (collisionProps.isLevelLost == true)
 	{
@@ -203,7 +206,6 @@ bool Level_Generic::Process(float _dt)
 	{
 		return true;
 	}
-
 	
 	// Process all static objects
 	for (UINT i = 0; i < m_pObjStatics->size(); i++)
@@ -231,19 +233,21 @@ bool Level_Generic::Process(float _dt)
 		(*m_pObjDynamics)[i]->Process(_dt);
 	}
 
+	// Create vectors to store references to created and deleted objects to safely add and remove them later
 	std::vector<UINT> deletedObjectIndices;
 	std::vector<GDI_Obj_Generic*> createdObjects;
 
 	// Process all breakable objects
 	for (UINT i = 0; i < m_pObjBreakables->size(); i++)
 	{
+		// Process and retrieve the collision properties of the breakable object
 		(*m_pObjBreakables)[i]->Process(_dt);
 		TCollisionProperties* collisionProps = (*m_pObjBreakables)[i]->GetPhysicsBody()->GetCollisionProperties();
 
 		// Determine if the object needs to be broken
 		if (collisionProps->isBreaking == true)
 		{
-			// Break the object
+			// Break the object in the physics world
 			std::vector<Physics_Body_2D*>* pNewBodies = m_pPhysWorld->BreakObject((*m_pObjBreakables)[i]->GetPhysicsBody());
 
 			COLORREF colorFill = (*m_pObjBreakables)[i]->GetColorFill();
@@ -274,7 +278,7 @@ bool Level_Generic::Process(float _dt)
 			m_pObjBreakables->erase(m_pObjBreakables->begin() + i);
 		}
 
-		// add all created objects to the dynamics objects vector
+		// Add all created objects to the dynamics objects vector
 		for (UINT i = 0; i < createdObjects.size(); i++)
 		{
 			m_pObjDynamics->push_back(createdObjects[i]);
@@ -325,14 +329,17 @@ void Level_Generic::Render()
 
 void Level_Generic::CutRope(v2float _cutLinePtA, v2float _cutLinePtB)
 {
-	// Cycle through all ropes backwards so ropes can be deleted without changing the indices
+	// Cycle through all cuttable ropes backwards so ropes can be deleted without changing the indices
 	for (int i = (int)m_pRopes_Cuttable->size() - 1; i >= 0; i--)
 	{
+		// Retrieve the two points that make up the line of the rope
 		v2float ropePtA = (*m_pRopes_Cuttable)[i]->GetPositionA();
 		v2float ropePtB = (*m_pRopes_Cuttable)[i]->GetPositionB();
 
+		// Check if the cutting line intersects the current rope line
 		if (CheckLinesIntersect(_cutLinePtA, _cutLinePtB, ropePtA, ropePtB))
 		{
+			// Delete the rope and remove it from the vector of cuttable ropes
 			ReleasePtr((*m_pRopes_Cuttable)[i]);
 			m_pRopes_Cuttable->erase(m_pRopes_Cuttable->begin() + i);
 		}

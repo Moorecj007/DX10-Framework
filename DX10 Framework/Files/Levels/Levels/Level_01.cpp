@@ -17,6 +17,7 @@
 
 Level_01::Level_01(GDI_Renderer* _pGDI_Renderer, int _clientWidth, int _clientHeight)
 {
+	// Assign member variables
 	m_pGDI_Renderer = _pGDI_Renderer;
 	m_clientWidth = _clientWidth;
 	m_clientHeight = _clientHeight;
@@ -28,6 +29,7 @@ Level_01::~Level_01()
 
 bool Level_01::ContructLevel()
 {
+	// Create Temporary points for use in object creation
 	TPhysicsProperties physProps;
 	v2float* pPoints;
 	Physics_Body_2D* pTempBody;
@@ -490,7 +492,7 @@ bool Level_01::ContructLevel()
 	VALIDATE(pPulleyBreakHolder->Initialise(pTempBody, colorRef::CYAN, colorRef::BLACK));
 	m_pObjDynamics->push_back(pPulleyBreakHolder);
 
-	Physics_Pulley_2D* pTempPhysPulley = m_pPhysWorld->CreatePulley(pPulleyBreakHolder->GetPhysicsBody(), pPulleyRight->GetPhysicsBody(), { 0, -5.0f }, { 0, -20.0f }, { 520, 270 }, { 940, 220 });
+	Physics_Pulley_2D* pTempPhysPulley = m_pPhysWorld->CreatePulley(pPulleyBreakHolder->GetPhysicsBody(), pPulleyRight->GetPhysicsBody(), { 0, -5.0f }, { 0, -20.0f }, { 520, 255 }, { 940, 220 });
 	GDI_Obj_Pulley* pTempPulley = new GDI_Obj_Pulley(m_pGDI_Renderer, m_pPhysWorld);
 	VALIDATE(pTempPulley->Initialise(pTempPhysPulley, colorRef::GREY));
 	m_pObjPulleys->push_back(pTempPulley);

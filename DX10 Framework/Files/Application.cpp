@@ -21,9 +21,10 @@ Application* Application::s_pApp = 0;
 // Global Variables
 FILE* g_file;
 
-int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdLine, int _cmdShow){
+int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdLine, int _cmdShow)
+{
 	#ifdef _DEBUG
-		//Create a Console window
+		// Create a Console window in debug mode only for showing various information
 		if (AllocConsole())
 		{
 			freopen_s(&g_file, "conout$", "w", stdout);
@@ -32,12 +33,14 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdL
 		}
 	#endif
 
+	// Set the client width and height
 	int clientWidth = 1000;
 	int clientHeight = 1000;
 
 	// Create the Application 
 	Application* pApp = Application::GetInstance();
 	
+	// Add 300 to the width to create a side panel that only the application and backbuffer know about
 	if (pApp->CreateWindowApp(clientWidth + 300, clientHeight, _hInstance) == true)
 	{
 		VALIDATE(pApp->Initialise(clientWidth, clientHeight, _hInstance));
@@ -80,6 +83,7 @@ LRESULT CALLBACK Application::WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam
 		break;
 		case WM_LBUTTONDOWN:
 		{
+			// Retrieves and sets the mouse position for when the left mouse button is first pressed
 			v2float mousePos = { (float)GET_X_LPARAM(_lParam), (float)GET_Y_LPARAM(_lParam) };
 			pApp->SetFirstMousePos(mousePos);
 			pApp->SetMouseDown(true);
@@ -87,13 +91,18 @@ LRESULT CALLBACK Application::WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam
 		break;
 		case WM_LBUTTONUP:
 		{
+			// Retrieves and sets the mouse position for when the left mouse button is released
 			v2float mousePos = { (float)GET_X_LPARAM(_lParam), (float)GET_Y_LPARAM(_lParam) };
 			pApp->SetSecondMousePos(mousePos);
-			pApp->CutRope();
 			pApp->SetMouseDown(false);
+
+			// Determines if any cuttable ropes were crossing the line created by the two mouse positions
+			pApp->CutRope();
+			
 		}
 		case WM_MOUSEMOVE:
 		{
+			// Continuously update the mouse second position for if the mouse button is held down
 			v2float mousePos = { (float)GET_X_LPARAM(_lParam), (float)GET_Y_LPARAM(_lParam) };
 			pApp->SetSecondMousePos(mousePos);
 		}
@@ -178,8 +187,10 @@ Application* Application::GetInstance()
 {
 	if (s_pApp == 0)
 	{
+		// If the application does not exist, create the application
 		s_pApp = new Application();
 	}
+	// Always return the current instance of the application
 	return s_pApp;
 }
 
@@ -222,6 +233,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 		m_pGDIRenderer = new GDI_Renderer();
 		VALIDATE(m_pGDIRenderer->Initialise(m_hWnd, _hInstance, m_clientWidth + 300, m_clientHeight));
 
+		// Initialise the application to run the first level on startup
 		m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
 		m_pCurrentLevel->ContructLevel();
 		m_levelSelection = LS_LEVEL01;
@@ -256,11 +268,13 @@ void Application::ShutDown()
 	ReleasePtr(m_pKeyDown);
 	ReleasePtr(m_pTimer);
 
+	// DX10 pointers to release
 	ReleasePtr(m_pShader_LitTex);
 	ReleasePtr(m_pCamera);
 	ReleasePtr(m_pCubeMesh);
 	ReleasePtr(m_pCube);
 
+	// GDI pointers to release
 	m_pCurrentLevel->DestroyLevel();
 	ReleasePtr(m_pCurrentLevel);
 
@@ -294,7 +308,11 @@ void Application::ExecuteOneFrame()
 	// Reset FPS counters
 	if (m_fpsTimer >= 1.0f)
 	{
-		printf("%d \n", m_fps);
+		// Print the FPS to the console if in Debug mode
+		#ifdef _DEBUG
+			printf("%d \n", m_fps);
+		#endif
+		
 		m_fpsTimer -= 1.0f;
 		m_fps = 0;
 	}
@@ -304,6 +322,7 @@ void Application::Process(float _dt)
 {
 	HandleInput();
 
+	// Processes to run when using DX10 Renderer
 	if (m_pDX10_Renderer != 0)
 	{
 		m_pCamera->Process(_dt);
@@ -311,8 +330,10 @@ void Application::Process(float _dt)
 		m_pShader_LitTex->SetUpPerFrame();
 	}
 
+	// Processes to run when using GDI Renderer
 	if (m_pGDIRenderer != 0)
 	{
+		// If the process returns true the level has been completed and so changes the current level to the next leve;l
 		if (m_pCurrentLevel->Process(_dt) == true)
 		{
 			switch (m_levelSelection)
@@ -351,6 +372,7 @@ void Application::Process(float _dt)
 
 void Application::Draw()
 {
+	// Render calls when using the DX10 Renderer
 	if (m_pDX10_Renderer != 0)
 	{
 		// Get the Renderer Ready to receive new data
@@ -362,6 +384,7 @@ void Application::Draw()
 		m_pDX10_Renderer->EndRender();
 	}
 
+	// Render calls when using the GDI Renderer
 	if (m_pGDIRenderer != 0)
 	{
 		m_pGDIRenderer->BeginRender();
@@ -387,10 +410,11 @@ void Application::HandleInput()
 		{
 			if (m_pDX10_Renderer->GetFullScreenState() == true)
 			{
+				// Toggle the screen mode to windowed before exiting application
 				m_pDX10_Renderer->ToggleFullscreen();
 			}
 		}
-		m_online = false;
+		m_online = false;	// Changing this to false will cause the main application loop to end -> quitting the application
 	}
 
 	if (m_pDX10_Renderer != 0)
@@ -457,7 +481,7 @@ void Application::HandleInput()
 			m_pCurrentLevel->ResetLevel();
 		}
 
-		if (m_pKeyDown[VK_F1])
+		if (m_pKeyDown[VK_F1])	// Load the First level
 		{
 			m_pCurrentLevel->DestroyLevel();
 			ReleasePtr(m_pCurrentLevel);
@@ -465,7 +489,7 @@ void Application::HandleInput()
 			m_pCurrentLevel->ContructLevel();
 			m_levelSelection = LS_LEVEL01;
 		}
-		if (m_pKeyDown[VK_F2])
+		if (m_pKeyDown[VK_F2])	// Load the Second level
 		{
 			m_pCurrentLevel->DestroyLevel();
 			ReleasePtr(m_pCurrentLevel);
@@ -473,7 +497,7 @@ void Application::HandleInput()
 			m_pCurrentLevel->ContructLevel();
 			m_levelSelection = LS_LEVEL02;
 		}
-		if (m_pKeyDown[VK_F3])
+		if (m_pKeyDown[VK_F3])	// Load the Third level
 		{
 			m_pCurrentLevel->DestroyLevel();
 			ReleasePtr(m_pCurrentLevel);
