@@ -18,7 +18,12 @@
 #define __PHYSICS_UTILITIES_H__
 
 // Library Includes
-#pragma comment(lib, "Box2D.lib")
+#if defined(DEBUG) | defined(_DEBUG)
+	#pragma comment(lib, "Box2D-Debug.lib")
+#else
+	#pragma comment(lib, "Box2D-Release.lib")
+#endif
+
 #include <Box2D.h>
 
 // Local Includes
