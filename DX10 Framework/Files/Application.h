@@ -118,9 +118,9 @@ public:
 	* Process: Process the Application
 	* @author: Callan Moore
 	* @parameter: _dt: The current delta tick
-	* @return: void
+	* @return: bool: Successful or not
 	********************/
-	void Process(float _dt);
+	bool Process(float _dt);
 
 	/***********************
 	* Draw: Draw the Application components
@@ -132,9 +132,9 @@ public:
 	/***********************
 	* HandleInput: Handle all input for the application
 	* @author: Callan Moore
-	* @return: void
+	* @return: Successful or not
 	********************/
-	void HandleInput();
+	bool HandleInput();
 	
 	/***********************
 	* CutRope: Call the CutRope function on the current Level

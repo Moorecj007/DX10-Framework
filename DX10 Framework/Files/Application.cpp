@@ -23,16 +23,6 @@ FILE* g_file;
 
 int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdLine, int _cmdShow)
 {
-	#ifdef _DEBUG
-		// Create a Console window in debug mode only for showing various information
-		if (AllocConsole())
-		{
-			freopen_s(&g_file, "conout$", "w", stdout);
-			HWND hWnd = GetConsoleWindow();
-			ShowWindow(hWnd, 1);
-		}
-	#endif
-
 	// Set the client width and height
 	int clientWidth = 1000;
 	int clientHeight = 1000;
@@ -43,7 +33,11 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdL
 	// Add 300 to the width to create a side panel that only the application and backbuffer know about
 	if (pApp->CreateWindowApp(clientWidth + 300, clientHeight, _hInstance) == true)
 	{
-		VALIDATE(pApp->Initialise(clientWidth, clientHeight, _hInstance));
+		if (pApp->Initialise(clientWidth, clientHeight, _hInstance) == false)
+		{
+			pApp->DestroyInstance();
+			return 0;
+		}
 		pApp->Execute();
 	}
 	
@@ -235,7 +229,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 
 		// Initialise the application to run the first level on startup
 		m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-		m_pCurrentLevel->ContructLevel();
+		VALIDATE(m_pCurrentLevel->ContructLevel());
 		m_levelSelection = LS_LEVEL01;
 	}
 
@@ -275,7 +269,10 @@ void Application::ShutDown()
 	ReleasePtr(m_pCube);
 
 	// GDI pointers to release
-	m_pCurrentLevel->DestroyLevel();
+	if (m_pCurrentLevel != 0)
+	{
+		m_pCurrentLevel->DestroyLevel();
+	}
 	ReleasePtr(m_pCurrentLevel);
 
 	// Delete and free the memory from the Renderer
@@ -298,7 +295,12 @@ void Application::ExecuteOneFrame()
 	// Limit to 60 FPS
 	if (m_deltaTick > (1.0 / 60.0f))
 	{
-		Process(m_deltaTick);
+		if (Process(m_deltaTick) == false)
+		{
+			// A process failed to create something
+			m_online = false;
+			return;
+		}
 		Draw();
 
 		m_deltaTick -= (1.0f / 60.0f);
@@ -318,9 +320,9 @@ void Application::ExecuteOneFrame()
 	}
 }
 
-void Application::Process(float _dt)
+bool Application::Process(float _dt)
 {
-	HandleInput();
+	VALIDATE(HandleInput());
 
 	// Processes to run when using DX10 Renderer
 	if (m_pDX10_Renderer != 0)
@@ -343,7 +345,7 @@ void Application::Process(float _dt)
 					m_pCurrentLevel->DestroyLevel();
 					ReleasePtr(m_pCurrentLevel);
 					m_pCurrentLevel = new Level_02(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-					m_pCurrentLevel->ContructLevel();
+					VALIDATE(m_pCurrentLevel->ContructLevel());
 					m_levelSelection = LS_LEVEL02;
 				}
 				break;
@@ -352,7 +354,7 @@ void Application::Process(float _dt)
 					m_pCurrentLevel->DestroyLevel();
 					ReleasePtr(m_pCurrentLevel);
 					m_pCurrentLevel = new Level_03(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-					m_pCurrentLevel->ContructLevel();
+					VALIDATE(m_pCurrentLevel->ContructLevel());
 					m_levelSelection = LS_LEVEL03;
 				}
 				break;
@@ -361,13 +363,15 @@ void Application::Process(float _dt)
 					m_pCurrentLevel->DestroyLevel();
 					ReleasePtr(m_pCurrentLevel);
 					m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-					m_pCurrentLevel->ContructLevel();
+					VALIDATE(m_pCurrentLevel->ContructLevel());
 					m_levelSelection = LS_LEVEL01;
 				}
 				break;
 			}	// End Switch
 		}
 	}
+
+	return true;
 }
 
 void Application::Draw()
@@ -402,7 +406,7 @@ void Application::Draw()
 	}
 }
 
-void Application::HandleInput()
+bool Application::HandleInput()
 {
 	if (m_pKeyDown[VK_ESCAPE])
 	{
@@ -486,7 +490,7 @@ void Application::HandleInput()
 			m_pCurrentLevel->DestroyLevel();
 			ReleasePtr(m_pCurrentLevel);
 			m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-			m_pCurrentLevel->ContructLevel();
+			VALIDATE(m_pCurrentLevel->ContructLevel());
 			m_levelSelection = LS_LEVEL01;
 		}
 		if (m_pKeyDown[VK_F2])	// Load the Second level
@@ -494,7 +498,7 @@ void Application::HandleInput()
 			m_pCurrentLevel->DestroyLevel();
 			ReleasePtr(m_pCurrentLevel);
 			m_pCurrentLevel = new Level_02(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-			m_pCurrentLevel->ContructLevel();
+			VALIDATE(m_pCurrentLevel->ContructLevel());
 			m_levelSelection = LS_LEVEL02;
 		}
 		if (m_pKeyDown[VK_F3])	// Load the Third level
@@ -502,10 +506,11 @@ void Application::HandleInput()
 			m_pCurrentLevel->DestroyLevel();
 			ReleasePtr(m_pCurrentLevel);
 			m_pCurrentLevel = new Level_03(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-			m_pCurrentLevel->ContructLevel();
+			VALIDATE(m_pCurrentLevel->ContructLevel());
 			m_levelSelection = LS_LEVEL03;
 		}
 	}
+	return true;
 }
 
 void Application::CutRope()
@@ -529,6 +534,7 @@ void Application::RenderInstructions()
 	m_pGDIRenderer->WriteLine("cutting line and release to cut.", 1030, Increment(&yPos, 15), colorRef::WHITE);
 	m_pGDIRenderer->WriteLine("The aim of each level is to get the", 1030, Increment(&yPos, 30), colorRef::WHITE);
 	m_pGDIRenderer->WriteLine("yellow gem to the green win zone.", 1030, Increment(&yPos, 15), colorRef::WHITE);
+	m_pGDIRenderer->WriteLine("Avoid the Red enemy objects.", 1030, Increment(&yPos, 15), colorRef::WHITE);
 
 	m_pGDIRenderer->WriteLine("KEY CODES", 1080, Increment(&yPos, 80), colorRef::WHITE);
 	m_pGDIRenderer->WriteLine("[R]     -> Reset current Level", 1030, Increment(&yPos, 15), colorRef::WHITE);
@@ -541,11 +547,12 @@ void Application::RenderInstructions()
 	m_pGDIRenderer->WriteLine("Gem", 1030, Increment(&yPos, 15), colorRef::YELLOW);
 	m_pGDIRenderer->WriteLine("Win Zone", 1030, Increment(&yPos, 15), colorRef::GREEN);
 	m_pGDIRenderer->WriteLine("Cuttable Rope", 1030, Increment(&yPos, 15), colorRef::PURPLE);
-	m_pGDIRenderer->WriteLine("Uncuttable Rope", 1030, Increment(&yPos, 15), colorRef::GREY);
+	m_pGDIRenderer->WriteLine("Non-cuttable Rope", 1030, Increment(&yPos, 15), colorRef::GREY);
 	m_pGDIRenderer->WriteLine("Interactive Object", 1030, Increment(&yPos, 15), colorRef::CYAN);
 	m_pGDIRenderer->WriteLine("Enemy Object", 1030, Increment(&yPos, 15), colorRef::RED);
 	m_pGDIRenderer->WriteLine("Breakable Object", 1030, Increment(&yPos, 15), colorRef::PINK);
 	m_pGDIRenderer->WriteLine("Spring Object", 1030, Increment(&yPos, 15), colorRef::DARKBLUE);
+	m_pGDIRenderer->WriteLine("Pulley System", 1050, Increment(&yPos, 15), colorRef::GREY);
 }
 
 int Application::Increment(int* _value, int _amount)

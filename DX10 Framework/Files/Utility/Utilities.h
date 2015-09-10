@@ -18,6 +18,9 @@
 #define __UTILITIES_H__
 #pragma message("Included Utilities.h")
 
+// Library Includes
+#include <sstream>
+
 // Defines
 #define _USE_MATH_DEFINES
 #define ReleasePtr(x) { if(x){ delete x; x = 0;} }
@@ -25,10 +28,16 @@
 
 // Handy Define to determine that a function was successful
 #if defined(DEBUG) | defined(_DEBUG)
-#define VALIDATE(x) {								\
-	if (!x) {										\
-		return (false);								\
-	}												\
+#define VALIDATE(x) {											\
+	if (!x) {													\
+		std::ostringstream strStream;							\
+		strStream << "Validate Failed: \n";						\
+		strStream << "File: " << __FILE__ << "\n";				\
+		strStream << "Function: " << __FUNCTION__ << "\n";		\
+		strStream << "Line: " << __LINE__ << "\n";				\
+		OutputDebugStringA(strStream.str().c_str());				\
+		return (false);											\
+	}															\
 }
 #else
 	#define VALIDATE(x) if(!x) return false

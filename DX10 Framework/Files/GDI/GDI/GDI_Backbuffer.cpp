@@ -35,6 +35,13 @@ CBackBuffer::~CBackBuffer()
 
 bool CBackBuffer::Initialise(HWND _hWnd, int _iWidth, int _iHeight)
 {
+	if (_hWnd == 0 ||
+		_iWidth <= 0 ||
+		_iHeight <= 0)
+	{
+		return false;
+	}
+
 	m_hWnd = _hWnd;
 	m_iWidth = _iWidth;
 	m_iHeight = _iHeight;

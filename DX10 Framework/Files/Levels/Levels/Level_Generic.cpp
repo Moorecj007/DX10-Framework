@@ -19,8 +19,6 @@ Level_Generic::~Level_Generic()
 {
 }
 
-
-
 bool Level_Generic::InitialSetup()
 {
 	// Create the points for the vectors to store all references to objects in the level
@@ -59,7 +57,7 @@ bool Level_Generic::InitialSetup()
 	VALIDATE(m_pBackground->Initialise(pBackgroundBody, colorRef::WHITE, colorRef::WHITE));
 
 	/*
-	Create the four walls of the level
+		Create the four walls of the level
 	*/
 
 	GDI_Obj_Generic* pNorthWall = new GDI_Obj_Polygon(m_pGDI_Renderer);
@@ -134,47 +132,84 @@ bool Level_Generic::InitialSetup()
 	VALIDATE(pWestWall->Initialise(pTempBody, colorRef::BLACK, colorRef::BLACK));
 	m_pObjStatics->push_back(pWestWall);
 
+	GDI_Obj_Generic* pPulleyDefine = new GDI_Obj_Polygon(m_pGDI_Renderer);
+	pPoints = new v2float[4];
+	pPoints[0] = { -5.0f, -5.0f };
+	pPoints[1] = { 5.0f, -5.0f };
+	pPoints[2] = { 5.0f, 5.0f };
+	pPoints[3] = { -5.0f, 5.0f };
+	ZeroMemory(&physProps, sizeof(physProps));
+	physProps.isStatic = true;
+	physProps.pPoints = pPoints;
+	physProps.size = 4;
+	physProps.friction = 0.3f;
+	physProps.pos = { 1040, 632 };
+	physProps.collisionType = CT_STANDARD;
+	physProps.collideWith = (CT_STANDARD | CT_GEM | CT_BREAKABLE | CT_ENEMY);
+	pTempBody = m_pPhysWorld->CreatePhysicsObject(physProps);
+	VALIDATE(pPulleyDefine->Initialise(pTempBody, colorRef::GREY, colorRef::GREY));
+	m_pObjStatics->push_back(pPulleyDefine);
+
 	return true;
 }
 
 void Level_Generic::DestroyLevel()
 {
 	// Delete all Cuttable GDI Ropes
-	for (UINT i = 0; i < m_pRopes_Cuttable->size(); i++)
+	if (m_pRopes_Cuttable != 0)
 	{
-		ReleasePtr((*m_pRopes_Cuttable)[i]);
+		for (UINT i = 0; i < m_pRopes_Cuttable->size(); i++)
+		{
+			ReleasePtr((*m_pRopes_Cuttable)[i]);
+		}
+		ReleasePtr(m_pRopes_Cuttable);
 	}
-	ReleasePtr(m_pRopes_Cuttable);
+	
 	// Delete all Unbreakable GDI Ropes
-	for (UINT i = 0; i < m_pRopes_Unbreakable->size(); i++)
+	if (m_pRopes_Unbreakable != 0)
 	{
-		ReleasePtr((*m_pRopes_Unbreakable)[i]);
+		for (UINT i = 0; i < m_pRopes_Unbreakable->size(); i++)
+		{
+			ReleasePtr((*m_pRopes_Unbreakable)[i]);
+		}
+		ReleasePtr(m_pRopes_Unbreakable);
 	}
-	ReleasePtr(m_pRopes_Unbreakable);
-	// Delete all GDI Pulley Objects
-	for (UINT i = 0; i < m_pObjPulleys->size(); i++)
+	if (m_pObjPulleys != 0)
 	{
-		ReleasePtr((*m_pObjPulleys)[i]);
+		// Delete all GDI Pulley Objects
+		for (UINT i = 0; i < m_pObjPulleys->size(); i++)
+		{
+			ReleasePtr((*m_pObjPulleys)[i]);
+		}
+		ReleasePtr(m_pObjPulleys);
 	}
-	ReleasePtr(m_pObjPulleys);
-	// Delete all GDI static objects
-	for (UINT i = 0; i < m_pObjStatics->size(); i++)
+	if (m_pObjStatics != 0)
 	{
-		ReleasePtr((*m_pObjStatics)[i]);
+		// Delete all GDI static objects
+		for (UINT i = 0; i < m_pObjStatics->size(); i++)
+		{
+			ReleasePtr((*m_pObjStatics)[i]);
+		}
+		ReleasePtr(m_pObjStatics);
 	}
-	ReleasePtr(m_pObjStatics);
 	// Delete all GDI dynamic objects
-	for (UINT i = 0; i < m_pObjDynamics->size(); i++)
+	if (m_pObjDynamics != 0)
 	{
-		ReleasePtr((*m_pObjDynamics)[i]);
+		for (UINT i = 0; i < m_pObjDynamics->size(); i++)
+		{
+			ReleasePtr((*m_pObjDynamics)[i]);
+		}
+		ReleasePtr(m_pObjDynamics);
 	}
-	ReleasePtr(m_pObjDynamics);
 	// Delete all GDI breakable objects
-	for (UINT i = 0; i < m_pObjBreakables->size(); i++)
+	if (m_pObjBreakables != 0)
 	{
-		ReleasePtr((*m_pObjBreakables)[i]);
+		for (UINT i = 0; i < m_pObjBreakables->size(); i++)
+		{
+			ReleasePtr((*m_pObjBreakables)[i]);
+		}
+		ReleasePtr(m_pObjBreakables);
 	}
-	ReleasePtr(m_pObjBreakables);
 
 	ReleasePtr(m_pGem);
 	ReleasePtr(m_pWinZone);
