@@ -35,8 +35,6 @@
 #include "Utility\Utilities.h"
 #include "Utility\Timer.h"
 #include "DX10\DX10.h"
-#include "GDI\GDI.h"
-#include "Levels\Levels.h"
 
 class Application
 {
@@ -135,20 +133,6 @@ public:
 	* @return: Successful or not
 	********************/
 	bool HandleInput();
-	
-	/***********************
-	* CutRope: Call the CutRope function on the current Level
-	* @author: Callan Moore
-	* @return: void
-	********************/
-	void CutRope();
-	
-	/***********************
-	* DrawCutLine: Draw the cut line on the client window
-	* @author: Callan Moore
-	* @return: void
-	********************/
-	void DrawCutLine();
 
 	/***********************
 	* SetKeyDown: Sets the Key down boolean for input Key
@@ -160,35 +144,12 @@ public:
 	void SetKeyDown(int _index, bool _down) { m_pKeyDown[_index] = _down; };
 
 	/***********************
-	* SetFirstMousePos: Store the position of the mouse when first clicked
-	* @author: Callan Moore
-	* @parameter: _firstMousePos: Position of the mouse on the client window
-	* @return: void
-	********************/
-	void SetFirstMousePos(v2float _firstMousePos) { m_firstMousePos = _firstMousePos; };
-	
-	/***********************
-	* SetSecondMousePos: Store the position of the mouse when click is released
-	* @author: Callan Moore
-	* @parameter: _secondMousePos: Position of the mouse on the client window
-	* @return: void
-	********************/
-	void SetSecondMousePos(v2float _secondMousePos) { m_secondMousePos = _secondMousePos; };
-
-	/***********************
 	* SetMouseDown: Set the state of the mouse button being clicked
 	* @author: Callan Moore
 	* @parameter: _mouseDown: The new state of the mouse button
 	* @return: void
 	********************/
 	void SetMouseDown(bool _mouseDown) { m_mouseDown = _mouseDown; };
-
-	/***********************
-	* RenderInstructions: Render the Game Instructions to the side panel
-	* @author: Callan Moore
-	* @return: void
-	********************/
-	void RenderInstructions();
 
 	/***********************
 	* Increment: Increment an input integer by the given amount and return the new value
@@ -214,9 +175,6 @@ private:
 	int m_clientWidth;
 	int m_clientHeight;
 	bool m_online;
-	v2float m_firstMousePos;
-	v2float m_secondMousePos;
-	bool m_mouseDown;
 	
 	// Timer Variables
 	Timer* m_pTimer;
@@ -226,10 +184,10 @@ private:
 
 	// Input Variables
 	bool* m_pKeyDown;
+	bool m_mouseDown;
 
 	// Renderer Variables
 	DX10_Renderer* m_pDX10_Renderer;
-	GDI_Renderer* m_pGDIRenderer;
 
 	// Camera
 	DX10_Camera_FirstPerson* m_pCamera;
@@ -242,10 +200,6 @@ private:
 	
 	// Shaders
 	DX10_Shader_LitTex* m_pShader_LitTex;
-
-	// Level Pointer
-	Level_Generic* m_pCurrentLevel;
-	eLevelSelection m_levelSelection;
 };
 
 #endif // __APPLICATION_H__

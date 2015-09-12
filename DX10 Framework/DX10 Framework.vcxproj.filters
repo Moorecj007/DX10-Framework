@@ -16,14 +16,8 @@
     <Filter Include="Header Files\DX10">
       <UniqueIdentifier>{65615134-2f44-4cf3-9ff3-697632071d6d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\GDI">
-      <UniqueIdentifier>{9fb32c53-9624-4a79-81b8-78ef32eaefe7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\DX10">
       <UniqueIdentifier>{50b50f22-385d-44a2-91d4-c31e84f97613}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\GDI">
-      <UniqueIdentifier>{7b77de56-d602-4091-9f9e-fac502f13dec}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\DX10\Meshes">
       <UniqueIdentifier>{c69ee119-2ba5-4605-bf7b-1b15c0bcabfd}</UniqueIdentifier>
@@ -39,12 +33,6 @@
     </Filter>
     <Filter Include="Resource Files\FX Files">
       <UniqueIdentifier>{575c96b6-4ddb-46ab-a0a6-4d6507d27ec0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\GDI\Objects">
-      <UniqueIdentifier>{1a7102b4-9b16-4a31-b743-94323686a8be}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\GDI\Objects">
-      <UniqueIdentifier>{08ae0f37-24a6-4b0b-b1ec-d29db76acf70}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{deded43c-a4d0-48b9-b8c6-6f51de4918eb}</UniqueIdentifier>
@@ -79,12 +67,6 @@
     <Filter Include="Header Files\DX10\Shaders">
       <UniqueIdentifier>{b4d3c7e4-c102-46cd-b922-cb8e7f260829}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Levels">
-      <UniqueIdentifier>{5bec2c67-b7e1-4270-b007-24a9a283a640}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Levels">
-      <UniqueIdentifier>{53e2a44d-5ec2-4d84-ba82-2344067f050b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Application.h">
@@ -92,15 +74,6 @@
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10.h">
       <Filter>Header Files\DX10</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\GDI\GDI.h">
-      <Filter>Header Files\GDI</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\GDI\GDI\GDI_Backbuffer.h">
-      <Filter>Header Files\GDI</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\GDI\GDI\GDI_Renderer.h">
-      <Filter>Header Files\GDI</Filter>
     </ClInclude>
     <ClInclude Include="Files\Utility\DirectInput.h">
       <Filter>Header Files\Utilities</Filter>
@@ -153,15 +126,6 @@
     <ClInclude Include="Files\Physics\2D Physics\Physics_Body_2D.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Generic.h">
-      <Filter>Header Files\GDI\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Circle.h">
-      <Filter>Header Files\GDI\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Polygon.h">
-      <Filter>Header Files\GDI\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Files\Physics\2D Physics\Physics_Utilities.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
@@ -174,43 +138,16 @@
     <ClInclude Include="Files\Physics\2D Physics\Physics_Rope_2D.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Files\Levels\Levels.h">
-      <Filter>Header Files\Levels</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Levels\Levels\Level_01.h">
-      <Filter>Header Files\Levels</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Levels\Levels\Level_02.h">
-      <Filter>Header Files\Levels</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Levels\Levels\Level_03.h">
-      <Filter>Header Files\Levels</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Levels\Levels\Level_Generic.h">
-      <Filter>Header Files\Levels</Filter>
-    </ClInclude>
     <ClInclude Include="Files\Physics\2D Physics\Physics_World_2D.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
     <ClInclude Include="Files\Physics\2D Physics\Physics_Collision_Listener.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Rope.h">
-      <Filter>Header Files\GDI\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\GDI\GDI\Objects\GDI_Obj_Pulley.h">
-      <Filter>Header Files\GDI\Objects</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\GDI\GDI\GDI_Renderer.cpp">
-      <Filter>Source Files\GDI</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\GDI\GDI\GDI_Backbuffer.cpp">
-      <Filter>Source Files\GDI</Filter>
     </ClCompile>
     <ClCompile Include="Files\Utility\DirectInput.cpp">
       <Filter>Source Files\Utilities</Filter>
@@ -248,41 +185,17 @@
     <ClCompile Include="Files\Physics\2D Physics\Physics_Body_2D.cpp">
       <Filter>Source Files\Physics\2D Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Circle.cpp">
-      <Filter>Source Files\GDI\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Polygon.cpp">
-      <Filter>Source Files\GDI\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Files\Physics\2D Physics\Physics_Pulley_2D.cpp">
       <Filter>Source Files\Physics\2D Physics</Filter>
     </ClCompile>
     <ClCompile Include="Files\Physics\2D Physics\Physics_Rope_2D.cpp">
       <Filter>Source Files\Physics\2D Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Files\Levels\Levels\Level_01.cpp">
-      <Filter>Source Files\Levels</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Levels\Levels\Level_02.cpp">
-      <Filter>Source Files\Levels</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Levels\Levels\Level_03.cpp">
-      <Filter>Source Files\Levels</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Levels\Levels\Level_Generic.cpp">
-      <Filter>Source Files\Levels</Filter>
-    </ClCompile>
     <ClCompile Include="Files\Physics\2D Physics\Physics_World_2D.cpp">
       <Filter>Source Files\Physics\2D Physics</Filter>
     </ClCompile>
     <ClCompile Include="Files\Physics\2D Physics\Physics_Collision_Listener.cpp">
       <Filter>Source Files\Physics\2D Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Rope.cpp">
-      <Filter>Source Files\GDI\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\GDI\GDI\Objects\GDI_Obj_Pulley.cpp">
-      <Filter>Source Files\GDI\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

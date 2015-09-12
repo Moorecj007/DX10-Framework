@@ -77,28 +77,13 @@ LRESULT CALLBACK Application::WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam
 		break;
 		case WM_LBUTTONDOWN:
 		{
-			// Retrieves and sets the mouse position for when the left mouse button is first pressed
-			v2float mousePos = { (float)GET_X_LPARAM(_lParam), (float)GET_Y_LPARAM(_lParam) };
-			pApp->SetFirstMousePos(mousePos);
 			pApp->SetMouseDown(true);
 		}
 		break;
 		case WM_LBUTTONUP:
 		{
-			// Retrieves and sets the mouse position for when the left mouse button is released
-			v2float mousePos = { (float)GET_X_LPARAM(_lParam), (float)GET_Y_LPARAM(_lParam) };
-			pApp->SetSecondMousePos(mousePos);
 			pApp->SetMouseDown(false);
-
-			// Determines if any cuttable ropes were crossing the line created by the two mouse positions
-			pApp->CutRope();
 			
-		}
-		case WM_MOUSEMOVE:
-		{
-			// Continuously update the mouse second position for if the mouse button is held down
-			v2float mousePos = { (float)GET_X_LPARAM(_lParam), (float)GET_Y_LPARAM(_lParam) };
-			pApp->SetSecondMousePos(mousePos);
 		}
 		break;
 		default: break;
@@ -190,17 +175,6 @@ Application* Application::GetInstance()
 
 bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hInstance)
 {
-	// Determine which Rendererer to use
-	bool usingDX10Renderer = false;
-	bool usingGDIRenderer = true;
-
-	// Default state so only one renderer can be active at any time
-	if (usingDX10Renderer == usingGDIRenderer)
-	{
-		usingDX10Renderer = true;
-		usingGDIRenderer = false;
-	}
-
 	// Save the client window sizes
 	m_clientWidth = _clientWidth;
 	m_clientHeight = _clientHeight;
@@ -209,29 +183,15 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	m_pKeyDown = new bool[255];
 	memset(m_pKeyDown, false, 255);
 
-	// Create a Renderer for graphics
-	if (usingDX10Renderer == true)
-	{
-		// Initialise the Renderer
-		m_pDX10_Renderer = new DX10_Renderer();
-		VALIDATE(m_pDX10_Renderer->Initialise(m_clientWidth, m_clientHeight, m_hWnd));
-	
-		// Initialise the Objects
-		m_pCamera = new DX10_Camera_FirstPerson();
-		m_pCamera->Initialise(m_pDX10_Renderer, _hInstance, m_hWnd);
-	}
-	
-	if (usingGDIRenderer == true)
-	{
-		// Initialise the Renderer
-		m_pGDIRenderer = new GDI_Renderer();
-		VALIDATE(m_pGDIRenderer->Initialise(m_hWnd, _hInstance, m_clientWidth + 300, m_clientHeight));
 
-		// Initialise the application to run the first level on startup
-		m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-		VALIDATE(m_pCurrentLevel->ContructLevel());
-		m_levelSelection = LS_LEVEL01;
-	}
+	// Initialise the Renderer
+	m_pDX10_Renderer = new DX10_Renderer();
+	VALIDATE(m_pDX10_Renderer->Initialise(m_clientWidth, m_clientHeight, m_hWnd));
+	
+	// Initialise the Objects
+	m_pCamera = new DX10_Camera_FirstPerson();
+	m_pCamera->Initialise(m_pDX10_Renderer, _hInstance, m_hWnd);
+
 
 	m_online = true;
 
@@ -262,26 +222,18 @@ void Application::ShutDown()
 	ReleasePtr(m_pKeyDown);
 	ReleasePtr(m_pTimer);
 
-	// DX10 pointers to release
-	ReleasePtr(m_pShader_LitTex);
-	ReleasePtr(m_pCamera);
-	ReleasePtr(m_pCubeMesh);
-	ReleasePtr(m_pCube);
-
-	// GDI pointers to release
-	if (m_pCurrentLevel != 0)
-	{
-		m_pCurrentLevel->DestroyLevel();
-	}
-	ReleasePtr(m_pCurrentLevel);
-
 	// Delete and free the memory from the Renderer
 	if (m_pDX10_Renderer != 0)
-	{
+	{ 
+		// DX10 pointers to release
+		ReleasePtr(m_pShader_LitTex);
+		ReleasePtr(m_pCamera);
+		ReleasePtr(m_pCubeMesh);
+		ReleasePtr(m_pCube);
+
 		m_pDX10_Renderer->ShutDown();
-	}
-	ReleasePtr(m_pDX10_Renderer);
-	ReleasePtr(m_pGDIRenderer);
+		ReleasePtr(m_pDX10_Renderer);
+	}	
 }
 
 void Application::ExecuteOneFrame()
@@ -310,11 +262,6 @@ void Application::ExecuteOneFrame()
 	// Reset FPS counters
 	if (m_fpsTimer >= 1.0f)
 	{
-		// Print the FPS to the console if in Debug mode
-		#ifdef _DEBUG
-			printf("%d \n", m_fps);
-		#endif
-		
 		m_fpsTimer -= 1.0f;
 		m_fps = 0;
 	}
@@ -328,47 +275,6 @@ bool Application::Process(float _dt)
 	if (m_pDX10_Renderer != 0)
 	{
 		m_pCamera->Process(_dt);
-		m_pCube->Process(_dt);
-		m_pShader_LitTex->SetUpPerFrame();
-	}
-
-	// Processes to run when using GDI Renderer
-	if (m_pGDIRenderer != 0)
-	{
-		// If the process returns true the level has been completed and so changes the current level to the next leve;l
-		if (m_pCurrentLevel->Process(_dt) == true)
-		{
-			switch (m_levelSelection)
-			{
-				case LS_LEVEL01:
-				{
-					m_pCurrentLevel->DestroyLevel();
-					ReleasePtr(m_pCurrentLevel);
-					m_pCurrentLevel = new Level_02(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-					VALIDATE(m_pCurrentLevel->ContructLevel());
-					m_levelSelection = LS_LEVEL02;
-				}
-				break;
-				case LS_LEVEL02:
-				{
-					m_pCurrentLevel->DestroyLevel();
-					ReleasePtr(m_pCurrentLevel);
-					m_pCurrentLevel = new Level_03(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-					VALIDATE(m_pCurrentLevel->ContructLevel());
-					m_levelSelection = LS_LEVEL03;
-				}
-				break;
-				case LS_LEVEL03:
-				{
-					m_pCurrentLevel->DestroyLevel();
-					ReleasePtr(m_pCurrentLevel);
-					m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-					VALIDATE(m_pCurrentLevel->ContructLevel());
-					m_levelSelection = LS_LEVEL01;
-				}
-				break;
-			}	// End Switch
-		}
 	}
 
 	return true;
@@ -382,27 +288,9 @@ void Application::Draw()
 		// Get the Renderer Ready to receive new data
 		m_pDX10_Renderer->StartRender();
 
-		m_pCube->Render();
 
 		// Tell the Renderer the data input is over and present the outcome
 		m_pDX10_Renderer->EndRender();
-	}
-
-	// Render calls when using the GDI Renderer
-	if (m_pGDIRenderer != 0)
-	{
-		m_pGDIRenderer->BeginRender();
-
-		m_pCurrentLevel->Render();
-
-		if (m_mouseDown == true)
-		{
-			DrawCutLine();
-		}
-
-		RenderInstructions();
-
-		m_pGDIRenderer->EndRender();
 	}
 }
 
@@ -477,82 +365,7 @@ bool Application::HandleInput()
 			m_pCamera->RotatePitch(1.0f);
 		}
 	}
-
-	if (m_levelSelection != LS_NONE)
-	{
-		if (m_pKeyDown[0x52])	// R Key
-		{
-			m_pCurrentLevel->ResetLevel();
-		}
-
-		if (m_pKeyDown[VK_F1])	// Load the First level
-		{
-			m_pCurrentLevel->DestroyLevel();
-			ReleasePtr(m_pCurrentLevel);
-			m_pCurrentLevel = new Level_01(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-			VALIDATE(m_pCurrentLevel->ContructLevel());
-			m_levelSelection = LS_LEVEL01;
-		}
-		if (m_pKeyDown[VK_F2])	// Load the Second level
-		{
-			m_pCurrentLevel->DestroyLevel();
-			ReleasePtr(m_pCurrentLevel);
-			m_pCurrentLevel = new Level_02(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-			VALIDATE(m_pCurrentLevel->ContructLevel());
-			m_levelSelection = LS_LEVEL02;
-		}
-		if (m_pKeyDown[VK_F3])	// Load the Third level
-		{
-			m_pCurrentLevel->DestroyLevel();
-			ReleasePtr(m_pCurrentLevel);
-			m_pCurrentLevel = new Level_03(m_pGDIRenderer, m_clientWidth, m_clientHeight);
-			VALIDATE(m_pCurrentLevel->ContructLevel());
-			m_levelSelection = LS_LEVEL03;
-		}
-	}
 	return true;
-}
-
-void Application::CutRope()
-{
-	m_pCurrentLevel->CutRope(m_firstMousePos, m_secondMousePos);
-}
-
-void Application::DrawCutLine()
-{
-	m_pGDIRenderer->RenderLine(m_firstMousePos, m_secondMousePos, colorRef::RED);
-}
-
-void Application::RenderInstructions()
-{
-	int yPos = 0;
-
-	m_pGDIRenderer->WriteLine("INSTRUCTIONS", 1080, Increment(&yPos, 150), colorRef::WHITE);
-	
-	m_pGDIRenderer->WriteLine("Use the Mouse Left click to cut the", 1030, Increment(&yPos, 15), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("purple ropes. Hold down to draw a", 1030, Increment(&yPos, 15), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("cutting line and release to cut.", 1030, Increment(&yPos, 15), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("The aim of each level is to get the", 1030, Increment(&yPos, 30), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("yellow gem to the green win zone.", 1030, Increment(&yPos, 15), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("Avoid the Red enemy objects.", 1030, Increment(&yPos, 15), colorRef::WHITE);
-
-	m_pGDIRenderer->WriteLine("KEY CODES", 1080, Increment(&yPos, 80), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("[R]     -> Reset current Level", 1030, Increment(&yPos, 15), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("[F1]   -> Skip to Level 01", 1030, Increment(&yPos, 15), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("[F2]   -> Skip to Level 02", 1030, Increment(&yPos, 15), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("[F3]   -> Skip to Level 03", 1030, Increment(&yPos, 15), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("[Esc] -> Quit Game", 1030, Increment(&yPos, 15), colorRef::WHITE);
-
-	m_pGDIRenderer->WriteLine("COLOR LEGEND", 1080, Increment(&yPos, 80), colorRef::WHITE);
-	m_pGDIRenderer->WriteLine("Gem", 1030, Increment(&yPos, 15), colorRef::YELLOW);
-	m_pGDIRenderer->WriteLine("Win Zone", 1030, Increment(&yPos, 15), colorRef::GREEN);
-	m_pGDIRenderer->WriteLine("Cuttable Rope", 1030, Increment(&yPos, 15), colorRef::PURPLE);
-	m_pGDIRenderer->WriteLine("Non-cuttable Rope", 1030, Increment(&yPos, 15), colorRef::GREY);
-	m_pGDIRenderer->WriteLine("Interactive Object", 1030, Increment(&yPos, 15), colorRef::CYAN);
-	m_pGDIRenderer->WriteLine("Enemy Object", 1030, Increment(&yPos, 15), colorRef::RED);
-	m_pGDIRenderer->WriteLine("Breakable Object", 1030, Increment(&yPos, 15), colorRef::PINK);
-	m_pGDIRenderer->WriteLine("Spring Object", 1030, Increment(&yPos, 15), colorRef::DARKBLUE);
-	m_pGDIRenderer->WriteLine("Pulley System", 1050, Increment(&yPos, 15), colorRef::GREY);
 }
 
 int Application::Increment(int* _value, int _amount)
