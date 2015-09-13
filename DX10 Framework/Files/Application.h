@@ -86,6 +86,14 @@ public:
 	bool Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hInstance);
 
 	/***********************
+	* Initialise_DX10: Initialise the DX10 for the Application
+	* @author: Callan Moore
+	* @Parameter: _hInstance: Handle to the current instance
+	* @return: bool: Successful or not
+	********************/
+	bool Initialise_DX10(HINSTANCE _hInstance);
+
+	/***********************
 	* ~CApplication: Default Destructor for Application class
 	* @author: Callan Moore
 	********************/
@@ -121,11 +129,18 @@ public:
 	bool Process(float _dt);
 
 	/***********************
-	* Draw: Draw the Application components
+	* ProcessShaders: Process all the Shaders to set up all once per frame variables
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	void Draw();
+	void ProcessShaders();
+
+	/***********************
+	* Render: Render the Application components
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void Render();
 
 	/***********************
 	* HandleInput: Handle all input for the application
@@ -151,18 +166,9 @@ public:
 	********************/
 	void SetMouseDown(bool _mouseDown) { m_mouseDown = _mouseDown; };
 
-	/***********************
-	* Increment: Increment an input integer by the given amount and return the new value
-	* @author: Callan Moore
-	* @parameter: _value: Value to increment
-	* @parameter: _amount: Increment amount
-	* @return: int: The result of the increment
-	********************/
-	int Increment(int* _value, int _amount);
-
 private:
 	// Preventing copies and extra constructions
-	Application();
+	Application() {}
 	Application(const Application& _kr);
 	Application& operator= (const Application& _kr);
 
@@ -193,7 +199,7 @@ private:
 	DX10_Camera_FirstPerson* m_pCamera;
 
 	// Objects
-	DX10_Obj_Generic* m_pCube;
+	DX10_Obj_LitTex* m_pCube;
 
 	// Meshes
 	DX10_Mesh_Generic* m_pCubeMesh;

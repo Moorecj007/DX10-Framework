@@ -25,54 +25,71 @@ class DX10_Obj_Generic
 public:
 
 	/***********************
-	* CGenericObject: Default Constructor for Generic Object class
-	* @author: Callan Moore
-	********************/
-	DX10_Obj_Generic();
-
-	/***********************
 	* ~CGenericObject: Default Destructor for Generic Object class
 	* @author: Callan Moore
 	********************/
-	virtual ~DX10_Obj_Generic();
+	virtual ~DX10_Obj_Generic() {}
 
 	/***********************
 	* BaseInitialise: Initialise the Base member variables
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	void BaseInitialise();
+	void BaseInitialise()
+	{
+		// Set initial position to origin point
+		m_pos = { 0, 0, 0 };
 
-	/***********************
-	* Initialise: Initialise the Generic Object for use
-	* @author: Callan Moore
-	* @parameter: _pRenderer: Renderer for this Application
-	* @parameter: _pMesh: Generic Mesh for this Object
-	* @return: bool: Successful or not
-	********************/
-	virtual bool Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _pMesh);
-	
-	/***********************
-	* Process: Process the new frame and update the Generic Object
-	* @author: Callan Moore
-	* @parameter: _dt: The delta tick for this frame
-	* @return: void
-	********************/
-	virtual void Process(float _dt) = 0;
-	
-	/***********************
-	* Render: Render the Generic Object to the screen space
-	* @author: Callan Moore
-	* @return: void
-	********************/
-	virtual void Render() = 0;
+		// Initialise Rotations to zero
+		m_rotationPitch = 0;
+		m_rotationYaw = 0;
+		m_rotationRoll = 0;
+
+		// Set IDs to zero (Invalid ID)
+		m_techniqueID = 0;
+		m_fxID = 0;
+		m_vertexLayoutID = 0;
+
+		// Set all pointers to NULL
+		m_pRenderer = 0;
+	}
 	
 	/***********************
 	* CalcWorldMatrix: Calculate the World Matrix 
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	virtual void CalcWorldMatrix();
+	virtual void CalcWorldMatrix()
+	{
+		// Matrices to make up the World Matrix
+		D3DXMATRIX matRotatePitch;
+		D3DXMATRIX matRotateYaw;
+		D3DXMATRIX matRotateRoll;
+		D3DXMATRIX matTranslation;
+
+		// Initialise each matrix to Identity
+		D3DXMatrixIdentity(&matRotatePitch);
+		D3DXMatrixIdentity(&matRotateYaw);
+		D3DXMatrixIdentity(&matRotateRoll);
+		D3DXMatrixIdentity(&matTranslation);
+
+		// Reset the Objects World Matrix for new Calculation
+		D3DXMatrixIdentity(&m_matWorld);
+
+		// Calculate a Rotation Matrices around the Pitch, Yaw and Roll axes
+		D3DXMatrixRotationX(&matRotatePitch, m_rotationPitch);
+		D3DXMatrixRotationY(&matRotateYaw, m_rotationYaw);
+		D3DXMatrixRotationZ(&matRotateRoll, m_rotationRoll);
+
+		// Calculate the Full Rotation Matrix and store in the World Matrix
+		m_matWorld = matRotatePitch * matRotateYaw * matRotateRoll;
+
+		// Calculate a translation Matrix based on the Objects current position in world space
+		D3DXMatrixTranslation(&matTranslation, m_pos.x, m_pos.y, m_pos.z);
+
+		// Calculate the Objects World Matrix
+		m_matWorld *= matTranslation;
+	}
 
 protected:
 	DX10_Renderer* m_pRenderer;

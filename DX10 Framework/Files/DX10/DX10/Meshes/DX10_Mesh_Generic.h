@@ -27,13 +27,13 @@ public:
 	* CGeometricMesh: Default Constructor for Geometric Mesh class
 	* @author: Callan Moore
 	********************/
-	DX10_Mesh_Generic();
+	DX10_Mesh_Generic() {}
 
 	/***********************
 	* ~CGeometricMesh: Default Destructor for Geometric Mesh class
 	* @author: Callan Moore
 	********************/
-	virtual ~DX10_Mesh_Generic();
+	virtual ~DX10_Mesh_Generic() {}
 
 	/***********************
 	* Initialise: Initialise the Generic mesh

@@ -18,9 +18,6 @@
 // Static Variables
 Application* Application::s_pApp = 0;
 
-// Global Variables
-FILE* g_file;
-
 int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdLine, int _cmdShow)
 {
 	// Set the client width and height
@@ -30,8 +27,7 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdL
 	// Create the Application 
 	Application* pApp = Application::GetInstance();
 	
-	// Add 300 to the width to create a side panel that only the application and backbuffer know about
-	if (pApp->CreateWindowApp(clientWidth + 300, clientHeight, _hInstance) == true)
+	if (pApp->CreateWindowApp(clientWidth, clientHeight, _hInstance) == true)
 	{
 		if (pApp->Initialise(clientWidth, clientHeight, _hInstance) == false)
 		{
@@ -156,12 +152,6 @@ int Application::Execute()
 	return (static_cast<int>(uiMsg.wParam));
 }
 
-// Constructors / Destructors
-Application::Application()
-{
-
-}
-
 Application* Application::GetInstance()
 {
 	if (s_pApp == 0)
@@ -183,15 +173,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	m_pKeyDown = new bool[255];
 	memset(m_pKeyDown, false, 255);
 
-
-	// Initialise the Renderer
-	m_pDX10_Renderer = new DX10_Renderer();
-	VALIDATE(m_pDX10_Renderer->Initialise(m_clientWidth, m_clientHeight, m_hWnd));
-	
-	// Initialise the Objects
-	m_pCamera = new DX10_Camera_FirstPerson();
-	m_pCamera->Initialise(m_pDX10_Renderer, _hInstance, m_hWnd);
-
+	VALIDATE(Initialise_DX10(_hInstance));
 
 	m_online = true;
 
@@ -205,6 +187,34 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	return true;
 }
 
+bool Application::Initialise_DX10(HINSTANCE _hInstance)
+{
+	// Initialise the Renderer
+	m_pDX10_Renderer = new DX10_Renderer();
+	VALIDATE(m_pDX10_Renderer->Initialise(m_clientWidth, m_clientHeight, m_hWnd));
+
+	// Initialise the Objects
+	m_pCamera = new DX10_Camera_FirstPerson();
+	m_pCamera->Initialise(m_pDX10_Renderer, _hInstance, m_hWnd);
+
+	m_pCubeMesh = new DX10_Mesh_Rect_Prism();
+	TVertexNormalUV vert;
+	VALIDATE(m_pCubeMesh->Initialise(m_pDX10_Renderer, vert, { 1, 1, 1 }));
+
+	m_pShader_LitTex = new DX10_Shader_LitTex();
+	VALIDATE(m_pShader_LitTex->Initialise(m_pDX10_Renderer));
+
+	UINT texID = 0;
+	m_pDX10_Renderer->CreateTexture("FireAnim/Fire001.bmp", &texID);
+	std::vector<UINT>* pTexVec = new std::vector < UINT > ;
+	pTexVec->push_back(texID);
+
+	m_pCube = new DX10_Obj_LitTex();
+	VALIDATE(m_pCube->Initialise(m_pDX10_Renderer, m_pCubeMesh, m_pShader_LitTex, pTexVec, 1.0f));
+
+	return true;
+}
+
 Application::~Application()
 {
 }
@@ -212,8 +222,7 @@ Application::~Application()
 void Application::DestroyInstance()
 {
 	s_pApp->ShutDown();
-	delete s_pApp;
-	s_pApp = 0;
+	ReleasePtr(s_pApp);
 }
 
 void Application::ShutDown()
@@ -253,7 +262,7 @@ void Application::ExecuteOneFrame()
 			m_online = false;
 			return;
 		}
-		Draw();
+		Render();
 
 		m_deltaTick -= (1.0f / 60.0f);
 		m_fps++;
@@ -273,14 +282,26 @@ bool Application::Process(float _dt)
 
 	// Processes to run when using DX10 Renderer
 	if (m_pDX10_Renderer != 0)
-	{
+	{		
+		ProcessShaders();
+
 		m_pCamera->Process(_dt);
+		m_pCube->Process(_dt);
 	}
 
 	return true;
 }
 
-void Application::Draw()
+void Application::ProcessShaders()
+{
+	// Setup the LitTex Shader if one exists
+	if (m_pShader_LitTex != 0)
+	{
+		m_pShader_LitTex->SetUpPerFrame();
+	}
+}
+
+void Application::Render()
 {
 	// Render calls when using the DX10 Renderer
 	if (m_pDX10_Renderer != 0)
@@ -288,6 +309,7 @@ void Application::Draw()
 		// Get the Renderer Ready to receive new data
 		m_pDX10_Renderer->StartRender();
 
+		m_pCube->Render(TECH_LITTEX_STANDARD);
 
 		// Tell the Renderer the data input is over and present the outcome
 		m_pDX10_Renderer->EndRender();
@@ -368,11 +390,7 @@ bool Application::HandleInput()
 	return true;
 }
 
-int Application::Increment(int* _value, int _amount)
-{
-	*_value += _amount;
-	return *_value;
-}
+
 
 
 

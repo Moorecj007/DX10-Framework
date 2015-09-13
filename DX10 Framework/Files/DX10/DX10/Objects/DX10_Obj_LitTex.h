@@ -19,7 +19,6 @@
 
 // Local Includes
 #include "DX10_Obj_Generic.h"
-#include "../DX10_Shader_Structures.h"
 #include "../Shaders/DX10_Shader_LitTex.h"
 
 class DX10_Obj_LitTex :
@@ -34,13 +33,36 @@ public:
 	* @parameter: _textureID: The ID for the Texture for this Object
 	* @parameter: _textureTime: Time in seconds to run through all animation frames
 	********************/
-	DX10_Obj_LitTex(DX10_Shader_LitTex* _pShader, std::vector<UINT>* _textureID, float _textureTime);
+	DX10_Obj_LitTex();
 
 	/***********************
 	* ~CDX10_LitTex_Obj: Default Destructor for Lit Texture Object class
 	* @author: Callan Moore
 	********************/
 	~DX10_Obj_LitTex();
+
+	/***********************
+	* Initialise: Initialise the Lit Tex Object for use
+	* @author: Callan Moore
+	* @parameter: _pRenderer: Renderer for this Application
+	* @parameter: _pMesh: Mesh for this Object
+	* @parameter: _pShader: The Shader for this Object
+	* @parameter: _textureID: The ID vector for the Textures for this Object
+	* @parameter: _textureTime: Time in seconds to run through all animation frames
+	* @return: bool: Successful or not
+	********************/
+	bool Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<UINT>* _textureID, float _textureTime);
+	
+	/***********************
+	* Initialise: Initialise the Lit Tex Object for use
+	* @author: Callan Moore
+	* @parameter: _pRenderer: Renderer for this Application
+	* @parameter: _pMesh: Mesh for this Object
+	* @parameter: _pShader: The Shader for this Object
+	* @parameter: _textureID: ID of the single texture for this object to display
+	* @return: bool : Successful or not
+	********************/
+	bool Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _pMesh, DX10_Shader_LitTex* _pShader, UINT _textureID);
 
 	/***********************
 	* Process: Process the new frame and update the LitTex Object
@@ -55,7 +77,7 @@ public:
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	virtual void Render();
+	virtual void Render(eTech_LitTex _tech);
 
 private:
 	DX10_Shader_LitTex* m_pShader;

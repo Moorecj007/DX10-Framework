@@ -310,30 +310,36 @@ private:
 	ID3D10Texture2D* m_pDepthStencilBuffer;
 	D3D10_RASTERIZER_DESC m_rasterizerDesc;
 	ID3D10RasterizerState* m_pRasterizerState;
-
 	D3D10_DRIVER_TYPE m_dx10DriverType;
 	D3DXCOLOR m_clearColor;
 
+	// Map of FX files
 	UINT m_nextEffectID;
 	std::map<std::string, UINT> m_effectIDs;
 	std::map<UINT, ID3D10Effect*> m_effectsByID;
 
+	// Map of Techniques
 	UINT m_nextTechniqueID;
 	std::map<UINT, std::map<std::string, UINT>> m_techniqueIDs;
 	std::map<UINT, ID3D10EffectTechnique*> m_techniquesByID;
 
+	// Map of Input Layouts
 	UINT m_nextInputLayoutID;
 	std::map<UINT, ID3D10InputLayout*> m_inputLayouts;
 
+	// Map of all Static Buffers
 	UINT m_nextBufferID;
 	std::map<UINT, DX10_StaticBuffer*> m_staticBuffers;
 
+	// Map of all Textures
 	UINT m_nextTextureID;
 	std::map<std::string, UINT> m_textureIDs;
 	std::map<UINT, ID3D10ShaderResourceView*> m_texturesByID;
 
 	// Lighting
 	Light m_activeLight;
+
+
 };
 
 #endif // __DX10_RENDERER_H__

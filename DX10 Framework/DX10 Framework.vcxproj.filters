@@ -102,9 +102,6 @@
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.h">
       <Filter>Header Files\DX10\Meshes</Filter>
     </ClInclude>
-    <ClInclude Include="Files\DX10\DX10\Objects\DX10_Obj_Color.h">
-      <Filter>Header Files\DX10\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Files\DX10\DX10\Objects\DX10_Obj_Generic.h">
       <Filter>Header Files\DX10\Objects</Filter>
     </ClInclude>
@@ -116,9 +113,6 @@
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\Systems\DX10_StaticBuffer.h">
       <Filter>Header Files\DX10\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\DX10\DX10\DX10_Shader_Structures.h">
-      <Filter>Header Files\DX10</Filter>
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h">
       <Filter>Header Files\DX10\Shaders</Filter>
@@ -144,6 +138,9 @@
     <ClInclude Include="Files\Physics\2D Physics\Physics_Collision_Listener.h">
       <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
+    <ClInclude Include="Files\Utility\Utility_Math.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
@@ -158,17 +155,8 @@
     <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.cpp">
       <Filter>Source Files\DX10\Meshes</Filter>
     </ClCompile>
-    <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Generic.cpp">
-      <Filter>Source Files\DX10\Meshes</Filter>
-    </ClCompile>
     <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.cpp">
       <Filter>Source Files\DX10\Meshes</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\DX10\DX10\Objects\DX10_Obj_Color.cpp">
-      <Filter>Source Files\DX10\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\DX10\DX10\Objects\DX10_Obj_Generic.cpp">
-      <Filter>Source Files\DX10\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Files\DX10\DX10\Objects\DX10_Obj_LitTex.cpp">
       <Filter>Source Files\DX10\Objects</Filter>
@@ -199,9 +187,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\FX\Color.fx">
-      <Filter>Resource Files\FX Files</Filter>
-    </FxCompile>
     <FxCompile Include="Resources\FX\LightStructures.fx">
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>

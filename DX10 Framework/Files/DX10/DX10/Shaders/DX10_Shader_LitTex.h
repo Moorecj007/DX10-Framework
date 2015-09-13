@@ -21,7 +21,23 @@
 #include "../../../Utility/Utilities.h"
 #include "../DX10_Utilities.h"
 #include "../DX10_Renderer.h"
-#include "../DX10_Shader_Structures.h"
+
+/***********************
+* TLitTex: Shader Variables for the LitTex FX
+* @author: Callan Moore
+********************/
+struct TLitTex
+{
+	DX10_Mesh_Generic* pMesh;
+	D3DXMATRIX* pMatWorld;
+	UINT textureID;
+};
+
+enum eTech_LitTex
+{
+	TECH_LITTEX_STANDARD,
+	TECH_LITTEX_ANIMWATER
+};
 
 class DX10_Shader_LitTex
 {
@@ -81,17 +97,19 @@ public:
 	* @parameter: _litTex: Structure containing all details for a litTex object
 	* @return: void
 	********************/
-	void Render(TLitTex _litTex)
+	void Render(TLitTex _litTex, eTech_LitTex _tech)
 	{
+		SetCurrentIDs(_tech);
+
 		// Reset draw states in case they're different
 		m_pDX10_Renderer->RestoreDefaultDrawStates();
 
 		// Set the Renderer Input layout and primitive topology to be the correct ones for this shader
-		m_pDX10_Renderer->SetInputLayout(m_vertexLayoutID);
+		m_pDX10_Renderer->SetInputLayout(m_currentVertexLayoutID);
 		m_pDX10_Renderer->SetPrimitiveTopology(_litTex.pMesh->GetPrimTopology());
 
 		// Retrieve the Technique
-		ID3D10EffectTechnique* pTech = m_pDX10_Renderer->GetTechnique(m_techniqueID);
+		ID3D10EffectTechnique* pTech = m_pDX10_Renderer->GetTechnique(m_currentTechID);
 
 		// Don't transform texture coordinates
 		D3DXMATRIX matTex;
@@ -125,7 +143,8 @@ private:
 	********************/
 	bool BuildFX()
 	{
-		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "LitTextureTech", &m_fxID, &m_techniqueID));
+		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "StandardTech", &m_fxID, &m_techID_Standard));
+		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "AnimateWaterTech", &m_fxID, &m_techID_AnimWater));
 
 		return true;
 	}
@@ -179,17 +198,50 @@ private:
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 		};
 		UINT elementNum = 3;
-		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_techniqueID, &m_vertexLayoutID);
+		
+		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_techID_Standard, &m_vertexLayoutID_Standard);
+		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_techID_AnimWater, &m_vertexLayoutID_AnimWater);
 	
 		return true;
+	}
+
+	// TO DO
+	void SetCurrentIDs(eTech_LitTex _tech)
+	{
+		switch (_tech)
+		{
+			case TECH_LITTEX_STANDARD:
+			{
+				m_currentVertexLayoutID = m_vertexLayoutID_Standard;
+				m_currentTechID = 	m_techID_Standard;
+			}
+			break;
+			case TECH_LITTEX_ANIMWATER:
+			{
+				m_currentVertexLayoutID = m_vertexLayoutID_AnimWater;
+				m_currentTechID = m_techID_AnimWater;
+			}
+			break;
+			default:
+			{
+				m_currentVertexLayoutID = 0;
+				m_currentTechID = 0;
+			}
+		}	// End Switch
 	}
 
 private:
 
 	UINT m_fxID;
-	UINT m_techniqueID;
-	UINT m_vertexLayoutID;
 	UINT m_specularID;
+
+	UINT m_currentVertexLayoutID;
+	UINT m_vertexLayoutID_Standard;
+	UINT m_vertexLayoutID_AnimWater;
+
+	UINT m_currentTechID;
+	UINT m_techID_Standard;
+	UINT m_techID_AnimWater;
 
 	DX10_Renderer*						m_pDX10_Renderer;
 

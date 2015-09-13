@@ -388,7 +388,7 @@ bool DX10_Renderer::CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UI
 
 	// Create the input layout
 	D3D10_PASS_DESC passDesc;
-	pTech->GetPassByIndex(0)->GetDesc(&passDesc);
+	pTech->GetPassByName("P0")->GetDesc(&passDesc);
 
 	VALIDATEHR(m_pDX10Device->CreateInputLayout(_vertexDesc, _elementNum, passDesc.pIAInputSignature,
 		passDesc.IAInputSignatureSize, &pVertexLayout));

@@ -32,17 +32,19 @@
 
 #include "DX10\DX10_Renderer.h"
 
+// Objects
 #include "DX10\Objects\DX10_Obj_Generic.h"
-#include "DX10\Objects\DX10_Obj_Color.h"
 #include "DX10\Objects\DX10_Obj_LitTex.h"
 
+// Meshes
 #include "DX10\Meshes\DX10_Mesh_Generic.h"
 #include "DX10\Meshes\DX10_Mesh_Rect_Prism.h"
 #include "DX10\Meshes\DX10_Mesh_Finite_Plane.h"
 
+// Cameras
 #include "DX10\Cameras\DX10_Camera_FirstPerson.h"
 
-#include "DX10\DX10_Shader_Structures.h"
+// Shaders
 #include "DX10\Shaders\DX10_Shader_LitTex.h"
 
 #endif	// __DX10_H__
