@@ -32,9 +32,14 @@ DX10_Obj_LitTex::~DX10_Obj_LitTex()
 
 bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<UINT>* _textureID, float _textureTime)
 {
-	if (_pRenderer == 0 || _pMesh ==0 || _pShader == 0)
+	if (_pRenderer == 0 || _pMesh == 0 || _pShader == 0 || _textureID == 0|| _textureTime < 0)
 	{
 		// If any pointers are NULL, Object cannot be initialized
+		return false;
+	}
+
+	if (_textureTime == 0.0f && _textureID->size() != 1)
+	{
 		return false;
 	}
 
@@ -69,7 +74,7 @@ bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _
 
 void DX10_Obj_LitTex::Process(float _dt)
 {
-	CalcWorldMatrix();
+	BaseProcess(_dt);
 
 	m_timeElapsed += _dt;
 	m_texIndex = (int)(m_timeElapsed * (float)m_pTextureID->size() / m_texTimer);

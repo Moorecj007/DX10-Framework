@@ -380,7 +380,7 @@ ID3D10EffectVariable* DX10_Renderer::GetFXVariable(UINT _fxID, std::string _tech
 	return pFX->GetVariableByName(_techVar.c_str());
 }
 
-bool DX10_Renderer::CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UINT _elementNum, UINT _techID, UINT* _vertexLayoutID)
+bool DX10_Renderer::CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UINT _elementNum, UINT _techID, UINT* _vertexLayoutID, UINT _passNum)
 {
 	// Find the Technique using the ID
 	ID3D10EffectTechnique* pTech = m_techniquesByID.find(_techID)->second;
@@ -388,7 +388,7 @@ bool DX10_Renderer::CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UI
 
 	// Create the input layout
 	D3D10_PASS_DESC passDesc;
-	pTech->GetPassByName("P0")->GetDesc(&passDesc);
+	pTech->GetPassByIndex(_passNum)->GetDesc(&passDesc);
 
 	VALIDATEHR(m_pDX10Device->CreateInputLayout(_vertexDesc, _elementNum, passDesc.pIAInputSignature,
 		passDesc.IAInputSignatureSize, &pVertexLayout));

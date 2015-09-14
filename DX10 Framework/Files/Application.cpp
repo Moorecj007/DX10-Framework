@@ -309,7 +309,7 @@ void Application::Render()
 		// Get the Renderer Ready to receive new data
 		m_pDX10_Renderer->StartRender();
 
-		m_pCube->Render(TECH_LITTEX_STANDARD);
+		m_pCube->Render();
 
 		// Tell the Renderer the data input is over and present the outcome
 		m_pDX10_Renderer->EndRender();

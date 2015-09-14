@@ -123,9 +123,10 @@ public:
 	* @parameter: _elementCount: Number of elements in the Vertex Description
 	* @parameter: _techID: Technique ID to base the layout on
 	* @Parameter: _vertexLayoutID: Storage variable to hold the ID of the created Vertex Layout
+	* @Parameter: _passNum: The pass number for the technique. Default to 0
 	* @return: bool: Successful or not
 	********************/
-	bool CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UINT _elementCount, UINT _techID, UINT* _pVertexLayoutID);
+	bool CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UINT _elementCount, UINT _techID, UINT* _pVertexLayoutID, UINT _passNum = 0);
 
 	/***********************
 	* CreateStaticBuffer: Creates a static buffer that holds all information for Vertex and Index Buffers for an Mesh

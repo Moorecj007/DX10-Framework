@@ -51,7 +51,7 @@ public:
 	* @parameter: _textureTime: Time in seconds to run through all animation frames
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<UINT>* _textureID, float _textureTime);
+	bool Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<UINT>* _textureID, float _textureTime = 0.0f);
 	
 	/***********************
 	* Initialise: Initialise the Lit Tex Object for use
@@ -77,7 +77,7 @@ public:
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	virtual void Render(eTech_LitTex _tech);
+	virtual void Render(eTech_LitTex _tech = TECH_LITTEX_STANDARD);
 
 private:
 	DX10_Shader_LitTex* m_pShader;
