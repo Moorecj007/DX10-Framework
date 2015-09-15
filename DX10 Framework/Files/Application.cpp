@@ -210,7 +210,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	pTexVec->push_back(texID);
 
 	m_pCube = new DX10_Obj_LitTex();
-	VALIDATE(m_pCube->Initialise(m_pDX10_Renderer, m_pCubeMesh, m_pShader_LitTex, pTexVec, 1.0f));
+	VALIDATE(m_pCube->Initialise(m_pDX10_Renderer, m_pCubeMesh, m_pShader_LitTex, pTexVec));
 
 	return true;
 }

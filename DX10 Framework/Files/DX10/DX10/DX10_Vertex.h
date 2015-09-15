@@ -25,6 +25,7 @@ enum eVertexType
 {
 	VT_BASIC,
 	VT_COLOR,
+	VT_UV,
 	VT_COLOR_UV,
 	VT_NORMAL_UV
 };
@@ -46,6 +47,16 @@ struct TVertexColor
 {
 	D3DXVECTOR3 pos;
 	D3DXCOLOR   color;
+};
+
+/***********************
+* TVertexUV: Basic Vertex with UVs
+* @author: Callan Moore
+********************/
+struct TVertexUV
+{
+	D3DXVECTOR3 pos;
+	v2float		uv;
 };
 
 /***********************

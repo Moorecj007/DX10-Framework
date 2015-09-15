@@ -197,7 +197,7 @@ private:
 			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 		};
-		UINT elementNum = 3;
+		UINT elementNum = sizeof(vertexDesc) / sizeof(vertexDesc[0]);
 		
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_techID_Standard, &m_vertexLayoutID_Standard);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_techID_AnimWater, &m_vertexLayoutID_AnimWater);

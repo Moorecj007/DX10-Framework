@@ -32,9 +32,12 @@
 
 #include "DX10\DX10_Renderer.h"
 
-// Objects
-#include "DX10\Objects\DX10_Obj_Generic.h"
-#include "DX10\Objects\DX10_Obj_LitTex.h"
+// 3D Objects
+#include "DX10\3D Objects\DX10_Obj_Generic.h"
+#include "DX10\3D Objects\DX10_Obj_LitTex.h"
+
+// 2D Objects
+#include "DX10\2D Objects\DXSprite.h"
 
 // Meshes
 #include "DX10\Meshes\DX10_Mesh_Generic.h"

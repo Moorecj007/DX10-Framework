@@ -103,12 +103,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp" />
+    <ClCompile Include="Files\DX10\DX10\2D Objects\DXSprite.cpp" />
+    <ClCompile Include="Files\DX10\DX10\3D Objects\DX10_Obj_LitTex.cpp" />
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.cpp" />
     <ClCompile Include="Files\DX10\DX10\DX10_Renderer.cpp" />
     <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.cpp" />
     <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.cpp" />
-    <ClCompile Include="Files\DX10\DX10\Objects\DX10_Obj_LitTex.cpp" />
-    <ClCompile Include="Files\DX10\DX10\Systems\DX10_StaticBuffer.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_World_2D.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Body_2D.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Collision_Listener.cpp" />
@@ -120,6 +120,9 @@
   <ItemGroup>
     <ClInclude Include="Files\Application.h" />
     <ClInclude Include="Files\DX10\DX10.h" />
+    <ClInclude Include="Files\DX10\DX10\2D Objects\DXSprite.h" />
+    <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_Generic.h" />
+    <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_LitTex.h" />
     <ClInclude Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.h" />
     <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h" />
     <ClInclude Include="Files\DX10\DX10\DX10_Utilities.h" />
@@ -127,10 +130,9 @@
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.h" />
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Generic.h" />
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.h" />
-    <ClInclude Include="Files\DX10\DX10\Objects\DX10_Obj_Generic.h" />
-    <ClInclude Include="Files\DX10\DX10\Objects\DX10_Obj_LitTex.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h" />
-    <ClInclude Include="Files\DX10\DX10\Systems\DX10_StaticBuffer.h" />
+    <ClInclude Include="Files\DX10\DX10\Shaders\FXTexture.h" />
+    <ClInclude Include="Files\DX10\DX10\Systems\DX10_Buffer.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_World_2D.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_Body_2D.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_Collision_Listener.h" />

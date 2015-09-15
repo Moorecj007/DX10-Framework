@@ -86,9 +86,9 @@ void DX10_Renderer::ShutDown()
 		iterFX++;
 	}
 
-	// Delete the Graphics memory stored as static Buffers
-	std::map<UINT, DX10_StaticBuffer*>::iterator iterBuffers = m_staticBuffers.begin();
-	while (iterBuffers != m_staticBuffers.end())
+	// Delete the Graphics memory stored as Buffers
+	std::map<UINT, DX10_Buffer*>::iterator iterBuffers = m_buffers.begin();
+	while (iterBuffers != m_buffers.end())
 	{
 		ReleasePtr(iterBuffers->second);
 		iterBuffers++;
@@ -443,13 +443,20 @@ bool DX10_Renderer::CreateTexture(std::string _texFileName, UINT* _pTexID)
 
 bool DX10_Renderer::RenderMesh(UINT _bufferID)
 {
-	// Retrieve the Vertex Buffer
-	std::map<UINT, DX10_StaticBuffer*>::iterator iterBuffer = m_staticBuffers.find(_bufferID);
-	if (iterBuffer == m_staticBuffers.end())
+	// Retrieve the Buffer
+	std::map<UINT, DX10_Buffer*>::iterator iterBuffer = m_buffers.find(_bufferID);
+	if (iterBuffer == m_buffers.end())
 	{
 		return false;
 	}
 	iterBuffer->second->Render();
+	return true;
+}
+
+bool DX10_Renderer::RenderSprite(UINT _bufferID)
+{
+	
+
 	return true;
 }
 
@@ -493,6 +500,17 @@ bool DX10_Renderer::SetInputLayout(UINT _vertexLayoutID)
 void DX10_Renderer::SetViewMatrix(D3DXMATRIX _view)
 {
 	m_matView = _view;
+}
+
+ID3D10Buffer* DX10_Renderer::GetVertexBuffer(UINT _buffID)
+{
+	// Retrieve the Technique
+	std::map<UINT, DX10_Buffer*>::iterator iterBuff = m_buffers.find(_buffID);
+	if (iterBuff == m_buffers.end())
+	{
+		return NULL;
+	}
+	return iterBuff->second->GetVertexBuffer();
 }
 
 ID3D10EffectTechnique* DX10_Renderer::GetTechnique(UINT _techID)

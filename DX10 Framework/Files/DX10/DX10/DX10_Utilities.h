@@ -23,6 +23,9 @@
 #include <d3dx10.h>
 #include <dxerr.h>
 
+// Local Includes
+#include "../../Utility/Utilities.h"
+
 // Defines
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC

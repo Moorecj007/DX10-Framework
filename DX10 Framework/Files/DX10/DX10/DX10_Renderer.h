@@ -26,7 +26,7 @@
 #include "DX10_Utilities.h"
 #include "../../Utility/Utilities.h"
 #include "DX10_Vertex.h"
-#include "Systems/DX10_StaticBuffer.h"
+#include "Systems/DX10_Buffer.h"
 
 class DX10_Renderer
 {
@@ -129,36 +129,37 @@ public:
 	bool CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UINT _elementCount, UINT _techID, UINT* _pVertexLayoutID, UINT _passNum = 0);
 
 	/***********************
-	* CreateStaticBuffer: Creates a static buffer that holds all information for Vertex and Index Buffers for an Mesh
+	* CreateBuffer: Creates a buffer that holds all information for Vertex and Index Buffers for an Mesh
 	* @author: Callan Moore
 	* @parameter: _pVertices: The array of Vertices
 	* @parameter: _pIndices: The array of Indices
 	* @parameter: _vertCount: Number of Vertices
 	* @parameter: _indexCount: Number of Indices
 	* @parameter: _stride: Stride size for each Vertex
-	* @parameter: _pBufferID: Storage variable to hold the ID of the created static buffer
+	* @parameter: _pBufferID: Storage variable to hold the ID of the created buffer
 	* @return: bool: Successful or not
 	********************/
 	template<typename TIndices, typename TVertices>
-	bool CreateStaticBuffer(typename TVertices* _pVertices, typename TIndices* _pIndices,
-		UINT _vertCount, UINT _indexCount, UINT _stride, UINT* _pBufferID)
+	bool CreateBuffer(typename TVertices* _pVertices, typename TIndices* _pIndices,
+		UINT _vertCount, UINT _indexCount, UINT _stride, UINT* _pBufferID,
+		D3D10_USAGE _vertexUsage = D3D10_USAGE_IMMUTABLE, D3D10_USAGE _indexUsage = D3D10_USAGE_IMMUTABLE)
 	{
 		*_pBufferID = ++m_nextBufferID;
 
-		DX10_StaticBuffer* staticBuff = new DX10_StaticBuffer(m_pDX10Device);
-		if (staticBuff->Initialise(_pVertices, _pIndices, _vertCount, _indexCount, _stride, _pBufferID))
+		DX10_Buffer* buff = new DX10_Buffer(m_pDX10Device);
+		if (buff->Initialise(_pVertices, _pIndices, _vertCount, _indexCount, _stride, _pBufferID, _vertexUsage, _indexUsage))
 		{
-			std::pair<UINT, DX10_StaticBuffer*> bufferPair(m_nextBufferID, staticBuff);
-			VALIDATE(m_staticBuffers.insert(bufferPair).second);
+			std::pair<UINT, DX10_Buffer*> bufferPair(m_nextBufferID, buff);
+			VALIDATE(m_buffers.insert(bufferPair).second);
 
 			return true;
 		}
 		else
 		{
-			// Delete the failed static buffer memory
+			// Delete the failed buffer memory
 			_pBufferID = 0;
-			delete staticBuff;
-			staticBuff = 0;
+			delete buff;
+			buff = 0;
 			return false;
 		}
 	}
@@ -175,10 +176,18 @@ public:
 	/***********************
 	* RenderObject: Renders an Object to the screen
 	* @author: Callan Moore
-	* @parameter: _vertexID: The ID of the static buffer stored on the Renderer
+	* @parameter: _bufferID: The ID of the buffer stored on the Renderer
 	* @return: bool: Successful or not
 	********************/
 	bool RenderMesh(UINT _bufferID);
+
+	/***********************
+	* RenderObject: Renders an Object to the screen
+	* @author: Callan Moore
+	* @parameter: _bufferID: The ID of the buffer stored on the Renderer
+	* @return: bool: Successful or not
+	********************/
+	bool RenderSprite(UINT _bufferID);
 
 	/***********************
 	* StartRender: Clears the Back buffer ready for new frame
@@ -248,6 +257,14 @@ public:
 	* @return: ID3D10ShaderResourceView*: The Texture
 	********************/
 	ID3D10ShaderResourceView* GetTexture(UINT _texID);
+
+	/***********************
+	* GetVertexBuffer: Retrieve the vertex buffer
+	* @author: Callan Moore
+	* @parameter: _buffID: The ID to the package buffer
+	* @return: ID3D10Buffer*: The vertex buffer linked to the ID
+	********************/
+	ID3D10Buffer* GetVertexBuffer(UINT _buffID);
 
 	/***********************
 	* CalcProjMatrix: Calculate the Projection Matrix for use in Renderering
@@ -328,9 +345,9 @@ private:
 	UINT m_nextInputLayoutID;
 	std::map<UINT, ID3D10InputLayout*> m_inputLayouts;
 
-	// Map of all Static Buffers
+	// Map of all Buffers
 	UINT m_nextBufferID;
-	std::map<UINT, DX10_StaticBuffer*> m_staticBuffers;
+	std::map<UINT, DX10_Buffer*> m_buffers;
 
 	// Map of all Textures
 	UINT m_nextTextureID;

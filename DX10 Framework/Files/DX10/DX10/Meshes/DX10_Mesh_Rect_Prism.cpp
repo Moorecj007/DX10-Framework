@@ -104,8 +104,8 @@ bool DX10_Mesh_Rect_Prism::Initialise(DX10_Renderer* _pRenderer, TVertexBasic _v
 	m_primTopology = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT indexCount = (sizeof(indices) / sizeof(*indices));
 
-	// Create the Static buffer and store the ID
-	m_pRenderer->CreateStaticBuffer(vertices, indices, vertexCount, indexCount, stride, &m_bufferID);
+	// Create the buffer and store the ID
+	m_pRenderer->CreateBuffer(vertices, indices, vertexCount, indexCount, stride, &m_bufferID);
 
 	return true;
 }
@@ -191,8 +191,8 @@ bool DX10_Mesh_Rect_Prism::Initialise(DX10_Renderer* _pRenderer, TVertexColor _v
 	m_primTopology = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT indexCount = (sizeof(indices) / sizeof(*indices));
 
-	// Create the Static buffer and store the ID
-	m_pRenderer->CreateStaticBuffer(vertices, indices, vertexCount, indexCount, stride, &m_bufferID);
+	// Create the buffer and store the ID
+	m_pRenderer->CreateBuffer(vertices, indices, vertexCount, indexCount, stride, &m_bufferID);
 
 	return true;
 }
@@ -278,8 +278,8 @@ bool DX10_Mesh_Rect_Prism::Initialise(DX10_Renderer* _pRenderer, TVertexColorUV 
 	m_primTopology = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT indexCount = (sizeof(indices) / sizeof(*indices));
 
-	// Create the Static buffer and store the ID
-	m_pRenderer->CreateStaticBuffer(vertices, indices, vertexCount, indexCount, stride, &m_bufferID);
+	// Create the buffer and store the ID
+	m_pRenderer->CreateBuffer(vertices, indices, vertexCount, indexCount, stride, &m_bufferID);
 
 	return true;
 }
@@ -365,8 +365,8 @@ bool DX10_Mesh_Rect_Prism::Initialise(DX10_Renderer* _pRenderer, TVertexNormalUV
 	m_primTopology = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT indexCount = (sizeof(indices) / sizeof(*indices));
 
-	// Create the Static buffer and store the ID
-	m_pRenderer->CreateStaticBuffer(vertices, indices, vertexCount, indexCount, stride, &m_bufferID);
+	// Create the buffer and store the ID
+	m_pRenderer->CreateBuffer(vertices, indices, vertexCount, indexCount, stride, &m_bufferID);
 
 	return true;
 }
