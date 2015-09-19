@@ -34,16 +34,14 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 
 	VALIDATE(InitialiseDeviceAndSwapChain());
 
-	m_clearColor = YELLOW;
+	m_clearColor = BLACK; //YELLOW
 
 	//Initialise the ID Keys for the Maps
-	m_nextEffectID = 0;
-	m_nextTechniqueID = 0;
 	m_nextInputLayoutID = 0;
 	m_nextBufferID = 0;
 	m_nextTextureID = 0;
 
-	m_activeLight.dir = D3DXVECTOR3(0.57735f, -0.57735f, 0.57735f);
+	m_activeLight.dir = D3DXVECTOR3(0, 0.0f, -1.0f);
 	m_activeLight.ambient = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);
 	m_activeLight.diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_activeLight.specular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -63,8 +61,8 @@ void DX10_Renderer::ShutDown()
 	}
 
 	// Delete the Graphics memory stored as DX10 Textures
-	std::map<UINT, ID3D10ShaderResourceView*>::iterator iterTexture = m_texturesByID.begin();
-	while (iterTexture != m_texturesByID.end())
+	std::map<std::string, ID3D10ShaderResourceView*>::iterator iterTexture = m_textures.begin();
+	while (iterTexture != m_textures.end())
 	{
 		ReleaseCOM(iterTexture->second);
 		iterTexture++;
@@ -79,8 +77,8 @@ void DX10_Renderer::ShutDown()
 	}
 
 	// Delete the Graphics memory stored as DX10 Effects
-	std::map<UINT, ID3D10Effect*>::iterator iterFX = m_effectsByID.begin();
-	while (iterFX != m_effectsByID.end())
+	std::map<std::string, ID3D10Effect*>::iterator iterFX = m_fxFiles.begin();
+	while (iterFX != m_fxFiles.end())
 	{
 		ReleaseCOM(iterFX->second);
 		iterFX++;
@@ -93,6 +91,8 @@ void DX10_Renderer::ShutDown()
 		ReleasePtr(iterBuffers->second);
 		iterBuffers++;
 	}
+	ReleaseCOM(m_pDepthStencilStateNormal);
+	ReleaseCOM(m_pDepthStencilStateZDisabled);
 	ReleaseCOM(m_pDepthStencilView);
 	ReleaseCOM(m_pDepthStencilBuffer);
 	ReleaseCOM(m_pRenderTargetView);
@@ -121,8 +121,8 @@ bool DX10_Renderer::InitialiseDeviceAndSwapChain()
 	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
 	// multi sampling per pixel ( 4 sample only) and High quality
-	swapChainDesc.SampleDesc.Count = 4;
-	swapChainDesc.SampleDesc.Quality = 4;
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
 
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = 1;
@@ -188,26 +188,105 @@ bool DX10_Renderer::onResize()
 	// Release the memory from the temporary Back Buffer
 	ReleaseCOM(pBackBuffer);
 
-	// Create the depth/stencil buffer and view.
-	D3D10_TEXTURE2D_DESC depthStencilDesc;
+	// Create the depth buffer.
+	D3D10_TEXTURE2D_DESC depthBufferDesc;
 
-	depthStencilDesc.Width = m_clientWidth;
-	depthStencilDesc.Height = m_clientHeight;
-	depthStencilDesc.MipLevels = 1;
-	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.SampleDesc.Count = 4; // multi sampling must match
-	depthStencilDesc.SampleDesc.Quality = 4; // swap chain values.
-	depthStencilDesc.Usage = D3D10_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
-	depthStencilDesc.CPUAccessFlags = 0;
-	depthStencilDesc.MiscFlags = 0;
+	depthBufferDesc.Width = m_clientWidth;
+	depthBufferDesc.Height = m_clientHeight;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1; // multi sampling must match
+	depthBufferDesc.SampleDesc.Quality = 0; // swap chain values.
+	depthBufferDesc.Usage = D3D10_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
 
-	VALIDATEHR(m_pDX10Device->CreateTexture2D(&depthStencilDesc, NULL, &m_pDepthStencilBuffer));
-	VALIDATEHR(m_pDX10Device->CreateDepthStencilView(m_pDepthStencilBuffer, NULL, &m_pDepthStencilView));
+	VALIDATEHR(m_pDX10Device->CreateTexture2D(&depthBufferDesc, NULL, &m_pDepthStencilBuffer));
+
+	//--------------------------------------------------------------------------------------
+	// Normal Depth Stencil
+	//--------------------------------------------------------------------------------------
+	D3D10_DEPTH_STENCIL_DESC depthStencilDesc;
+
+	// Initialize the description of the stencil state.
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D10_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D10_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D10_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D10_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	VALIDATEHR(m_pDX10Device->CreateDepthStencilState(&depthStencilDesc, &m_pDepthStencilStateNormal));
+
+	// Set the depth stencil state on the D3D device.
+	m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateNormal, 1);
+
+	D3D10_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+
+	// Initialize the depth stencil view.
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view.
+	VALIDATEHR(m_pDX10Device->CreateDepthStencilView(m_pDepthStencilBuffer, &depthStencilViewDesc, &m_pDepthStencilView));
+
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
+
+	//--------------------------------------------------------------------------------------
+	// Disabled Depth Stencil
+	//--------------------------------------------------------------------------------------
+	D3D10_DEPTH_STENCIL_DESC depthDisabledStencilDesc;
+
+	// Clear the second depth stencil state before setting the parameters.
+	ZeroMemory(&depthDisabledStencilDesc, sizeof(depthDisabledStencilDesc));
+
+	// Now create a second depth stencil state which turns off the Z buffer for 2D rendering.
+	depthDisabledStencilDesc.DepthEnable = false;
+	depthDisabledStencilDesc.DepthWriteMask = D3D10_DEPTH_WRITE_MASK_ALL;
+	depthDisabledStencilDesc.DepthFunc = D3D10_COMPARISON_LESS;
+	depthDisabledStencilDesc.StencilEnable = true;
+	depthDisabledStencilDesc.StencilReadMask = 0xFF;
+	depthDisabledStencilDesc.StencilWriteMask = 0xFF;
+	depthDisabledStencilDesc.FrontFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.FrontFace.StencilDepthFailOp = D3D10_STENCIL_OP_INCR;
+	depthDisabledStencilDesc.FrontFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.FrontFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
+	depthDisabledStencilDesc.BackFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.BackFace.StencilDepthFailOp = D3D10_STENCIL_OP_DECR;
+	depthDisabledStencilDesc.BackFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.BackFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
+
+	// Create the state using the device.
+	VALIDATEHR(m_pDX10Device->CreateDepthStencilState(&depthDisabledStencilDesc, &m_pDepthStencilStateZDisabled));
+
+	//VALIDATEHR(m_pDX10Device->CreateDepthStencilView(m_pDepthStencilBuffer, NULL, &m_pDepthStencilView));
 	
 	// Bind the Render Target View to the output-merger stage of the pipeline
-	m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
+	//m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 	
 	// Set the View Port for the Device
 	D3D10_VIEWPORT viewPort;
@@ -224,7 +303,8 @@ bool DX10_Renderer::onResize()
 	// Calculate the new Projection Matrix
 	CalcProjMatrix();
 
-	
+	// Create an orthographic projection matrix for 2D rendering.
+	D3DXMatrixOrthoLH(&m_matOrtho, static_cast<float>(m_clientWidth), static_cast<float>(m_clientHeight), 0.1f, 100.0f);
 
 	return true;
 }
@@ -261,22 +341,30 @@ void DX10_Renderer::ToggleFillMode()
 	m_pDX10Device->RSSetState(m_pRasterizerState);
 }
 
-bool DX10_Renderer::BuildFX(std::string _fxFileName, std::string _technique, UINT* _pFXID, UINT* _pTechID)
+void DX10_Renderer::TurnZBufferOn()
+{
+	m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateNormal, 1);
+}
+
+void DX10_Renderer::TurnZBufferOff()
+{
+	m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateZDisabled, 1);
+}
+
+bool DX10_Renderer::BuildFX(std::string _fxFileName, std::string _techniqueName, ID3D10Effect*& _prFX, ID3D10EffectTechnique*& _prTech)
 {	
 	ID3D10Effect* pFX = 0;
-	UINT fxID;
-	UINT techID;
+	ID3D10EffectTechnique* pTech = 0;
 
 	// Checking if the Effects file is already loaded
-	std::map<std::string, UINT>::iterator fxCheck;
-	fxCheck = m_effectIDs.find(_fxFileName);
+	std::map<std::string, ID3D10Effect*>::iterator fxCheck;
+	fxCheck = m_fxFiles.find(_fxFileName);
 
 	// Check if the FX file has already been created
-	if (fxCheck != m_effectIDs.end())
+	if (fxCheck != m_fxFiles.end())
 	{
-		// FX file already exists, save the ID
-		fxID = fxCheck->second;
-		pFX = m_effectsByID.find(fxID)->second;
+		// FX file already exists, save the Pointer
+		pFX = fxCheck->second;
 	}
 	else
 	{
@@ -299,37 +387,34 @@ bool DX10_Renderer::BuildFX(std::string _fxFileName, std::string _technique, UIN
 		ReleaseCOM(compilationErrors);
 		
 		// Create the pairs to be inserted into the appropriate FX Maps
-		fxID = ++m_nextEffectID;
-		std::pair<std::string, UINT> fxPair(_fxFileName, fxID);
-		std::pair<UINT, ID3D10Effect*> fxPairByID(fxID, pFX);
+		std::pair<std::string, ID3D10Effect*> fxPair(_fxFileName, pFX);
 
 		// Insert the pairs into their respective Maps
-		VALIDATE(m_effectIDs.insert(fxPair).second);
-		VALIDATE(m_effectsByID.insert(fxPairByID).second);
+		VALIDATE(m_fxFiles.insert(fxPair).second);
 	}
 
 	// Adding the Technique to the Map
 
 	// Retrieve the Technique IDs map using the FX ID to get a Map of all techniques for that particular FX file
-	std::map<UINT, std::map<std::string, UINT>>::iterator fxIDCheck;
-	fxIDCheck = m_techniqueIDs.find(fxID);
+	std::map<std::string, std::map<std::string, ID3D10EffectTechnique*>>::iterator fxNameCheck;
+	fxNameCheck = m_techniques.find(_fxFileName);
 
 	// Check if the FX file already has techniques stored for it
-	if (fxIDCheck != m_techniqueIDs.end())
+	if (fxNameCheck != m_techniques.end())
 	{
 		// Search the Inner Map (of Techs by FX ID) to check if the Technique has already been created
-		std::map<std::string, UINT>::iterator techIDCheck;
-		techIDCheck = fxIDCheck->second.find(_technique);
+		std::map<std::string, ID3D10EffectTechnique*>::iterator techNameCheck;
+		techNameCheck = fxNameCheck->second.find(_techniqueName);
 
-		if (techIDCheck != fxIDCheck->second.end())
+		if (techNameCheck != fxNameCheck->second.end())
 		{
 			// Technique already exists, save the ID
-			techID = fxCheck->second;
+			pTech = techNameCheck->second;
 		}
 		else
 		{
 			// Technique has not been created so Retrieve the Tech from the FX file
-			ID3D10EffectTechnique* pTech = pFX->GetTechniqueByName(_technique.c_str());
+			pTech = pFX->GetTechniqueByName(_techniqueName.c_str());
 
 			if (pTech == NULL)
 			{
@@ -338,57 +423,43 @@ bool DX10_Renderer::BuildFX(std::string _fxFileName, std::string _technique, UIN
 			}
 
 			// Create pairs to store in the Technique Maps
-			techID = ++m_nextTechniqueID;
-			std::pair<std::string, UINT> techPair(_technique, techID);
-			std::pair<UINT, ID3D10EffectTechnique*> techPairByID(techID, pTech);
+			std::pair<std::string, ID3D10EffectTechnique*> techPair(_techniqueName, pTech);
 
 			// Insert the pairs into their respective Maps
-			VALIDATE((&fxIDCheck->second)->insert(techPair).second);
-			VALIDATE(m_techniquesByID.insert(techPairByID).second);
+			VALIDATE((&fxNameCheck->second)->insert(techPair).second);
 		}
 	}
 	else
 	{
 		// Technique has not been created so Retrieve the Tech from the FX file
-		ID3D10EffectTechnique* pTech = pFX->GetTechniqueByName(_technique.c_str());
+		pTech = pFX->GetTechniqueByName(_techniqueName.c_str());
+		if (pTech == NULL)
+		{
+			// technique was not found
+			return false;
+		}
 
 		// Create pairs to store in the Technique Maps
-		techID = ++m_nextTechniqueID;
-		std::map<std::string, UINT> innerTechMap;
-		std::pair<std::string, UINT> innerTechPair(_technique, techID);
+		std::map<std::string, ID3D10EffectTechnique*> innerTechMap;
+		std::pair<std::string, ID3D10EffectTechnique*> innerTechPair(_techniqueName, pTech);
 		VALIDATE(innerTechMap.insert(innerTechPair).second);
 
-		std::pair<UINT, std::map<std::string, UINT>> outerTechMap(fxID, innerTechMap);
-		VALIDATE(m_techniqueIDs.insert(outerTechMap).second);
-
-		std::pair<UINT, ID3D10EffectTechnique*> techByIDPair(techID, pTech);
-		VALIDATE(m_techniquesByID.insert(techByIDPair).second);
+		std::pair<std::string, std::map<std::string, ID3D10EffectTechnique*>> outerTechMap(_fxFileName, innerTechMap);
+		VALIDATE(m_techniques.insert(outerTechMap).second);
 	}
 
 	// Save the FX and Technique IDs in the memory passed by the Object.
-	*_pFXID = fxID;
-	*_pTechID = techID;
+	_prFX = pFX;
+	_prTech = pTech;
 	return true;
 }
 
-ID3D10EffectVariable* DX10_Renderer::GetFXVariable(UINT _fxID, std::string _techVar)
+bool DX10_Renderer::CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UINT _elementNum, ID3D10EffectTechnique* _pTech, ID3D10InputLayout*& _prVertexLayout, UINT _passNum)
 {
-	// Retrieve the FX pointer
-	ID3D10Effect* pFX = m_effectsByID.find(_fxID)->second;
-
-	// Retrieve the pointer to the variable and return it to the calling object
-	return pFX->GetVariableByName(_techVar.c_str());
-}
-
-bool DX10_Renderer::CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UINT _elementNum, UINT _techID, UINT* _vertexLayoutID, UINT _passNum)
-{
-	// Find the Technique using the ID
-	ID3D10EffectTechnique* pTech = m_techniquesByID.find(_techID)->second;
 	ID3D10InputLayout* pVertexLayout;
-
 	// Create the input layout
 	D3D10_PASS_DESC passDesc;
-	pTech->GetPassByIndex(_passNum)->GetDesc(&passDesc);
+	_pTech->GetPassByIndex(_passNum)->GetDesc(&passDesc);
 
 	VALIDATEHR(m_pDX10Device->CreateInputLayout(_vertexDesc, _elementNum, passDesc.pIAInputSignature,
 		passDesc.IAInputSignatureSize, &pVertexLayout));
@@ -398,66 +469,45 @@ bool DX10_Renderer::CreateVertexLayout(D3D10_INPUT_ELEMENT_DESC* _vertexDesc, UI
 	std::pair<UINT, ID3D10InputLayout*> inputLayerPair(inputLayerID, pVertexLayout);
 	VALIDATE(m_inputLayouts.insert(inputLayerPair).second);
 
-	// Store the ID in for the calling object
-	*_vertexLayoutID = inputLayerID;
+	_prVertexLayout = pVertexLayout;
 	return true;
 }
 
-bool DX10_Renderer::CreateTexture(std::string _texFileName, UINT* _pTexID)
+bool DX10_Renderer::CreateTexture(std::string _texFileName, ID3D10ShaderResourceView*& _prTex)
 {
-	ID3D10Effect* pTexture = 0;
-	UINT texID;
+	ID3D10ShaderResourceView* pTexture = 0;
 
 	// Look for the texture by name to see if it is already loaded
-	std::map<std::string, UINT>::iterator texCheck;
-	texCheck = m_textureIDs.find(_texFileName);
+	std::map<std::string, ID3D10ShaderResourceView*>::iterator texCheck;
+	texCheck = m_textures.find(_texFileName);
 
 	// Check if the Texture exists
-	if (texCheck != m_textureIDs.end())
+	if (texCheck != m_textures.end())
 	{
 		// Texture is already loaded. Save its ID
-		texID = texCheck->second;
+		pTexture = texCheck->second;
 	}
 	else
 	{
 		// Texture is new, create and save.
-		texID = ++m_nextTextureID;
-
-		ID3D10ShaderResourceView* pTexture;
-		std::string filePath = "Resources/Textures/";
+		std::string filePath = TEXTUREFILEPATH;
 		filePath.append(_texFileName);
 
 		VALIDATEHR(D3DX10CreateShaderResourceViewFromFileA(m_pDX10Device,
 			filePath.c_str(), 0, 0, &pTexture, 0));
 
-		std::pair<std::string, UINT> texNameID(_texFileName, texID);
-		std::pair<UINT, ID3D10ShaderResourceView*> texIDResource(texID, pTexture);
+		std::pair<std::string, ID3D10ShaderResourceView*> texPair(_texFileName, pTexture);
 
-		VALIDATE(m_textureIDs.insert(texNameID).second);
-		VALIDATE(m_texturesByID.insert(texIDResource).second);
+		VALIDATE(m_textures.insert(texPair).second);
 	}
 
-	*_pTexID = texID;
+	_prTex = pTexture;
 	return true;
 }
 
-bool DX10_Renderer::RenderMesh(UINT _bufferID)
+void DX10_Renderer::RenderBuffer(DX10_Buffer* _buffer)
 {
-	// Retrieve the Buffer
-	std::map<UINT, DX10_Buffer*>::iterator iterBuffer = m_buffers.find(_bufferID);
-	if (iterBuffer == m_buffers.end())
-	{
-		return false;
-	}
-	iterBuffer->second->Render();
-	return true;
-}
-
-bool DX10_Renderer::RenderSprite(UINT _bufferID)
-{
-	
-
-	return true;
+	_buffer->Render();
 }
 
 void DX10_Renderer::StartRender()
@@ -478,61 +528,286 @@ void DX10_Renderer::RestoreDefaultDrawStates()
 	m_pDX10Device->OMSetBlendState(0, blendFactors, 0xFFFFFFFF);	
 }
 
+bool DX10_Renderer::ReadFileCounts(std::string _fileName, int& _rVertexCount, int& _rTexCount, int& _rNormalCount, int& _rPolygonCount)
+{
+	std::ifstream fin;
+	char input;
+
+	// Initialize the counts.
+	_rVertexCount = 0;
+	_rTexCount = 0;
+	_rNormalCount = 0;
+	_rPolygonCount = 0;
+
+	// Open the file.
+	fin.open(_fileName.c_str());
+
+	// Check if it was successful in opening the file.
+	if (fin.fail() == true)
+	{
+		return false;
+	}
+
+	// Read from the file and continue to read until the end of the file is reached.
+	fin.get(input);
+	while (!fin.eof())
+	{
+		// If the line starts with 'v' then count either the vertex, the texture coordinates, or the normal vector.
+		if (input == 'v')
+		{
+			fin.get(input);
+			if (input == ' ') { _rVertexCount++; }
+			if (input == 't') { _rTexCount++; }
+			if (input == 'n') { _rNormalCount++; }
+		}
+
+		// If the line starts with 'f' then increment the face count.
+		if (input == 'f')
+		{
+			fin.get(input);
+			if (input == ' ') { _rPolygonCount++; }
+		}
+
+		// Otherwise read in the remainder of the line.
+		while (input != '\n')
+		{
+			fin.get(input);
+		}
+
+		// Start reading the beginning of the next line.
+		fin.get(input);
+	}
+
+	// Close the file.
+	fin.close();
+
+	return true;
+}
+
+bool DX10_Renderer::LoadMeshObj(std::string _fileName, TVertexNormalUV*& _prVertexBuffer, DWORD*& _prIndexBuffer, int* _pVertexCount, int* _pIndexCount, v3float _scale)
+{
+	int vertexCount;
+	int texCount;
+	int normalCount;
+	int polygonCount;
+	ReadFileCounts(_fileName, vertexCount, texCount, normalCount, polygonCount);
+
+	v3float* pVertices;
+	v3float* pTexUVs;
+	v3float* pNormals;
+	PolygonType *pPolygons;
+	std::ifstream fin;
+	int vIndex;
+	int tIndex;
+	int nIndex;
+	char input;
+	char input2;
+	//ofstream fout;
+
+	// Initialize the four data structures.
+	pVertices = new v3float[vertexCount];
+	VALIDATE(pVertices);
+
+	pTexUVs = new v3float[texCount];
+	VALIDATE(pTexUVs);
+
+	pNormals = new v3float[normalCount];
+	VALIDATE(pNormals);
+
+	pPolygons = new PolygonType[polygonCount];
+	VALIDATE(pPolygons);
+
+	// Create and Initialize the indexes.
+	int vertexIndex = 0;
+	int texcoordIndex = 0;
+	int normalIndex = 0;
+	int faceIndex = 0;
+
+	// Open the file.
+	fin.open(_fileName.c_str());
+
+	// Check if it was successful in opening the file.
+	VALIDATE(!fin.fail());
+
+	// Read in the vertices, texture coordinates, and normals into the data structures.
+	// Important: Also convert to left hand coordinate system since Maya uses right hand coordinate system.
+	fin.get(input);
+	while (!fin.eof())
+	{
+		if (input == 'v')
+		{
+			fin.get(input);
+
+			// Read in the vertices.
+			if (input == ' ')
+			{
+				fin >> pVertices[vertexIndex].x >> pVertices[vertexIndex].y >> pVertices[vertexIndex].z;
+
+				// Invert the Z vertex to change to left hand system.
+				pVertices[vertexIndex].z = pVertices[vertexIndex].z * -1.0f;
+				vertexIndex++;
+			}
+
+			// Read in the texture uv coordinates.
+			if (input == 't')
+			{
+				fin >> pTexUVs[texcoordIndex].x >> pTexUVs[texcoordIndex].y;
+
+				// Invert the V texture coordinates to left hand system.
+				pTexUVs[texcoordIndex].y = 1.0f - pTexUVs[texcoordIndex].y;
+				texcoordIndex++;
+			}
+
+			// Read in the normals.
+			if (input == 'n')
+			{
+				fin >> pNormals[normalIndex].x >> pNormals[normalIndex].y >> pNormals[normalIndex].z;
+
+				// Invert the Z normal to change to left hand system.
+				pNormals[normalIndex].z = pNormals[normalIndex].z * -1.0f;
+				normalIndex++;
+			}
+		}
+
+		// Read in the faces.
+		if (input == 'f')
+		{
+			fin.get(input);
+			if (input == ' ')
+			{
+				// Read the face data in backwards to convert it to a left hand system from right hand system.
+				fin >> pPolygons[faceIndex].vIndex3 >> input2 >> pPolygons[faceIndex].tIndex3 >> input2 >> pPolygons[faceIndex].nIndex3
+					>> pPolygons[faceIndex].vIndex2 >> input2 >> pPolygons[faceIndex].tIndex2 >> input2 >> pPolygons[faceIndex].nIndex2
+					>> pPolygons[faceIndex].vIndex1 >> input2 >> pPolygons[faceIndex].tIndex1 >> input2 >> pPolygons[faceIndex].nIndex1;
+				faceIndex++;
+			}
+		}
+
+		// Read in the remainder of the line.
+		while (input != '\n')
+		{
+			fin.get(input);
+		}
+
+		// Start reading the beginning of the next line.
+		fin.get(input);
+	}
+
+	// Close the file.
+	fin.close();
+
+	//// Open the output file.
+	//fout.open("model.txt");
+	//
+	//// Write out the file header that our model format uses.
+	//fout << "Vertex Count: " << (_polygonCount * 3) << endl;
+	//fout << endl;
+	//fout << "Data:" << endl;
+	//fout << endl;
+	//
+	//// Now loop through all the faces and output the three vertices for each face.
+	//for (int i = 0; i < faceIndex; i++)
+	//{
+	//	vIndex = pPolygons[i].vIndex1 - 1;
+	//	tIndex = pPolygons[i].tIndex1 - 1;
+	//	nIndex = pPolygons[i].nIndex1 - 1;
+	//
+	//	fout << pVertices[vIndex].x << ' ' << pVertices[vIndex].y << ' ' << pVertices[vIndex].z << ' '
+	//		<< pTexUVs[tIndex].x << ' ' << pTexUVs[tIndex].y << ' '
+	//		<< pNormals[nIndex].x << ' ' << pNormals[nIndex].y << ' ' << pNormals[nIndex].z << endl;
+	//
+	//	vIndex = pPolygons[i].vIndex2 - 1;
+	//	tIndex = pPolygons[i].tIndex2 - 1;
+	//	nIndex = pPolygons[i].nIndex2 - 1;
+	//
+	//	fout << pVertices[vIndex].x << ' ' << pVertices[vIndex].y << ' ' << pVertices[vIndex].z << ' '
+	//		<< pTexUVs[tIndex].x << ' ' << pTexUVs[tIndex].y << ' '
+	//		<< pNormals[nIndex].x << ' ' << pNormals[nIndex].y << ' ' << pNormals[nIndex].z << endl;
+	//
+	//	vIndex = pPolygons[i].vIndex3 - 1;
+	//	tIndex = pPolygons[i].tIndex3 - 1;
+	//	nIndex = pPolygons[i].nIndex3 - 1;
+	//
+	//	fout << pVertices[vIndex].x << ' ' << pVertices[vIndex].y << ' ' << pVertices[vIndex].z << ' '
+	//		<< pTexUVs[tIndex].x << ' ' << pTexUVs[tIndex].y << ' '
+	//		<< pNormals[nIndex].x << ' ' << pNormals[nIndex].y << ' ' << pNormals[nIndex].z << endl;
+	//}
+	//
+	//// Close the output file.
+	//fout.close();
+
+	TVertexNormalUV* pVertexBuffer = new TVertexNormalUV[polygonCount * 3];
+	DWORD* pIndexBuffer = new DWORD[polygonCount * 3];
+	int vertexBufferIndex = 0;
+	int indexBufferIndex = 0;
+	for (int i = 0; i < faceIndex; i++)
+	{
+		// Converting to zero-index
+		vIndex = pPolygons[i].vIndex1 - 1;
+		tIndex = pPolygons[i].tIndex1 - 1;
+		nIndex = pPolygons[i].nIndex1 - 1;
+
+		pVertexBuffer[vertexBufferIndex++] = {  { pVertices[vIndex].x * _scale.x, pVertices[vIndex].y * _scale.y, pVertices[vIndex].z * _scale.z },
+												{ pNormals[nIndex].x, pNormals[nIndex].y, pNormals[nIndex].z },
+												{ pTexUVs[tIndex].x, pTexUVs[tIndex].y } };
+
+		pIndexBuffer[indexBufferIndex++] = (vertexBufferIndex - 1);
+
+		// Converting to zero-index
+		vIndex = pPolygons[i].vIndex2 - 1;
+		tIndex = pPolygons[i].tIndex2 - 1;
+		nIndex = pPolygons[i].nIndex2 - 1;
+
+		pVertexBuffer[vertexBufferIndex++] = {  { pVertices[vIndex].x * _scale.x, pVertices[vIndex].y * _scale.y, pVertices[vIndex].z * _scale.z },
+												{ pNormals[nIndex].x, pNormals[nIndex].y, pNormals[nIndex].z },
+												{ pTexUVs[tIndex].x, pTexUVs[tIndex].y } };
+
+		pIndexBuffer[indexBufferIndex++] = (vertexBufferIndex - 1);
+
+		// Converting to zero-index
+		vIndex = pPolygons[i].vIndex3 - 1;
+		tIndex = pPolygons[i].tIndex3 - 1;
+		nIndex = pPolygons[i].nIndex3 - 1;
+
+		pVertexBuffer[vertexBufferIndex++] = {  { pVertices[vIndex].x * _scale.x, pVertices[vIndex].y * _scale.y, pVertices[vIndex].z * _scale.z },
+												{ pNormals[nIndex].x, pNormals[nIndex].y, pNormals[nIndex].z },
+												{ pTexUVs[tIndex].x, pTexUVs[tIndex].y } };
+
+		pIndexBuffer[indexBufferIndex++] = (vertexBufferIndex - 1);
+	}
+
+	// Release the four data structures.
+	ReleasePtrArray(pVertices);
+	ReleasePtrArray(pTexUVs);
+	ReleasePtrArray(pNormals);
+	ReleasePtrArray(pPolygons);
+
+	_prVertexBuffer = pVertexBuffer;
+	*_pVertexCount = vertexBufferIndex;
+	_prIndexBuffer = pIndexBuffer;
+	*_pIndexCount = indexBufferIndex;
+
+	return true;
+}
+
+
+
+
+
 void DX10_Renderer::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY _primitiveType)
 {
 	m_pDX10Device->IASetPrimitiveTopology(_primitiveType);
 }
 
-bool DX10_Renderer::SetInputLayout(UINT _vertexLayoutID)
+bool DX10_Renderer::SetInputLayout(ID3D10InputLayout* _pVertexLayout)
 {
-	// Retrieve the Vertex Layout
-	std::map<UINT, ID3D10InputLayout*>::iterator iterVLayout = m_inputLayouts.find(_vertexLayoutID);
-	if (iterVLayout == m_inputLayouts.end())
-	{
-		return false;
-	}
-	ID3D10InputLayout* pVertexLayout = iterVLayout->second;
-
-	m_pDX10Device->IASetInputLayout(pVertexLayout);
+	m_pDX10Device->IASetInputLayout(_pVertexLayout);
 	return true;
 }
 
 void DX10_Renderer::SetViewMatrix(D3DXMATRIX _view)
 {
 	m_matView = _view;
-}
-
-ID3D10Buffer* DX10_Renderer::GetVertexBuffer(UINT _buffID)
-{
-	// Retrieve the Technique
-	std::map<UINT, DX10_Buffer*>::iterator iterBuff = m_buffers.find(_buffID);
-	if (iterBuff == m_buffers.end())
-	{
-		return NULL;
-	}
-	return iterBuff->second->GetVertexBuffer();
-}
-
-ID3D10EffectTechnique* DX10_Renderer::GetTechnique(UINT _techID)
-{
-	// Retrieve the Technique
-	std::map<UINT, ID3D10EffectTechnique*>::iterator iterTech = m_techniquesByID.find(_techID);
-	if (iterTech == m_techniquesByID.end())
-	{
-		return NULL;
-	}
-	return iterTech->second;
-}
-
-ID3D10ShaderResourceView* DX10_Renderer::GetTexture(UINT _texID)
-{
-	// Retrieve the Texture
-	std::map<UINT, ID3D10ShaderResourceView*>::iterator iterTex = m_texturesByID.find(_texID);
-	if (iterTex == m_texturesByID.end())
-	{
-		return NULL;
-	}
-	return iterTex->second;
 }
 
 void DX10_Renderer::CalcProjMatrix()

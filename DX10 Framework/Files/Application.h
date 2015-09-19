@@ -35,6 +35,21 @@
 #include "Utility\Utilities.h"
 #include "Utility\Timer.h"
 #include "DX10\DX10.h"
+#include "DX10\DX10\2D Objects\GUI_Button.h"
+#include "Input\InputGamePad.h"
+#include "Menus\Menu.h"
+#include "Gameplay\Gameplay.h"
+
+enum APP_STATE
+{
+	APP_STATE_TITLE,
+	APP_STATE_MAIN_MENU,
+	APP_STATE_MATCH_MENU,
+	APP_STATE_OPTION_MENU,
+	APP_STATE_INSTRUCTIONS_MENU,
+	APP_STATE_PAUSE_MENU,
+	APP_STATE_GAME
+};
 
 class Application
 {
@@ -172,6 +187,22 @@ private:
 	Application(const Application& _kr);
 	Application& operator= (const Application& _kr);
 
+	/*******************
+	-> Exits the application
+	@author:	Juran Griffith.
+	@parameter:	None.
+	@return:	void
+	********************/
+	void ExitApp();
+
+	/*******************
+	-> Updates the application based on the menu item selected
+	@author:	Juran Griffith.
+	@parameter:	None.
+	@return:	void
+	********************/
+	void UpdateState(MENU_STATE _state);
+
 private:
 	// Singleton Instance
 	static Application* s_pApp;
@@ -196,16 +227,24 @@ private:
 	DX10_Renderer* m_pDX10_Renderer;
 
 	// Camera
-	DX10_Camera_FirstPerson* m_pCamera;
+	DX10_Camera_Debug* m_pCamera;
 
-	// Objects
-	DX10_Obj_LitTex* m_pCube;
+	// Game Pad Input
+	XButtonIDs m_XButtons;	//TO DO Jc - Maybe use enums
+	XStickDirectionIDs m_XStickDirections; //TO DO Jc - Maybe use enums
+	InputGamePad* m_pGamepadPlayerOne;
 
-	// Meshes
-	DX10_Mesh_Generic* m_pCubeMesh;
-	
-	// Shaders
-	DX10_Shader_LitTex* m_pShader_LitTex;
+	// Menu Objects
+	std::vector<Menu*> m_menus;
+
+	// Game play Objects
+	Game* m_pGame;
+
+	// App State
+	APP_STATE m_state;
+	bool m_isFullscreen;
+	bool m_isSound;
+	bool m_isRumble;
 };
 
 #endif // __APPLICATION_H__

@@ -20,9 +20,9 @@ struct Light
 struct SurfaceInfo
 {
 	float3 pos;
-    	float3 normal;
-    	float4 diffuse;
-    	float4 spec;
+	float3 normal;
+    float4 diffuse;
+    float4 spec;
 };
 
 float3 ParallelLight(SurfaceInfo v, Light L, float3 eyePos)
@@ -33,7 +33,7 @@ float3 ParallelLight(SurfaceInfo v, Light L, float3 eyePos)
 	float3 lightVec = -L.dir;
 	
 	// Add the ambient term.
-	litColor += (float3)(v.diffuse * L.ambient);	
+	litColor += (float3)(v.diffuse * L.ambient);
 	
 	// Add diffuse and specular term, provided the surface is in 
 	// the line of site of the light.
@@ -43,8 +43,8 @@ float3 ParallelLight(SurfaceInfo v, Light L, float3 eyePos)
 	if( diffuseFactor > 0.0f )
 	{
 		float specPower  = max(v.spec.a, 1.0f);
-		float3 toEye     = normalize(eyePos - v.pos);
-		float3 R         = reflect(-lightVec, v.normal);
+		float3 toEye = normalize(eyePos - v.pos);
+			float3 R = reflect(-lightVec, v.normal);
 		float specFactor = pow(max(dot(R, toEye), 0.0f), specPower);
 					
 		// diffuse and specular terms
@@ -82,8 +82,8 @@ float3 PointLight(SurfaceInfo v, Light L, float3 eyePos)
 	if( diffuseFactor > 0.0f )
 	{
 		float specPower  = max(v.spec.a, 1.0f);
-		float3 toEye     = normalize(eyePos - v.pos);
-		float3 R         = reflect(-lightVec, v.normal);
+		float3 toEye = normalize(eyePos - v.pos);
+			float3 R = reflect(-lightVec, v.normal);
 		float specFactor = pow(max(dot(R, toEye), 0.0f), specPower);
 	
 		// diffuse and specular terms

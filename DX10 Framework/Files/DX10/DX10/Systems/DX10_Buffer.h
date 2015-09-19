@@ -57,7 +57,7 @@ public:
 	********************/
 	template<typename TIndices, typename TVertices>
 	bool Initialise(	typename TVertices* _pVertices, typename TIndices* _pIndices,
-						UINT _vertCount, UINT _indexCount, UINT _stride, UINT* _bufferID,
+						UINT _vertCount, UINT _indexCount, UINT _stride,
 						D3D10_USAGE _vertexUsage, D3D10_USAGE _indexUsage)
 	{
 		m_vertexCount = _vertCount;
@@ -68,7 +68,7 @@ public:
 		vertexBufferDesc.Usage = _vertexUsage;
 		vertexBufferDesc.ByteWidth = sizeof(TVertices) * m_vertexCount;
 		vertexBufferDesc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
-		vertexBufferDesc.CPUAccessFlags = 0;
+		(_vertexUsage == D3D10_USAGE_DYNAMIC) ? vertexBufferDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE : vertexBufferDesc.CPUAccessFlags = 0;
 		vertexBufferDesc.MiscFlags = 0;
 
 		D3D10_SUBRESOURCE_DATA subResourceData;
@@ -89,7 +89,7 @@ public:
 			indexBufferDesc.Usage = _indexUsage;
 			indexBufferDesc.ByteWidth = sizeof(TIndices) * m_indexCount;
 			indexBufferDesc.BindFlags = D3D10_BIND_INDEX_BUFFER;
-			indexBufferDesc.CPUAccessFlags = 0;
+			(_indexUsage == D3D10_USAGE_DYNAMIC) ? indexBufferDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE : indexBufferDesc.CPUAccessFlags = 0;
 			indexBufferDesc.MiscFlags = 0;
 			D3D10_SUBRESOURCE_DATA subResourceData;
 			subResourceData.pSysMem = _pIndices;
@@ -132,8 +132,6 @@ public:
 	{
 		return m_pVertexBuffer;
 	}
-
-
 
 private:
 	ID3D10Device* m_pDX10Device;

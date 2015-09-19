@@ -18,7 +18,7 @@
 #define __DX10_OBJ_GENERIC_H__
 
 // Local Includes
-#include "../Meshes/DX10_Mesh_Generic.h"
+#include "../Meshes/DX10_Mesh.h"
 
 class DX10_Obj_Generic
 {
@@ -219,7 +219,7 @@ public:
 
 protected:
 	DX10_Renderer* m_pRenderer;
-	DX10_Mesh_Generic* m_pMesh;
+	DX10_Mesh* m_pMesh;
 	D3DXCOLOR m_color;
 
 	float m_dt;

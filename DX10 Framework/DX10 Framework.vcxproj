@@ -43,11 +43,15 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)Libraries\VLD\include;$(ProjectDir)Libraries\Box2D;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath>$(ProjectDir)Libraries\VLD\lib\Win32;$(LibraryPath);$(DXSDK_DIR)Lib\x86;$(ProjectDir)Libraries\Box2D</LibraryPath>
+    <OutDir>..\Output\Debug\</OutDir>
+    <IntDir>..\Output\Debug\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)Libraries\VLD\include;$(ProjectDir)Libraries\Box2D;$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath>$(ProjectDir)Libraries\VLD\lib\Win32;$(LibraryPath);$(DXSDK_DIR)Lib\x86;$(ProjectDir)Libraries\Box2D</LibraryPath>
+    <OutDir>..\Output\Release\</OutDir>
+    <IntDir>..\Output\Debug\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -74,6 +78,9 @@
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>
     </Bscmake>
+    <BuildLog>
+      <Path>$(IntDir)$(MSBuildProjectName).log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -100,39 +107,56 @@
       <ShaderModel>4.0</ShaderModel>
       <ShaderType>Effect</ShaderType>
     </FxCompile>
+    <BuildLog>
+      <Path>$(IntDir)$(MSBuildProjectName).log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp" />
     <ClCompile Include="Files\DX10\DX10\2D Objects\DXSprite.cpp" />
+    <ClCompile Include="Files\DX10\DX10\2D Objects\GUI_Button.cpp" />
     <ClCompile Include="Files\DX10\DX10\3D Objects\DX10_Obj_LitTex.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_Debug.cpp" />
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.cpp" />
     <ClCompile Include="Files\DX10\DX10\DX10_Renderer.cpp" />
-    <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.cpp" />
-    <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.cpp" />
+    <ClCompile Include="Files\Gameplay\Gameplay\Arena\ArenaFloor.cpp" />
+    <ClCompile Include="Files\Gameplay\Gameplay\Arena\ArenaTile.cpp" />
+    <ClCompile Include="Files\Gameplay\Gameplay\Game.cpp" />
+    <ClCompile Include="Files\Gameplay\Gameplay\Orbs\Orb.cpp" />
+    <ClCompile Include="Files\Input\InputGamePad.cpp" />
+    <ClCompile Include="Files\Menus\Menu.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_World_2D.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Body_2D.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Collision_Listener.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Rope_2D.cpp" />
     <ClCompile Include="Files\Physics\2D Physics\Physics_Pulley_2D.cpp" />
     <ClCompile Include="Files\Utility\DirectInput.cpp" />
+    <ClCompile Include="Files\Utility\Mutex_Semaphore.cpp" />
     <ClCompile Include="Files\Utility\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Application.h" />
     <ClInclude Include="Files\DX10\DX10.h" />
     <ClInclude Include="Files\DX10\DX10\2D Objects\DXSprite.h" />
+    <ClInclude Include="Files\DX10\DX10\2D Objects\GUI_Button.h" />
     <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_Generic.h" />
     <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_LitTex.h" />
+    <ClInclude Include="Files\DX10\DX10\Cameras\DX10_Camera_Debug.h" />
     <ClInclude Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.h" />
     <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h" />
     <ClInclude Include="Files\DX10\DX10\DX10_Utilities.h" />
     <ClInclude Include="Files\DX10\DX10\DX10_Vertex.h" />
-    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.h" />
-    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Generic.h" />
-    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.h" />
+    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h" />
-    <ClInclude Include="Files\DX10\DX10\Shaders\FXTexture.h" />
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Sprite.h" />
     <ClInclude Include="Files\DX10\DX10\Systems\DX10_Buffer.h" />
+    <ClInclude Include="Files\Gameplay\Gameplay.h" />
+    <ClInclude Include="Files\Gameplay\Gameplay\Arena\ArenaFloor.h" />
+    <ClInclude Include="Files\Gameplay\Gameplay\Arena\ArenaTile.h" />
+    <ClInclude Include="Files\Gameplay\Gameplay\Game.h" />
+    <ClInclude Include="Files\Gameplay\Gameplay\Orbs\Orb.h" />
+    <ClInclude Include="Files\Input\InputGamePad.h" />
+    <ClInclude Include="Files\Menus\Menu.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_World_2D.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_Body_2D.h" />
     <ClInclude Include="Files\Physics\2D Physics\Physics_Collision_Listener.h" />
@@ -141,6 +165,7 @@
     <ClInclude Include="Files\Physics\2D Physics\Physics_Utilities.h" />
     <ClInclude Include="Files\Physics\Physics_2D.h" />
     <ClInclude Include="Files\Utility\DirectInput.h" />
+    <ClInclude Include="Files\Utility\Mutex_Semaphore.h" />
     <ClInclude Include="Files\Utility\Timer.h" />
     <ClInclude Include="Files\Utility\Utilities.h" />
     <ClInclude Include="Files\Utility\Utility_Math.h" />
@@ -148,6 +173,7 @@
   <ItemGroup>
     <FxCompile Include="Resources\FX\LightStructures.fx" />
     <FxCompile Include="Resources\FX\LitTex.fx" />
+    <FxCompile Include="Resources\FX\Sprite.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

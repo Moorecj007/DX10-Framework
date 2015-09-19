@@ -20,25 +20,25 @@ DX10_Obj_LitTex::DX10_Obj_LitTex()
 	DX10_Obj_Generic::BaseInitialise();
 
 	m_pShader = 0;
-	m_pTextureID = 0;
+	m_pTextures = 0;
 	m_texIndex = 0;
 	m_texTimer = 0;
 }
 
 DX10_Obj_LitTex::~DX10_Obj_LitTex()
 {
-	ReleasePtr(m_pTextureID);
+	ReleasePtr(m_pTextures);
 }
 
-bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<UINT>* _textureID, float _textureTime)
+bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<std::string>* _pTexNames, float _textureTime)
 {
-	if (_pRenderer == 0 || _pMesh == 0 || _pShader == 0 || _textureID == 0|| _textureTime < 0)
+	if (_pRenderer == 0 || _pMesh == 0 || _pShader == 0 || _pTexNames == 0|| _textureTime < 0)
 	{
 		// If any pointers are NULL, Object cannot be initialized
 		return false;
 	}
 
-	if (_textureTime == 0.0f && _textureID->size() != 1)
+	if (_textureTime == 0.0f && _pTexNames->size() != 1)
 	{
 		return false;
 	}
@@ -47,14 +47,23 @@ bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _
 	m_pRenderer = _pRenderer;
 	m_pMesh = _pMesh;
 	m_pShader = _pShader;
-	m_pTextureID = _textureID;
 	m_texIndex = 0;
 	m_texTimer = _textureTime;
+
+	m_pTextures = new std::vector<ID3D10ShaderResourceView*>;
+	for (UINT i = 0; i < _pTexNames->size(); i++)
+	{
+		ID3D10ShaderResourceView* pTempTex = 0;
+		VALIDATE(m_pRenderer->CreateTexture((*_pTexNames)[i], pTempTex));
+		m_pTextures->push_back(pTempTex);
+	}
+	// Delete allocated memory
+	ReleasePtr(_pTexNames);
 
 	return true;
 }
 
-bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _pMesh, DX10_Shader_LitTex* _pShader, UINT _textureID)
+bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_LitTex* _pShader, std::string _texName)
 {
 	if (_pRenderer == 0 || _pMesh == 0 || _pShader == 0)
 	{
@@ -66,8 +75,11 @@ bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh_Generic* _
 	m_pRenderer = _pRenderer;
 	m_pMesh = _pMesh;
 	m_pShader = _pShader;
-	m_pTextureID = new std::vector<UINT>;
-	m_pTextureID->push_back(_textureID);
+
+	m_pTextures = new std::vector<ID3D10ShaderResourceView*>;
+	ID3D10ShaderResourceView* pTempTex = 0;
+	VALIDATE(m_pRenderer->CreateTexture(_texName, pTempTex));
+	m_pTextures->push_back(pTempTex);
 
 	return true;
 }
@@ -77,7 +89,7 @@ void DX10_Obj_LitTex::Process(float _dt)
 	BaseProcess(_dt);
 
 	m_timeElapsed += _dt;
-	m_texIndex = (int)(m_timeElapsed * (float)m_pTextureID->size() / m_texTimer);
+	m_texIndex = (int)(m_timeElapsed * (float)m_pTextures->size() / m_texTimer);
 
 	if (m_timeElapsed >= m_texTimer)
 	{
@@ -91,7 +103,7 @@ void DX10_Obj_LitTex::Render(eTech_LitTex _tech)
 	TLitTex litTex;
 	litTex.pMesh = m_pMesh;
 	litTex.pMatWorld = &m_matWorld;
-	litTex.textureID = (*m_pTextureID)[m_texIndex];
+	litTex.pTexBase = (*m_pTextures)[m_texIndex];
 
 	m_pShader->Render(litTex, _tech);
 }

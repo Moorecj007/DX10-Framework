@@ -22,9 +22,6 @@
     <Filter Include="Header Files\DX10\Meshes">
       <UniqueIdentifier>{c69ee119-2ba5-4605-bf7b-1b15c0bcabfd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\DX10\Meshes">
-      <UniqueIdentifier>{c811de54-86d4-477a-b759-efcce14280f4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files\FX Files">
       <UniqueIdentifier>{575c96b6-4ddb-46ab-a0a6-4d6507d27ec0}</UniqueIdentifier>
     </Filter>
@@ -55,9 +52,6 @@
     <Filter Include="Header Files\DX10\Systems">
       <UniqueIdentifier>{b76c8d14-58fe-4db0-b2fd-8c8b01f6d5c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\DX10\Systems">
-      <UniqueIdentifier>{594f7cb3-9e53-44bd-aeaa-c73facc748bf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\DX10\Shaders">
       <UniqueIdentifier>{b4d3c7e4-c102-46cd-b922-cb8e7f260829}</UniqueIdentifier>
     </Filter>
@@ -72,6 +66,42 @@
     </Filter>
     <Filter Include="Source Files\DX10\3D Objects">
       <UniqueIdentifier>{bc46c547-50d5-4796-abeb-4edbc31ed386}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Gameplay">
+      <UniqueIdentifier>{b77f8965-d3b1-440f-a22b-9aaabdca36ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Gameplay\Arena">
+      <UniqueIdentifier>{29b46027-4837-474a-ad48-f40239efa027}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Gameplay\Powerups">
+      <UniqueIdentifier>{971ff1ec-f167-491a-8a32-035da513bda3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Gameplay\Orbs">
+      <UniqueIdentifier>{b8e7644f-01f6-48e7-807d-54e474c4db74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Gameplay">
+      <UniqueIdentifier>{5b66dc34-7b4a-4680-bc03-9feadc514f9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Gameplay\Arena">
+      <UniqueIdentifier>{165b8d80-60d7-46fe-b839-f62a905093ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Gameplay\Powerups">
+      <UniqueIdentifier>{4dff5600-ae76-4ee2-96dd-8590fa098051}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Gameplay\Orbs">
+      <UniqueIdentifier>{9f9bef79-380a-430c-8440-2db26ae17ac6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Inputs">
+      <UniqueIdentifier>{96584204-e35c-4f3b-81a1-8a6b41a0b4b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Inputs">
+      <UniqueIdentifier>{29bcc5ca-a10a-42d0-a94a-56f08a8142b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Menus">
+      <UniqueIdentifier>{3b06da23-8fee-4653-8115-8b765f15452c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Menus">
+      <UniqueIdentifier>{1dced5e0-6e38-411e-b515-4b7d7926cd3c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -98,15 +128,6 @@
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\DX10_Vertex.h">
       <Filter>Header Files\DX10</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.h">
-      <Filter>Header Files\DX10\Meshes</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Generic.h">
-      <Filter>Header Files\DX10\Meshes</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.h">
-      <Filter>Header Files\DX10\Meshes</Filter>
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.h">
       <Filter>Header Files\DX10\Cameras</Filter>
@@ -141,9 +162,6 @@
     <ClInclude Include="Files\DX10\DX10\Systems\DX10_Buffer.h">
       <Filter>Header Files\DX10\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="Files\DX10\DX10\Shaders\FXTexture.h">
-      <Filter>Header Files\DX10\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_Generic.h">
       <Filter>Header Files\DX10\3D Objects</Filter>
     </ClInclude>
@@ -152,6 +170,42 @@
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\2D Objects\DXSprite.h">
       <Filter>Header Files\DX10\2D Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\2D Objects\GUI_Button.h">
+      <Filter>Header Files\DX10\2D Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Gameplay\Gameplay\Arena\ArenaFloor.h">
+      <Filter>Header Files\Gameplay\Arena</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Gameplay\Gameplay\Arena\ArenaTile.h">
+      <Filter>Header Files\Gameplay\Arena</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Gameplay\Gameplay\Game.h">
+      <Filter>Header Files\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Gameplay\Gameplay.h">
+      <Filter>Header Files\Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Sprite.h">
+      <Filter>Header Files\DX10\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Input\InputGamePad.h">
+      <Filter>Header Files\Inputs</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Cameras\DX10_Camera_Debug.h">
+      <Filter>Header Files\DX10\Cameras</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Menus\Menu.h">
+      <Filter>Header Files\Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Utility\Mutex_Semaphore.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Gameplay\Gameplay\Orbs\Orb.h">
+      <Filter>Header Files\Gameplay\Orbs</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh.h">
+      <Filter>Header Files\DX10\Meshes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -163,12 +217,6 @@
     </ClCompile>
     <ClCompile Include="Files\Utility\Timer.cpp">
       <Filter>Source Files\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Finite_Plane.cpp">
-      <Filter>Source Files\DX10\Meshes</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\DX10\DX10\Meshes\DX10_Mesh_Rect_Prism.cpp">
-      <Filter>Source Files\DX10\Meshes</Filter>
     </ClCompile>
     <ClCompile Include="Files\DX10\DX10\DX10_Renderer.cpp">
       <Filter>Source Files\DX10</Filter>
@@ -197,12 +245,42 @@
     <ClCompile Include="Files\DX10\DX10\2D Objects\DXSprite.cpp">
       <Filter>Source Files\DX10\2D Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Files\DX10\DX10\2D Objects\GUI_Button.cpp">
+      <Filter>Source Files\DX10\2D Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Gameplay\Gameplay\Game.cpp">
+      <Filter>Source Files\Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Gameplay\Gameplay\Arena\ArenaTile.cpp">
+      <Filter>Source Files\Gameplay\Arena</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Gameplay\Gameplay\Arena\ArenaFloor.cpp">
+      <Filter>Source Files\Gameplay\Arena</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Input\InputGamePad.cpp">
+      <Filter>Source Files\Inputs</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_Debug.cpp">
+      <Filter>Source Files\DX10\Cameras</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Menus\Menu.cpp">
+      <Filter>Source Files\Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Utility\Mutex_Semaphore.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Gameplay\Gameplay\Orbs\Orb.cpp">
+      <Filter>Source Files\Gameplay\Orbs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\FX\LightStructures.fx">
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
     <FxCompile Include="Resources\FX\LitTex.fx">
+      <Filter>Resource Files\FX Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\FX\Sprite.fx">
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
   </ItemGroup>
