@@ -67,30 +67,6 @@
     <Filter Include="Source Files\DX10\3D Objects">
       <UniqueIdentifier>{bc46c547-50d5-4796-abeb-4edbc31ed386}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Gameplay">
-      <UniqueIdentifier>{b77f8965-d3b1-440f-a22b-9aaabdca36ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Gameplay\Arena">
-      <UniqueIdentifier>{29b46027-4837-474a-ad48-f40239efa027}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Gameplay\Powerups">
-      <UniqueIdentifier>{971ff1ec-f167-491a-8a32-035da513bda3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Gameplay\Orbs">
-      <UniqueIdentifier>{b8e7644f-01f6-48e7-807d-54e474c4db74}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Gameplay">
-      <UniqueIdentifier>{5b66dc34-7b4a-4680-bc03-9feadc514f9d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Gameplay\Arena">
-      <UniqueIdentifier>{165b8d80-60d7-46fe-b839-f62a905093ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Gameplay\Powerups">
-      <UniqueIdentifier>{4dff5600-ae76-4ee2-96dd-8590fa098051}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Gameplay\Orbs">
-      <UniqueIdentifier>{9f9bef79-380a-430c-8440-2db26ae17ac6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Inputs">
       <UniqueIdentifier>{96584204-e35c-4f3b-81a1-8a6b41a0b4b9}</UniqueIdentifier>
     </Filter>
@@ -174,18 +150,6 @@
     <ClInclude Include="Files\DX10\DX10\2D Objects\GUI_Button.h">
       <Filter>Header Files\DX10\2D Objects</Filter>
     </ClInclude>
-    <ClInclude Include="Files\Gameplay\Gameplay\Arena\ArenaFloor.h">
-      <Filter>Header Files\Gameplay\Arena</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Gameplay\Gameplay\Arena\ArenaTile.h">
-      <Filter>Header Files\Gameplay\Arena</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Gameplay\Gameplay\Game.h">
-      <Filter>Header Files\Gameplay</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Gameplay\Gameplay.h">
-      <Filter>Header Files\Gameplay</Filter>
-    </ClInclude>
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Sprite.h">
       <Filter>Header Files\DX10\Shaders</Filter>
     </ClInclude>
@@ -200,9 +164,6 @@
     </ClInclude>
     <ClInclude Include="Files\Utility\Mutex_Semaphore.h">
       <Filter>Header Files\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Gameplay\Gameplay\Orbs\Orb.h">
-      <Filter>Header Files\Gameplay\Orbs</Filter>
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh.h">
       <Filter>Header Files\DX10\Meshes</Filter>
@@ -248,15 +209,6 @@
     <ClCompile Include="Files\DX10\DX10\2D Objects\GUI_Button.cpp">
       <Filter>Source Files\DX10\2D Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Files\Gameplay\Gameplay\Game.cpp">
-      <Filter>Source Files\Gameplay</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Gameplay\Gameplay\Arena\ArenaTile.cpp">
-      <Filter>Source Files\Gameplay\Arena</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Gameplay\Gameplay\Arena\ArenaFloor.cpp">
-      <Filter>Source Files\Gameplay\Arena</Filter>
-    </ClCompile>
     <ClCompile Include="Files\Input\InputGamePad.cpp">
       <Filter>Source Files\Inputs</Filter>
     </ClCompile>
@@ -268,9 +220,6 @@
     </ClCompile>
     <ClCompile Include="Files\Utility\Mutex_Semaphore.cpp">
       <Filter>Source Files\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Gameplay\Gameplay\Orbs\Orb.cpp">
-      <Filter>Source Files\Gameplay\Orbs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

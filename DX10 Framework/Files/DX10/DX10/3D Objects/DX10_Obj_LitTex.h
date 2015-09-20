@@ -48,10 +48,10 @@ public:
 	* @parameter: _pMesh: Mesh for this Object
 	* @parameter: _pShader: The Shader for this Object
 	* @parameter: _textureID: The ID vector for the Textures for this Object
-	* @parameter: _textureTime: Time in seconds to run through all animation frames
+	* @parameter: _animationSpeed: Time in seconds to run through all animation frames
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<std::string>* _pTexNames, float _textureTime = 0.0f);
+	bool Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<std::string>* _pTexNames, float _animationSpeed = 1.0f);
 	
 	/***********************
 	* Initialise: Initialise the Lit Tex Object for use
@@ -79,11 +79,23 @@ public:
 	********************/
 	virtual void Render(eTech_LitTex _tech = TECH_LITTEX_STANDARD);
 
+	// TO DO
+	virtual void SetScrollSpeed(float _scrollSpeed) { m_scrolling = true;  m_scrollSpeed = _scrollSpeed; };
+
 protected:
 	DX10_Shader_LitTex* m_pShader;
 	std::vector<ID3D10ShaderResourceView*>* m_pTextures;
+
+	// Animating texture
+	bool m_animation;
 	UINT m_texIndex;
-	float m_timeElapsed;
-	float m_texTimer;
+	float m_animationTimer;
+	float m_animationSpeed;
+
+	// Scrolling Texture
+	bool m_scrolling;
+	float m_scrollSpeed;
+	float m_scrollTimer;
+	D3DXMATRIX m_matTexTranslation;
 };
 #endif	// __DX10_OBJ_LITTEX_H__

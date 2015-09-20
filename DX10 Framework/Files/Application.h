@@ -38,7 +38,6 @@
 #include "DX10\DX10\2D Objects\GUI_Button.h"
 #include "Input\InputGamePad.h"
 #include "Menus\Menu.h"
-#include "Gameplay\Gameplay.h"
 
 enum APP_STATE
 {
@@ -229,22 +228,16 @@ private:
 	// Camera
 	DX10_Camera_Debug* m_pCamera;
 
-	// Game Pad Input
-	XButtonIDs m_XButtons;	//TO DO Jc - Maybe use enums
-	XStickDirectionIDs m_XStickDirections; //TO DO Jc - Maybe use enums
-	InputGamePad* m_pGamepadPlayerOne;
+	// Meshes
+	DX10_Mesh* m_pMeshTerrain;
+	DX10_Mesh* m_pMeshWaterPlane;
 
-	// Menu Objects
-	std::vector<Menu*> m_menus;
+	// Shaders
+	DX10_Shader_LitTex* m_pShader_LitTex;
 
-	// Game play Objects
-	Game* m_pGame;
-
-	// App State
-	APP_STATE m_state;
-	bool m_isFullscreen;
-	bool m_isSound;
-	bool m_isRumble;
+	// Objects
+	DX10_Obj_LitTex* m_pTerrain;
+	DX10_Obj_LitTex* m_pWater;
 };
 
 #endif // __APPLICATION_H__
