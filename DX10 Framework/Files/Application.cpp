@@ -26,10 +26,13 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdL
 	// Seed the random based on the time
 	srand((UINT)time(NULL));
 
-	if (AllocConsole())
-	{
-		freopen_s(&g_file, "conout$", "w", stdout);
-	}
+	#ifdef _DEBUG
+		if (AllocConsole())
+		{
+			freopen_s(&g_file, "conout$", "w", stdout);
+			SetConsoleTitleA("Debug Console");
+		}
+	#endif // _DEBUG
 
 	// Set the client width and height
 	int clientWidth = 1000;
@@ -176,6 +179,7 @@ Application* Application::GetInstance()
 
 bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hInstance)
 {
+
 	// Save the client window sizes
 	m_clientWidth = _clientWidth;
 	m_clientHeight = _clientHeight;
@@ -207,26 +211,33 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	// Initialise the Objects
 	m_pCamera = new DX10_Camera_Debug();
 	VALIDATE(m_pCamera->Initialise(m_pDX10_Renderer));
-	m_pCamera->SetPostionVec({ 0, 0, -50.0f });
+	m_pCamera->SetPostionVec({ 0, 20, -50.0f });
 	m_pCamera->SetTargetVec({ 0, 0, 0 });
 	m_pCamera->SetUpVec({ 0, 1, 0 });
 
-	m_pMeshTerrain = new DX10_Mesh();
-	VALIDATE(m_pMeshTerrain->Initialise(m_pDX10_Renderer, MT_BUDGETTERRAIN, { 1, 1, 1 }));
-
-	//m_pMeshWaterPlane = new DX10_Mesh();
-	//VALIDATE(m_pMeshWaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 21, 0, 21 }));
-
+	// Create the Shaders
 	m_pShader_LitTex = new DX10_Shader_LitTex();
 	VALIDATE(m_pShader_LitTex->Initialise(m_pDX10_Renderer));
 
-	m_pTerrain = new DX10_Obj_LitTex;
-	VALIDATE(m_pTerrain->Initialise(m_pDX10_Renderer, m_pMeshTerrain, m_pShader_LitTex, "BudgetTerrain.png"));
+	m_pShader_Water = new DX10_Shader_Water();
+	VALIDATE(m_pShader_Water->Initialise(m_pDX10_Renderer));
 
-	//m_pWater = new DX10_Obj_LitTex();
-	//VALIDATE(m_pWater->Initialise(m_pDX10_Renderer, m_pMeshWaterPlane, m_pShader_LitTex, "WaterTile.png"));
-	//m_pWater->SetScrollSpeed(4.0f);
-	//m_pWater->SetPosition({ 0, 0.9f, 0 });
+	// Create the Meshes
+	m_pMesh_Terrain = new DX10_Mesh();
+	VALIDATE(m_pMesh_Terrain->Initialise(m_pDX10_Renderer, MT_BUDGETTERRAIN, { 10, 10, 10 }));
+
+	m_pMesh_WaterPlane = new DX10_Mesh();
+	VALIDATE(m_pMesh_WaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 80, 1, 80 }));
+
+	// Create the Objects
+	m_pObj_Terrain = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "TerrainTexture.png"));
+
+	m_pObj_Water = new DX10_Obj_Water();
+	VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterTile.png"));
+	m_pObj_Water->SetPosition({ 0, -3, 0 });
+	m_pObj_Water->SetScroll(10, { 0, 1 });
+	m_pObj_Water->SetTransparency(0.5f);
 
 	return true;
 }
@@ -250,15 +261,19 @@ void Application::ShutDown()
 	// Delete and free the memory from the Renderer
 	if (m_pDX10_Renderer != 0)
 	{ 
-		// DX10 pointers to release
+		// Release the Cameras
 		ReleasePtr(m_pCamera);
-
+		// Release the Shaders
 		ReleasePtr(m_pShader_LitTex);
-		ReleasePtr(m_pMeshTerrain);
-		//ReleasePtr(m_pMeshWaterPlane);
-		ReleasePtr(m_pTerrain);
-		//ReleasePtr(m_pWater);
-			
+		ReleasePtr(m_pShader_Water);
+		// Release the Meshes
+		ReleasePtr(m_pMesh_Terrain);
+		ReleasePtr(m_pMesh_WaterPlane);
+		// Release the Objects
+		ReleasePtr(m_pObj_Terrain);
+		ReleasePtr(m_pObj_Water);
+		
+
 		// Release the renderers resources
 		m_pDX10_Renderer->ShutDown();
 		ReleasePtr(m_pDX10_Renderer);
@@ -284,7 +299,6 @@ void Application::ExecuteOneFrame()
 		}
 
 		Render();
-
 		m_deltaTick = 0;
 		m_fps++;
 	}	
@@ -292,7 +306,6 @@ void Application::ExecuteOneFrame()
 	// Reset FPS counters
 	if (m_fpsTimer >= 1.0f)
 	{
-		//printf("%d \n", m_fps);
 		m_fpsTimer -= 1.0f;
 		m_fps = 0;
 	}
@@ -304,13 +317,13 @@ bool Application::Process(float _dt)
 
 	// Processes to run when using DX10 Renderer
 	if (m_pDX10_Renderer != 0)
-	{
+	{		
 		m_pCamera->Process();
 
 		ProcessShaders();
 
-		m_pTerrain->Process(_dt);
-		//m_pWater->Process(_dt);
+		m_pObj_Terrain->Process(_dt);
+		m_pObj_Water->Process(_dt);
 	}
 
 	return true;
@@ -319,6 +332,7 @@ bool Application::Process(float _dt)
 void Application::ProcessShaders()
 {
 	m_pShader_LitTex->SetUpPerFrame();
+	m_pShader_Water->SetUpPerFrame();
 }
 
 void Application::Render()
@@ -329,8 +343,8 @@ void Application::Render()
 		// Get the Renderer Ready to receive new data
 		m_pDX10_Renderer->StartRender();
 
-		m_pTerrain->Render();
-		//m_pWater->Render(TECH_LITTEX_ANIMWATER);
+		m_pObj_Terrain->Render();
+		m_pObj_Water->Render();
 
 		// Tell the Renderer the data input is over and present the outcome
 		m_pDX10_Renderer->EndRender();	

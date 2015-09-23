@@ -116,6 +116,7 @@
     <ClCompile Include="Files\DX10\DX10\2D Objects\DXSprite.cpp" />
     <ClCompile Include="Files\DX10\DX10\2D Objects\GUI_Button.cpp" />
     <ClCompile Include="Files\DX10\DX10\3D Objects\DX10_Obj_LitTex.cpp" />
+    <ClCompile Include="Files\DX10\DX10\3D Objects\DX10_Obj_Water.cpp" />
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_Debug.cpp" />
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.cpp" />
     <ClCompile Include="Files\DX10\DX10\DX10_Renderer.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="Files\DX10\DX10\2D Objects\GUI_Button.h" />
     <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_Generic.h" />
     <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_LitTex.h" />
+    <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_Water.h" />
     <ClInclude Include="Files\DX10\DX10\Cameras\DX10_Camera_Debug.h" />
     <ClInclude Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.h" />
     <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h" />
@@ -145,6 +147,7 @@
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Sprite.h" />
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Water.h" />
     <ClInclude Include="Files\DX10\DX10\Systems\DX10_Buffer.h" />
     <ClInclude Include="Files\Input\InputGamePad.h" />
     <ClInclude Include="Files\Menus\Menu.h" />
@@ -165,6 +168,7 @@
     <FxCompile Include="Resources\FX\LightStructures.fx" />
     <FxCompile Include="Resources\FX\LitTex.fx" />
     <FxCompile Include="Resources\FX\Sprite.fx" />
+    <FxCompile Include="Resources\FX\Water.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

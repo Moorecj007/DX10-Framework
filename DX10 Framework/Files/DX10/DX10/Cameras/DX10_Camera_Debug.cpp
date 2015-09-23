@@ -89,6 +89,7 @@ void DX10_Camera_Debug::Process()
 		
 	//Get the render to calculate the view matrix and set the view port
 	m_pRenderer->SetViewMatrix(m_matView);
+	m_pRenderer->SetEyePosition(pos);
 }
 
 void DX10_Camera_Debug::Pitch(float _fDeg)

@@ -168,6 +168,12 @@
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh.h">
       <Filter>Header Files\DX10\Meshes</Filter>
     </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Water.h">
+      <Filter>Header Files\DX10\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_Water.h">
+      <Filter>Header Files\DX10\3D Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
@@ -221,6 +227,9 @@
     <ClCompile Include="Files\Utility\Mutex_Semaphore.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Files\DX10\DX10\3D Objects\DX10_Obj_Water.cpp">
+      <Filter>Source Files\DX10\3D Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\FX\LightStructures.fx">
@@ -230,6 +239,9 @@
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
     <FxCompile Include="Resources\FX\Sprite.fx">
+      <Filter>Resource Files\FX Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\FX\Water.fx">
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
   </ItemGroup>

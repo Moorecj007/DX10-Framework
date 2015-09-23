@@ -35,6 +35,7 @@
 // 3D Objects
 #include "DX10\3D Objects\DX10_Obj_Generic.h"
 #include "DX10\3D Objects\DX10_Obj_LitTex.h"
+#include "DX10\3D Objects\DX10_Obj_Water.h"
 
 // 2D Objects
 #include "DX10\2D Objects\DXSprite.h"
@@ -48,5 +49,7 @@
 
 // Shaders
 #include "DX10\Shaders\DX10_Shader_LitTex.h"
+#include "DX10\Shaders\DX10_Shader_Sprite.h"
+#include "DX10\Shaders\DX10_Shader_Water.h"
 
 #endif	// __DX10_H__

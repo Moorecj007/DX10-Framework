@@ -315,8 +315,6 @@ public:
 	********************/
 	Light* GetActiveLight() { return &m_activeLight; };
 
-	
-
 private:
 	// Window Variables
 	HWND m_hWnd;

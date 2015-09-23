@@ -48,13 +48,22 @@ public:
 		m_rotPerSecond_Yaw = 0;
 		m_rotPerSecond_Roll = 0;
 
-		// Set IDs to zero (Invalid ID)
-		m_techniqueID = 0;
-		m_fxID = 0;
-		m_vertexLayoutID = 0;
-
 		// Set all pointers to NULL
 		m_pRenderer = 0;
+		m_pTextures = 0;
+
+		// Animation variables
+		m_animating = false;
+		m_texIndex = 0;
+		m_animationSpeed = 0;
+		m_animationTimer = 0;
+
+		// Scrolling Variables
+		m_scrolling = false;
+		m_scrollSpeed = 0;
+		m_scrollTimer = 0;
+		m_scrollDir = { 0, 0 };
+		D3DXMatrixTranslation(&m_matTexTranslation, 0, 0, 0);
 	}
 	
 	/***********************
@@ -72,6 +81,30 @@ public:
 
 		// Calculate the new world matrix
 		CalcWorldMatrix();
+
+		if (m_animating == true)
+		{
+			m_animationTimer += _dt;
+			m_texIndex = (int)(m_animationTimer * (float)m_pTextures->size() / m_animationSpeed);
+
+			if (m_animationTimer >= m_animationSpeed)
+			{
+				m_animationTimer -= m_animationSpeed;
+				m_texIndex = 0;
+			}
+		}
+
+		if (m_scrolling == true)
+		{
+			m_scrollTimer += _dt;
+			v2float scrollTranslation = m_scrollDir * (m_scrollTimer / m_scrollSpeed);
+			D3DXMatrixTranslation(&m_matTexTranslation, scrollTranslation.x, scrollTranslation.y, 0);
+
+			if (m_scrollTimer >= m_scrollSpeed)
+			{
+				m_scrollTimer -= m_scrollSpeed;
+			}
+		}
 	}
 	
 	/***********************
@@ -216,6 +249,19 @@ public:
 	********************/
 	void SetRotPerSecondRoll(float _rotZ) { m_rotation_Roll = _rotZ; };
 	
+	/***********************
+	* SetScroll: Set the Object to be a scrolling object with scroll speed and direction
+	* @author: Callan Moore
+	* @parameter: _scrollSpeed: The speed to do a full scroll cycle in seconds
+	* @parameter: _scrollDir: The direction to scroll in
+	* @return: void
+	********************/
+	virtual void SetScroll(float _scrollSpeed, v2float _scrollDir)
+	{	
+		m_scrolling = true;
+		m_scrollSpeed = _scrollSpeed;
+		m_scrollDir = _scrollDir.Normalise();
+	}
 
 protected:
 	DX10_Renderer* m_pRenderer;
@@ -231,12 +277,23 @@ protected:
 	float m_rotPerSecond_Pitch;
 	float m_rotPerSecond_Yaw;
 	float m_rotPerSecond_Roll;
-	
-	UINT m_fxID;
-	UINT m_techniqueID;
-	UINT m_vertexLayoutID;
 
 	D3DXMATRIX m_matWorld;
+
+	std::vector<ID3D10ShaderResourceView*>* m_pTextures;
+
+	// Animating
+	bool m_animating;
+	UINT m_texIndex;
+	float m_animationTimer;
+	float m_animationSpeed;
+
+	// Scrolling
+	bool m_scrolling;
+	float m_scrollTimer;
+	float m_scrollSpeed;
+	v2float m_scrollDir;
+	D3DXMATRIX m_matTexTranslation;
 };
 
 #endif	// __DX10_OBJ_GENERIC_H__

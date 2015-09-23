@@ -14,8 +14,8 @@
 
 // Inclusion Guards
 #pragma once
-#ifndef __DX10_SHADER_LITTEX_H__
-#define __DX10_SHADER_LITTEX_H__
+#ifndef __DX10_SHADER_WATER_H__
+#define __DX10_SHADER_WATER_H__
 
 // Local Includes
 #include "../../../Utility/Utilities.h"
@@ -23,42 +23,40 @@
 #include "../DX10_Renderer.h"
 
 /***********************
-* TLitTex: Shader Variables for the LitTex FX
+* TWater: Shader Variables for the Water FX
 * @author: Callan Moore
 ********************/
-struct TLitTex
+struct TWater
 {
 	DX10_Mesh* pMesh;
 	D3DXMATRIX* pMatWorld;
 	ID3D10ShaderResourceView* pTexBase;
-	ID3D10ShaderResourceView* pTex2;
-	float reduceAlpha = 0.0f;
+	D3DXMATRIX* pMatTexTranslation;
+	float transparency = 0.0f;
 };
 
-enum eTech_LitTex
+enum eTech_Water
 {
-	TECH_LITTEX_STANDARD,
-	TECH_LITTEX_FADE,
-	TECH_LITTEX_BLENDTEX2
+	TECH_WATER_STANDARD
 };
 
-class DX10_Shader_LitTex
+class DX10_Shader_Water
 {
 public:
 
 	/***********************
-	* DX10_Shader_LitTex: Default Constructor for Lit Texture Shader class
+	* DX10_Shader_Water: Default Constructor for Water Shader class
 	* @author: Callan Moore
 	********************/
-	DX10_Shader_LitTex()
+	DX10_Shader_Water()
 	{
 	}
 
 	/***********************
-	* ~DX10_Shader_LitTex: Default Destructor for Lit Texture Shader class
+	* ~DX10_Shader_Water: Default Destructor for Water Shader class
 	* @author: Callan Moore
 	********************/
-	~DX10_Shader_LitTex()
+	~DX10_Shader_Water()
 	{
 	}
 
@@ -97,11 +95,11 @@ public:
 	/***********************
 	* Render: Ready the shader technique with object specific details and setting the objects mesh to render
 	* @author: Callan Moore
-	* @parameter: _litTex: Structure containing all details for a litTex object
+	* @parameter: _litTex: Structure containing all details for a object using the Water Shader
 	* @parameter: _eTech: Technique Identifier to determine which technique to use
 	* @return: void
 	********************/
-	void Render(TLitTex _litTex, eTech_LitTex _eTech)
+	void Render(TWater _water, eTech_Water _eTech)
 	{
 		// Reset draw states in case they're different
 		m_pDX10_Renderer->RestoreDefaultDrawStates();
@@ -109,11 +107,11 @@ public:
 
 		// Set the Renderer Input layout and primitive topology to be the correct ones for this shader
 		m_pDX10_Renderer->SetInputLayout(m_pCurrentVertexLayout);
-		m_pDX10_Renderer->SetPrimitiveTopology(_litTex.pMesh->GetPrimTopology());
+		m_pDX10_Renderer->SetPrimitiveTopology(_water.pMesh->GetPrimTopology());
 
 		// Don't transform texture coordinates
-		D3DXMATRIX matTex;
-		D3DXMatrixIdentity(&matTex);
+		//D3DXMATRIX matTex;
+		//D3DXMatrixIdentity(&matTex);
 
 		if (m_pCurrentTech != NULL)
 		{
@@ -121,21 +119,17 @@ public:
 			m_pCurrentTech->GetDesc(&techDesc);
 			for (UINT p = 0; p < techDesc.Passes; ++p)
 			{
-				D3DXMATRIX matWorld = *_litTex.pMatWorld;
+				D3DXMATRIX matWorld = *_water.pMatWorld;
+				D3DXMATRIX matTex = *_water.pMatTexTranslation;
 
 				m_pMatWorld->SetMatrix((float*)&matWorld);
 				m_pMatTex->SetMatrix((float*)&matTex);
-				m_pMapDiffuse->SetResource(_litTex.pTexBase);
+				m_pMapDiffuse->SetResource(_water.pTexBase);
 				m_pMapSpecular->SetResource(m_pSpecularTex);
-				m_pReduceAlpha->SetRawValue(&_litTex.reduceAlpha, 0, sizeof(float));
-				
-				if (_eTech == TECH_LITTEX_BLENDTEX2)
-				{
-					m_pMapDiffuse2->SetResource(_litTex.pTex2);
-				}
+				m_pTransparency->SetFloat(_water.transparency);
 
 				m_pCurrentTech->GetPassByIndex(p)->Apply(0);
-				_litTex.pMesh->Render();			
+				_water.pMesh->Render();
 			}
 		}
 	}
@@ -149,9 +143,7 @@ private:
 	********************/
 	bool BuildFX()
 	{
-		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "StandardTech", m_pFX, m_pTech_Standard));
-		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "FadeTech", m_pFX, m_pTech_Fade));
-		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "BlendTex2Tech", m_pFX, m_pTech_BlendTex2));
+		VALIDATE(m_pDX10_Renderer->BuildFX("Water.fx", "StandardTech", m_pFX, m_pTech_Standard));
 
 		return true;
 	}
@@ -173,11 +165,10 @@ private:
 		// Per Object
 		m_pMatWorld = m_pFX->GetVariableByName("g_matWorld")->AsMatrix();
 		m_pMatTex = m_pFX->GetVariableByName("g_matTex")->AsMatrix();
-		m_pReduceAlpha = m_pFX->GetVariableByName("g_reduceAlpha")->AsScalar();
+		m_pTransparency = m_pFX->GetVariableByName("g_transparency")->AsScalar();
 
 		// Globals
 		m_pMapDiffuse = m_pFX->GetVariableByName("g_mapDiffuse")->AsShaderResource();
-		m_pMapDiffuse2 = m_pFX->GetVariableByName("g_mapDiffuse2")->AsShaderResource();
 		m_pMapSpecular = m_pFX->GetVariableByName("g_mapSpec")->AsShaderResource();
 
 		VALIDATE(m_pLight != 0);
@@ -186,9 +177,8 @@ private:
 		VALIDATE(m_pMatProj != 0);
 		VALIDATE(m_pMatWorld != 0);
 		VALIDATE(m_pMatTex != 0);
-		VALIDATE(m_pReduceAlpha != 0);
+		VALIDATE(m_pTransparency != 0);
 		VALIDATE(m_pMapDiffuse != 0);
-		VALIDATE(m_pMapDiffuse2 != 0);
 		VALIDATE(m_pMapSpecular != 0);
 
 		return true;
@@ -211,8 +201,6 @@ private:
 		UINT elementNum = sizeof(vertexDesc) / sizeof(vertexDesc[0]);
 		
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Standard, m_pVertexLayout_Standard);
-		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Fade, m_pVertexLayout_Fade);
-		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_BlendTex2, m_pVertexLayout_BlendTex2);
 	
 		return true;
 	}
@@ -223,26 +211,14 @@ private:
 	* @parameter: _tech: Enumerator to determine which set of pointers to use as current
 	* @return: void
 	********************/
-	void SetCurrentPtrs(eTech_LitTex _tech)
+	void SetCurrentPtrs(eTech_Water _tech)
 	{
 		switch (_tech)
 		{
-			case TECH_LITTEX_STANDARD:
+			case TECH_WATER_STANDARD:
 			{
 				m_pCurrentVertexLayout = m_pVertexLayout_Standard;
 				m_pCurrentTech = m_pTech_Standard;
-			}
-			break;
-			case TECH_LITTEX_FADE:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_Fade;
-				m_pCurrentTech = m_pTech_Fade;
-			}
-			break;
-			case TECH_LITTEX_BLENDTEX2:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_BlendTex2;
-				m_pCurrentTech = m_pTech_BlendTex2;
 			}
 			break;
 			default:
@@ -255,21 +231,16 @@ private:
 
 private:
 
+	DX10_Renderer*						m_pDX10_Renderer;
+
 	ID3D10Effect* m_pFX;
 	ID3D10ShaderResourceView* m_pSpecularTex;
 
 	ID3D10InputLayout* m_pCurrentVertexLayout;
 	ID3D10InputLayout* m_pVertexLayout_Standard;
-	ID3D10InputLayout* m_pVertexLayout_Fade;
-	ID3D10InputLayout* m_pVertexLayout_BlendTex2;
 
 	ID3D10EffectTechnique* m_pCurrentTech;
 	ID3D10EffectTechnique* m_pTech_Standard;
-	ID3D10EffectTechnique* m_pTech_AnimWater;
-	ID3D10EffectTechnique* m_pTech_Fade;
-	ID3D10EffectTechnique* m_pTech_BlendTex2;
-
-	DX10_Renderer*						m_pDX10_Renderer;
 
 	ID3D10EffectVariable*				m_pLight;
 	ID3D10EffectVariable*				m_pEyePos;
@@ -278,11 +249,11 @@ private:
 
 	ID3D10EffectMatrixVariable*			m_pMatWorld;
 	ID3D10EffectMatrixVariable*			m_pMatTex;
-	ID3D10EffectVariable*				m_pReduceAlpha;
 
 	ID3D10EffectShaderResourceVariable* m_pMapDiffuse;
-	ID3D10EffectShaderResourceVariable* m_pMapDiffuse2;
 	ID3D10EffectShaderResourceVariable* m_pMapSpecular;
+
+	ID3D10EffectScalarVariable*			m_pTransparency;
 };
 
-#endif	// __DX10_SHADER_LITTEX_H__
+#endif	// __DX10_SHADER_WATER_H__

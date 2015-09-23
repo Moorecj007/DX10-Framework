@@ -34,14 +34,14 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 
 	VALIDATE(InitialiseDeviceAndSwapChain());
 
-	m_clearColor = YELLOW;
+	m_clearColor = d3dxColors::Yellow;
 
 	//Initialise the ID Keys for the Maps
 	m_nextInputLayoutID = 0;
 	m_nextBufferID = 0;
 	m_nextTextureID = 0;
 
-	m_activeLight.dir = D3DXVECTOR3(0, -1.0f, -1.0f);
+	m_activeLight.dir = D3DXVECTOR3(-1.0f, -1.0f, 0);
 	m_activeLight.ambient = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);
 	m_activeLight.diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_activeLight.specular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);

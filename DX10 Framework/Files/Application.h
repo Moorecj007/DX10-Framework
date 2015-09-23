@@ -194,14 +194,6 @@ private:
 	********************/
 	void ExitApp();
 
-	/*******************
-	-> Updates the application based on the menu item selected
-	@author:	Juran Griffith.
-	@parameter:	None.
-	@return:	void
-	********************/
-	void UpdateState(MENU_STATE _state);
-
 private:
 	// Singleton Instance
 	static Application* s_pApp;
@@ -228,16 +220,17 @@ private:
 	// Camera
 	DX10_Camera_Debug* m_pCamera;
 
-	// Meshes
-	DX10_Mesh* m_pMeshTerrain;
-	DX10_Mesh* m_pMeshWaterPlane;
-
 	// Shaders
 	DX10_Shader_LitTex* m_pShader_LitTex;
+	DX10_Shader_Water* m_pShader_Water;
+
+	// Meshes
+	DX10_Mesh* m_pMesh_Terrain;
+	DX10_Mesh* m_pMesh_WaterPlane;
 
 	// Objects
-	DX10_Obj_LitTex* m_pTerrain;
-	DX10_Obj_LitTex* m_pWater;
+	DX10_Obj_LitTex* m_pObj_Terrain;
+	DX10_Obj_Water* m_pObj_Water;
 };
 
 #endif // __APPLICATION_H__

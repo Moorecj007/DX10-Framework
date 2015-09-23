@@ -6,32 +6,31 @@
 *
 * (c) 2005 - 2015 Media Design School
 *
-* File Name : DX10_Obj_LitTex.h
-* Description : 3D Lit Texture Object for DirectX 10
+* File Name : DX10_Obj_Water.h
+* Description : 3D Lit Texture Water Object for DirectX 10
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */
 
 // This Include
-#include "DX10_Obj_LitTex.h"
+#include "DX10_Obj_Water.h"
 
-DX10_Obj_LitTex::DX10_Obj_LitTex()
+DX10_Obj_Water::DX10_Obj_Water()
 {
 	DX10_Obj_Generic::BaseInitialise();
 
 	// Nullify Pointers
 	m_pShader = 0;
-	m_pTextures = 0;
-	
-	
+
+	m_transparency = 0.5f;
 }
 
-DX10_Obj_LitTex::~DX10_Obj_LitTex()
+DX10_Obj_Water::~DX10_Obj_Water()
 {
 	ReleasePtr(m_pTextures);
 }
 
-bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<std::string>* _pTexNames, float _animationSpeed)
+bool DX10_Obj_Water::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_Water* _pShader, std::vector<std::string>* _pTexNames, float _animationSpeed)
 {
 	if (_pRenderer == 0 || _pMesh == 0 || _pShader == 0 || _pTexNames == 0|| _animationSpeed <= 0)
 	{
@@ -66,7 +65,7 @@ bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, D
 	return true;
 }
 
-bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_LitTex* _pShader, std::string _texName)
+bool DX10_Obj_Water::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_Water* _pShader, std::string _texName)
 {
 	if (_pRenderer == 0 || _pMesh == 0 || _pShader == 0)
 	{
@@ -87,26 +86,19 @@ bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, D
 	return true;
 }
 
-void DX10_Obj_LitTex::Process(float _dt)
+void DX10_Obj_Water::Process(float _dt)
 {
 	BaseProcess(_dt);
-
-	m_animationTimer += _dt;
-	m_texIndex = (int)(m_animationTimer * (float)m_pTextures->size() / m_animationSpeed);
-
-	if (m_animationTimer >= m_animationSpeed)
-	{
-		m_animationTimer -= m_animationSpeed;
-		m_texIndex = 0;
-	}
 }
 
-void DX10_Obj_LitTex::Render(eTech_LitTex _tech)
+void DX10_Obj_Water::Render(eTech_Water _tech)
 {
-	TLitTex litTex;
-	litTex.pMesh = m_pMesh;
-	litTex.pMatWorld = &m_matWorld;
-	litTex.pTexBase = (*m_pTextures)[m_texIndex];
+	TWater water;
+	water.pMesh = m_pMesh;
+	water.pMatWorld = &m_matWorld;
+	water.pTexBase = (*m_pTextures)[m_texIndex];
+	water.pMatTexTranslation = &m_matTexTranslation;
+	water.transparency = m_transparency;
 
-	m_pShader->Render(litTex, _tech);
+	m_pShader->Render(water, _tech);
 }
