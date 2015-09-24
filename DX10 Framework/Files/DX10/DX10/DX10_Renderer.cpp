@@ -98,6 +98,11 @@ void DX10_Renderer::ShutDown()
 	ReleaseCOM(m_pRenderTargetView);
 	ReleaseCOM(m_pDX10SwapChain);
 	ReleaseCOM(m_pRasterizerState);
+	ReleaseCOM(m_pDepthStencilStateReflection);
+	ReleaseCOM(m_pDepthStencilStateMirror);
+	ReleaseCOM(m_pRasterizerState_Reflection);
+	ReleaseCOM(m_blendReflection);
+
 	if (m_pDX10Device != 0)
 	{
 		m_pDX10Device->ClearState();
@@ -283,11 +288,6 @@ bool DX10_Renderer::onResize()
 	// Create the state using the device.
 	VALIDATEHR(m_pDX10Device->CreateDepthStencilState(&depthDisabledStencilDesc, &m_pDepthStencilStateZDisabled));
 
-	//VALIDATEHR(m_pDX10Device->CreateDepthStencilView(m_pDepthStencilBuffer, NULL, &m_pDepthStencilView));
-	
-	// Bind the Render Target View to the output-merger stage of the pipeline
-	//m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
-	
 	// Set the View Port for the Device
 	D3D10_VIEWPORT viewPort;
 	viewPort.TopLeftX = 0;
@@ -306,6 +306,78 @@ bool DX10_Renderer::onResize()
 	// Create an orthographic projection matrix for 2D rendering.
 	D3DXMatrixOrthoLH(&m_matOrtho, static_cast<float>(m_clientWidth), static_cast<float>(m_clientHeight), 0.1f, 100.0f);
 
+	InitialiseReflectionStates();
+
+	return true;
+}
+
+bool DX10_Renderer::InitialiseReflectionStates()
+{
+	//--------------------------------------------------------------------------------------
+	// Depth Stencil for Setting reflection surface (MIRROR)
+	//--------------------------------------------------------------------------------------
+	D3D10_DEPTH_STENCIL_DESC depthStencilDesc;
+
+	// Initialize the description of the stencil state.
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D10_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D10_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D10_STENCIL_OP_REPLACE;
+	depthStencilDesc.FrontFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilPassOp = D3D10_STENCIL_OP_REPLACE;
+	depthStencilDesc.BackFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	VALIDATEHR(m_pDX10Device->CreateDepthStencilState(&depthStencilDesc, &m_pDepthStencilStateMirror));
+
+	//--------------------------------------------------------------------------------------
+	// Depth Stencil for reflection
+	//--------------------------------------------------------------------------------------
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D10_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthFunc = D3D10_COMPARISON_ALWAYS;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D10_COMPARISON_EQUAL;
+
+	VALIDATEHR(m_pDX10Device->CreateDepthStencilState(&depthStencilDesc, &m_pDepthStencilStateReflection));
+
+	// Create the blend description for the reflection blend
+	D3D10_BLEND_DESC blendDesc = { 0 };
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.BlendEnable[0] = true;
+	blendDesc.SrcBlend = D3D10_BLEND_BLEND_FACTOR;
+	blendDesc.DestBlend = D3D10_BLEND_INV_BLEND_FACTOR;
+	blendDesc.BlendOp = D3D10_BLEND_OP_ADD;
+	blendDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
+	blendDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
+	blendDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+	blendDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+	VALIDATEHR(m_pDX10Device->CreateBlendState(&blendDesc, &m_blendReflection));
+
+	// create the Rasterizer description for culling clockwise when using reflection
+	D3D10_RASTERIZER_DESC rasterizerDesc;
+	ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
+	rasterizerDesc.FillMode = D3D10_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D10_CULL_BACK;
+	rasterizerDesc.FrontCounterClockwise = true;
+
+	VALIDATEHR(m_pDX10Device->CreateRasterizerState(&rasterizerDesc, &m_pRasterizerState_Reflection));
+
 	return true;
 }
 
@@ -316,6 +388,52 @@ void DX10_Renderer::ClearScreen()
 	
 	// Present the Back Buffer with no synchronization
 	m_pDX10SwapChain->Present(0, 0);
+}
+
+void DX10_Renderer::ApplyDepthStencilState(eDepthState _depthState)
+{
+	switch (_depthState)
+	{
+		case DS_NORMAL:
+		{
+			m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateNormal, 1);
+		}
+		break;
+		case DS_ZDISABLED:
+		{
+			m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateZDisabled, 1);
+		}
+		break;
+		case DS_MIRROR:
+		{
+			m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateMirror, 1);
+		}
+		break;
+		case DS_REFLECT:
+		{
+			m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateReflection, 1);
+		}
+		break;
+		default:
+		{
+			m_pDX10Device->OMSetDepthStencilState(0, 0);
+		}
+		break;
+	}	// End Switch
+}
+
+void DX10_Renderer::ApplyReflectionStates()
+{
+	m_pDX10Device->RSSetState(m_pRasterizerState_Reflection);
+	float blendf[] = { 0.40f, 0.40f, 0.40f, 0.40f };
+	m_pDX10Device->OMSetBlendState(m_blendReflection, blendf, 0xffffffff);
+	ApplyDepthStencilState(DS_REFLECT);
+}
+
+void DX10_Renderer::FlipLightsAcrossPlane(D3DXPLANE _plane)
+{
+	D3DXMATRIX matReflect = CreateReflectionMatrix(_plane);
+	D3DXVec3TransformNormal(&m_activeLight.dir, &m_activeLight.dir, &matReflect);
 }
 
 void DX10_Renderer::ToggleFullscreen()
@@ -339,16 +457,6 @@ void DX10_Renderer::ToggleFillMode()
 	ReleaseCOM(m_pRasterizerState);
 	m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc, &m_pRasterizerState);
 	m_pDX10Device->RSSetState(m_pRasterizerState);
-}
-
-void DX10_Renderer::TurnZBufferOn()
-{
-	m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateNormal, 1);
-}
-
-void DX10_Renderer::TurnZBufferOff()
-{
-	m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateZDisabled, 1);
 }
 
 bool DX10_Renderer::BuildFX(std::string _fxFileName, std::string _techniqueName, ID3D10Effect*& _prFX, ID3D10EffectTechnique*& _prTech)
@@ -525,7 +633,8 @@ void DX10_Renderer::RestoreDefaultDrawStates()
 {
 	float blendFactors[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	m_pDX10Device->OMSetDepthStencilState(0, 0);
-	m_pDX10Device->OMSetBlendState(0, blendFactors, 0xFFFFFFFF);	
+	m_pDX10Device->OMSetBlendState(0, blendFactors, 0xFFFFFFFF);
+	m_pDX10Device->RSSetState(m_pRasterizerState); 
 }
 
 bool DX10_Renderer::ReadFileCounts(std::string _fileName, int& _rVertexCount, int& _rTexCount, int& _rNormalCount, int& _rPolygonCount)
@@ -789,10 +898,6 @@ bool DX10_Renderer::LoadMeshObj(std::string _fileName, TVertexNormalUV*& _prVert
 
 	return true;
 }
-
-
-
-
 
 void DX10_Renderer::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY _primitiveType)
 {

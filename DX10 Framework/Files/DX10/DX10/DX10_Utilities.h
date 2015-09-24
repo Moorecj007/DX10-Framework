@@ -237,5 +237,45 @@ struct Light
 	float spotPower;
 };
 
+// TO DO CAL
+enum eDepthState
+{
+	DS_DEFAULT,
+	DS_NORMAL,
+	DS_ZDISABLED,
+	DS_REFLECT,
+	DS_MIRROR
+};
+
+// TO DO CAL
+inline D3DXMATRIX CreateReflectionMatrix(D3DXPLANE _plane)
+{
+	D3DXMATRIX matReflect;
+	D3DXPLANE planeNormalized;
+	D3DXPlaneNormalize(&planeNormalized, &_plane);
+
+	matReflect[0] = -2 * planeNormalized.a * planeNormalized.a + 1;
+	matReflect[1] = -2 * planeNormalized.b * planeNormalized.a;
+	matReflect[2] = -2 * planeNormalized.c * planeNormalized.a;
+	matReflect[3] = 0;
+
+	matReflect[4] = -2 * planeNormalized.a * planeNormalized.b;
+	matReflect[5] = -2 * planeNormalized.b * planeNormalized.b + 1;
+	matReflect[6] = -2 * planeNormalized.c * planeNormalized.b;
+	matReflect[7] = 0;
+
+	matReflect[8] = -2 * planeNormalized.a * planeNormalized.c;
+	matReflect[9] = -2 * planeNormalized.b * planeNormalized.c;
+	matReflect[10] = -2 * planeNormalized.c * planeNormalized.c + 1;
+	matReflect[11] = 0;
+
+	matReflect[12] = -2 * planeNormalized.a * planeNormalized.d;
+	matReflect[13] = -2 * planeNormalized.b * planeNormalized.d;
+	matReflect[14] = -2 * planeNormalized.c * planeNormalized.d;
+	matReflect[15] = 1;
+
+	return matReflect;
+}
+
 
 #endif // __DX10_UTILITIES_H__

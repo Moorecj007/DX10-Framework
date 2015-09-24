@@ -164,7 +164,7 @@ void Menu::Draw()
 	if (m_state == MENU_STATE_DEFAULT)
 	{
 		// Turn the z buffer off
-		m_pDX10_Renderer->TurnZBufferOff();
+		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 
 		// Draw Title
 		if (m_title)
@@ -184,13 +184,13 @@ void Menu::Draw()
 		}
 
 		// Turn the z buffer on
-		m_pDX10_Renderer->TurnZBufferOn();
+		m_pDX10_Renderer->ApplyDepthStencilState(DS_NORMAL);
 	}
 }
 
 bool Menu::AddSprite(std::string _filename, UINT _imageWidth, UINT _imageHeight, UINT _sliceWidth, UINT _sliceHeight)
 {
-	//	TO IMPROVE Juran
+	//	TO DO Juran
 	//  - Dynamically find the width and height of image files (may need to check which type of image it is too)
 	//	- Check for duplicate sprites
 	m_sprites.push_back(new DXSprite());

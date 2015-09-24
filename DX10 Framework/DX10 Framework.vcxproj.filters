@@ -96,9 +96,6 @@
     <ClInclude Include="Files\Utility\Utilities.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h">
-      <Filter>Header Files\DX10</Filter>
-    </ClInclude>
     <ClInclude Include="Files\DX10\DX10\DX10_Utilities.h">
       <Filter>Header Files\DX10</Filter>
     </ClInclude>
@@ -173,6 +170,9 @@
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_Water.h">
       <Filter>Header Files\DX10\3D Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h">
+      <Filter>Header Files\Inputs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

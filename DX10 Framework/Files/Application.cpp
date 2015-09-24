@@ -229,6 +229,9 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pMesh_WaterPlane = new DX10_Mesh();
 	VALIDATE(m_pMesh_WaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 80, 1, 80 }));
 
+	m_pMesh_Cube = new DX10_Mesh();
+	VALIDATE(m_pMesh_Cube->Initialise(m_pDX10_Renderer, MT_RECTPRISM, { 10, 10, 10 }));
+
 	// Create the Objects
 	m_pObj_Terrain = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "TerrainTexture.png"));
@@ -238,6 +241,11 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pObj_Water->SetPosition({ 0, -3, 0 });
 	m_pObj_Water->SetScroll(10, { 0, 1 });
 	m_pObj_Water->SetTransparency(0.5f);
+
+	m_pObj_Cube = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Cube->Initialise(m_pDX10_Renderer, m_pMesh_Cube, m_pShader_LitTex, "pball.png"));
+	m_pObj_Cube->SetPosition({ 0, 15, 0 });
+
 
 	return true;
 }
@@ -269,9 +277,11 @@ void Application::ShutDown()
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Terrain);
 		ReleasePtr(m_pMesh_WaterPlane);
+		ReleasePtr(m_pMesh_Cube);
 		// Release the Objects
 		ReleasePtr(m_pObj_Terrain);
 		ReleasePtr(m_pObj_Water);
+		ReleasePtr(m_pObj_Cube);
 		
 
 		// Release the renderers resources
@@ -324,6 +334,7 @@ bool Application::Process(float _dt)
 
 		m_pObj_Terrain->Process(_dt);
 		m_pObj_Water->Process(_dt);
+		m_pObj_Cube->Process(_dt);
 	}
 
 	return true;
@@ -342,9 +353,20 @@ void Application::Render()
 	{
 		// Get the Renderer Ready to receive new data
 		m_pDX10_Renderer->StartRender();
+		
 
-		m_pObj_Terrain->Render();
+		m_pObj_Terrain->Render();	
+		m_pObj_Cube->Render();
+
+		m_pDX10_Renderer->ApplyDepthStencilState(DS_MIRROR);
 		m_pObj_Water->Render();
+		m_pDX10_Renderer->ApplyDepthStencilState(DS_DEFAULT);
+		
+		D3DXPLANE mirrorPlane = { 0.0f, 1.0f, 0.0f, 0.0f };
+		m_pDX10_Renderer->FlipLightsAcrossPlane(mirrorPlane);
+		m_pObj_Cube->Render(TECH_LITTEX_STANDARD, mirrorPlane, true);
+		m_pObj_Terrain->Render(TECH_LITTEX_STANDARD, mirrorPlane, true);
+		m_pDX10_Renderer->FlipLightsAcrossPlane(mirrorPlane);
 
 		// Tell the Renderer the data input is over and present the outcome
 		m_pDX10_Renderer->EndRender();	

@@ -227,10 +227,12 @@ private:
 	// Meshes
 	DX10_Mesh* m_pMesh_Terrain;
 	DX10_Mesh* m_pMesh_WaterPlane;
+	DX10_Mesh* m_pMesh_Cube;
 
 	// Objects
 	DX10_Obj_LitTex* m_pObj_Terrain;
 	DX10_Obj_Water* m_pObj_Water;
+	DX10_Obj_LitTex* m_pObj_Cube; // TO DO CAL
 };
 
 #endif // __APPLICATION_H__

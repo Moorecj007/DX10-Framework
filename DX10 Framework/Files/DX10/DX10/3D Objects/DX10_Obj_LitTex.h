@@ -75,9 +75,10 @@ public:
 	/***********************
 	* Render: Render the Lit Texture Object to the screen space
 	* @author: Callan Moore
+	TO DO CAL
 	* @return: void
 	********************/
-	virtual void Render(eTech_LitTex _tech = TECH_LITTEX_STANDARD);
+	virtual void Render(eTech_LitTex _tech = TECH_LITTEX_STANDARD, D3DXPLANE _mirrorPlane = { 0, 0, 0, 0 }, bool _reflect = false);
 
 protected:
 	DX10_Shader_LitTex* m_pShader;

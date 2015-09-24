@@ -88,7 +88,6 @@ public:
 	********************/
 	void SetUpPerFrame()
 	{
-		m_pLight->SetRawValue(m_pDX10_Renderer->GetActiveLight(), 0, sizeof(Light));
 		m_pEyePos->SetRawValue(m_pDX10_Renderer->GetEyePos(), 0, sizeof(D3DXVECTOR3));
 		m_pMatView->SetMatrix((float*)m_pDX10_Renderer->GetViewMatrix());
 		m_pMatProj->SetMatrix((float*)m_pDX10_Renderer->GetProjMatrix());
@@ -103,8 +102,6 @@ public:
 	********************/
 	void Render(TLitTex _litTex, eTech_LitTex _eTech)
 	{
-		// Reset draw states in case they're different
-		m_pDX10_Renderer->RestoreDefaultDrawStates();
 		SetCurrentPtrs(_eTech);
 
 		// Set the Renderer Input layout and primitive topology to be the correct ones for this shader
@@ -123,6 +120,7 @@ public:
 			{
 				D3DXMATRIX matWorld = *_litTex.pMatWorld;
 
+				m_pLight->SetRawValue(m_pDX10_Renderer->GetActiveLight(), 0, sizeof(Light));
 				m_pMatWorld->SetMatrix((float*)&matWorld);
 				m_pMatTex->SetMatrix((float*)&matTex);
 				m_pMapDiffuse->SetResource(_litTex.pTexBase);
@@ -138,6 +136,7 @@ public:
 				_litTex.pMesh->Render();			
 			}
 		}
+		m_pDX10_Renderer->RestoreDefaultDrawStates();
 	}
 
 private:

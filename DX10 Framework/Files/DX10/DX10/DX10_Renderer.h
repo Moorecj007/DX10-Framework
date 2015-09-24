@@ -83,12 +83,24 @@ public:
 	********************/
 	bool onResize();
 
+	// TO DO CAL
+	bool InitialiseReflectionStates();
+
 	/***********************
 	* ClearScreen: Clears the screen to clear color
 	* @author: Callan Moore
 	* @return: void
 	********************/
 	void ClearScreen();
+
+	// TO DO CAL
+	void ApplyDepthStencilState(eDepthState _depthState);
+
+	// TO DO CAL
+	void ApplyReflectionStates();
+
+	// TO DO CAL
+	void FlipLightsAcrossPlane(D3DXPLANE _plane);
 
 	/***********************
 	* ToggleFullscreen: Toggle Full screen on and off
@@ -103,22 +115,6 @@ public:
 	* @return: void
 	********************/
 	void ToggleFillMode();
-
-	/*******************
-	* TurnZBufferOn: Turns the z buffer on to render 3D objects properly
-	* @author:	Juran Griffith.
-	* @parameter:	None.
-	* @return:	void.
-	********************/
-	void TurnZBufferOn();
-
-	/*******************
-	* TurnZBufferOff: Turns the z buffer off to render 2D objects properly
-	* @author:	Juran Griffith.
-	* @parameter:	None.
-	* @return:	void.
-	********************/
-	void TurnZBufferOff();
 
 	/***********************
 	* BuildFX: Build a FX file and Technique and store on the Renderer
@@ -335,11 +331,18 @@ private:
 	ID3D10DepthStencilView* m_pDepthStencilView;
 	ID3D10DepthStencilState* m_pDepthStencilStateNormal;
 	ID3D10DepthStencilState* m_pDepthStencilStateZDisabled;
+	
 	ID3D10Texture2D* m_pDepthStencilBuffer;
 	D3D10_RASTERIZER_DESC m_rasterizerDesc;
 	ID3D10RasterizerState* m_pRasterizerState;
 	D3D10_DRIVER_TYPE m_dx10DriverType;
 	D3DXCOLOR m_clearColor;
+
+	// Reflection 
+	ID3D10DepthStencilState* m_pDepthStencilStateReflection;
+	ID3D10DepthStencilState* m_pDepthStencilStateMirror;
+	ID3D10RasterizerState* m_pRasterizerState_Reflection;
+	ID3D10BlendState* m_blendReflection;
 
 	// Map of FX files
 	std::map<std::string, ID3D10Effect*> m_fxFiles;

@@ -101,17 +101,11 @@ public:
 	********************/
 	void Render(TWater _water, eTech_Water _eTech)
 	{
-		// Reset draw states in case they're different
-		m_pDX10_Renderer->RestoreDefaultDrawStates();
 		SetCurrentPtrs(_eTech);
 
 		// Set the Renderer Input layout and primitive topology to be the correct ones for this shader
 		m_pDX10_Renderer->SetInputLayout(m_pCurrentVertexLayout);
 		m_pDX10_Renderer->SetPrimitiveTopology(_water.pMesh->GetPrimTopology());
-
-		// Don't transform texture coordinates
-		//D3DXMATRIX matTex;
-		//D3DXMatrixIdentity(&matTex);
 
 		if (m_pCurrentTech != NULL)
 		{
@@ -132,6 +126,7 @@ public:
 				_water.pMesh->Render();
 			}
 		}
+		m_pDX10_Renderer->RestoreDefaultDrawStates();
 	}
 
 private:
