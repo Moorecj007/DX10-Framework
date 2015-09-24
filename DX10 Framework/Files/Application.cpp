@@ -224,7 +224,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Meshes
 	m_pMesh_Terrain = new DX10_Mesh();
-	VALIDATE(m_pMesh_Terrain->Initialise(m_pDX10_Renderer, MT_BUDGETTERRAIN, { 10, 10, 10 }));
+	VALIDATE(m_pMesh_Terrain->Initialise(m_pDX10_Renderer, MT_TERRAIN, { 10, 10, 10 }));
 
 	m_pMesh_WaterPlane = new DX10_Mesh();
 	VALIDATE(m_pMesh_WaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 80, 1, 80 }));
