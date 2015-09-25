@@ -172,7 +172,7 @@
       <Filter>Header Files\DX10\3D Objects</Filter>
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h">
-      <Filter>Header Files\Inputs</Filter>
+      <Filter>Header Files\DX10</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

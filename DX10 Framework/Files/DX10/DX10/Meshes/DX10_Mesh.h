@@ -25,8 +25,8 @@ enum eMeshType
 	MT_FINITEPLANE,
 	MT_RECTPRISM,
 	MT_SPHERE,
-	MT_BUDGETTERRAIN,
-	MT_TERRAIN
+	MT_EPICTERRAIN,
+	MT_WHARF
 };
 
 class DX10_Mesh
@@ -113,14 +113,14 @@ public:
 				return "Resources/Meshes/Mesh_Sphere.txt";
 			}
 			break;
-			case MT_BUDGETTERRAIN:
+			case MT_EPICTERRAIN:
 			{
-				return "Resources/Meshes/Mesh_BudgetTerrain.txt";
+				return "Resources/Meshes/Mesh_EpicTerrain.txt";
 			}
 			break;
-			case MT_TERRAIN:
+			case MT_WHARF:
 			{
-				return "Resources/Meshes/Mesh_Terrain.txt";
+				return "Resources/Meshes/Mesh_Wharf.txt";
 			}
 			break;
 			default: return "";

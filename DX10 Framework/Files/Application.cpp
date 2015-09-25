@@ -224,27 +224,28 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Meshes
 	m_pMesh_Terrain = new DX10_Mesh();
-	VALIDATE(m_pMesh_Terrain->Initialise(m_pDX10_Renderer, MT_TERRAIN, { 10, 10, 10 }));
+	VALIDATE(m_pMesh_Terrain->Initialise(m_pDX10_Renderer, MT_EPICTERRAIN, { 30, 30, 30 }));
 
 	m_pMesh_WaterPlane = new DX10_Mesh();
-	VALIDATE(m_pMesh_WaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 80, 1, 80 }));
+	VALIDATE(m_pMesh_WaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 300, 1, 300 }));
 
-	m_pMesh_Cube = new DX10_Mesh();
-	VALIDATE(m_pMesh_Cube->Initialise(m_pDX10_Renderer, MT_RECTPRISM, { 10, 10, 10 }));
+	m_pMesh_Wharf = new DX10_Mesh();
+	VALIDATE(m_pMesh_Wharf->Initialise(m_pDX10_Renderer, MT_WHARF, { 3, 3, 3 }));
 
 	// Create the Objects
 	m_pObj_Terrain = new DX10_Obj_LitTex();
-	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "TerrainTexture.png"));
+	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "EpicTerrainTexture.png"));
 
 	m_pObj_Water = new DX10_Obj_Water();
 	VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterTile.png"));
-	m_pObj_Water->SetPosition({ 0, -3, 0 });
+	m_pObj_Water->SetPosition({ 0, -5, 0 });
 	m_pObj_Water->SetScroll(10, { 0, 1 });
 	m_pObj_Water->SetTransparency(0.5f);
 
-	m_pObj_Cube = new DX10_Obj_LitTex();
-	VALIDATE(m_pObj_Cube->Initialise(m_pDX10_Renderer, m_pMesh_Cube, m_pShader_LitTex, "pball.png"));
-	m_pObj_Cube->SetPosition({ 0, 15, 0 });
+	m_pObj_Wharf = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Wharf->Initialise(m_pDX10_Renderer, m_pMesh_Wharf, m_pShader_LitTex, "WharfTexture.png"));
+	m_pObj_Wharf->SetPosition({ 70, -2, -65 });
+	m_pObj_Wharf->SetRotationYaw(DegreesToRadians(90));
 
 
 	return true;
@@ -277,11 +278,11 @@ void Application::ShutDown()
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Terrain);
 		ReleasePtr(m_pMesh_WaterPlane);
-		ReleasePtr(m_pMesh_Cube);
+		ReleasePtr(m_pMesh_Wharf);
 		// Release the Objects
 		ReleasePtr(m_pObj_Terrain);
 		ReleasePtr(m_pObj_Water);
-		ReleasePtr(m_pObj_Cube);
+		ReleasePtr(m_pObj_Wharf);
 		
 
 		// Release the renderers resources
@@ -334,7 +335,7 @@ bool Application::Process(float _dt)
 
 		m_pObj_Terrain->Process(_dt);
 		m_pObj_Water->Process(_dt);
-		m_pObj_Cube->Process(_dt);
+		m_pObj_Wharf->Process(_dt);
 	}
 
 	return true;
@@ -356,7 +357,7 @@ void Application::Render()
 		
 
 		m_pObj_Terrain->Render();	
-		m_pObj_Cube->Render();
+		m_pObj_Wharf->Render();
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_MIRROR);
 		m_pObj_Water->Render();
@@ -364,8 +365,8 @@ void Application::Render()
 		
 		D3DXPLANE mirrorPlane = { 0.0f, 1.0f, 0.0f, 0.0f };
 		m_pDX10_Renderer->FlipLightsAcrossPlane(mirrorPlane);
-		m_pObj_Cube->Render(TECH_LITTEX_STANDARD, mirrorPlane, true);
-		m_pObj_Terrain->Render(TECH_LITTEX_STANDARD, mirrorPlane, true);
+		m_pObj_Wharf->Render(TECH_LITTEX_STANDARD, mirrorPlane, true);
+		//m_pObj_Terrain->Render(TECH_LITTEX_STANDARD, mirrorPlane, true);
 		m_pDX10_Renderer->FlipLightsAcrossPlane(mirrorPlane);
 
 		// Tell the Renderer the data input is over and present the outcome
