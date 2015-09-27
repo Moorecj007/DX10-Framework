@@ -9,17 +9,25 @@
 
 cbuffer cbPerFrame
 {
-	Light g_light;
+	
 	float3 g_eyePosW;
-
 	float4x4 g_matView;
 	float4x4 g_matProj;
+
+	// Can change if Reflections is used in the frame
+	Light g_light;
+
+	// Reflection 
+	float4 g_reflectionPlane;
 };
 
 cbuffer cbPerObject
 {
+	// Standard
 	float4x4 g_matWorld;
 	float4x4 g_matTex;
+
+	// Fade + BlendTex
 	float	 g_reduceAlpha;
 };
 
@@ -30,13 +38,15 @@ Texture2D g_mapSpec;
 
 bool g_specularEnabled;
 
+// Sampler
 SamplerState g_triLinearSam
 {
-	Filter = ANISOTROPIC;
+	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = WRAP;
 	AddressV = WRAP;
 };
 
+// Structure for the Vertex Shader Input
 struct VS_IN
 {
 	float3 position		: POSITION;
@@ -44,6 +54,7 @@ struct VS_IN
 	float2 texCoord		: TEXCOORD;
 };
 
+// Structure for the Vertex Shader Output and Pixel Shader Input
 struct VS_OUT
 {
 	float4 positionH    : SV_POSITION;
@@ -52,7 +63,7 @@ struct VS_OUT
     float2 texCoord     : TEXCOORD;
 };
 
-// For transparency values
+// Blend state for Transparency Values
 BlendState SrcAlphaBlendingAdd
 {
 	BlendEnable[0] = TRUE;
@@ -65,6 +76,10 @@ BlendState SrcAlphaBlendingAdd
 	RenderTargetWriteMask[0] = 0x0F;
 };
  
+//--------------------------------------------------------------
+// Standard Shading
+//--------------------------------------------------------------
+
 VS_OUT VS_Standard(VS_IN _inputVS)
 {
 	VS_OUT outputVS;
@@ -111,17 +126,6 @@ technique10 StandardTech
        	SetGeometryShader( NULL );
 		SetPixelShader(CompileShader(ps_4_0, PS_Standard()));
     }
-}
-
-technique10 AnimateWaterTech
-{
-	pass P0
-	{
-		// TO DO - Set Blend State
-		SetVertexShader(CompileShader(vs_4_0, VS_Standard()));
-		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_4_0, PS_Standard()));
-	}
 }
 
 //--------------------------------------------------------------
@@ -202,3 +206,48 @@ technique10 BlendTex2Tech
 		SetPixelShader(CompileShader(ps_4_0, PS_BlendTex2()));
 	}
 }
+
+//--------------------------------------------------------------
+// Reflection on a plane
+//--------------------------------------------------------------
+
+float4 PS_Reflection(VS_OUT _inputPS) : SV_Target
+{
+	float numerator = g_reflectionPlane.x * _inputPS.position.x + g_reflectionPlane.y * _inputPS.position.y + g_reflectionPlane.z * _inputPS.position.z + g_reflectionPlane.w;
+	float denom = sqrt(g_reflectionPlane.x * g_reflectionPlane.x + g_reflectionPlane.y * g_reflectionPlane.y + g_reflectionPlane.z * g_reflectionPlane.z);
+
+	float distance = numerator / denom;
+
+	// Get materials from texture maps.
+	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
+
+	if (distance > 0.0f)
+	{
+		clip(diffuse.a - 255);
+	}
+	
+	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
+
+	// Map [0,1] --> [0,256]
+	spec.a *= 256.0f;
+
+	// Interpolating normal can make it not be of unit length so normalize it.
+	float3 normal = normalize(_inputPS.normal);
+
+	// Compute the lit color for this pixel.
+	SurfaceInfo surface = { _inputPS.position, normal, diffuse, spec };
+	float3 litColor = ParallelLight(surface, g_light, g_eyePosW);
+
+	return float4(litColor, diffuse.a);
+}
+
+technique10 ReflectionTech
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_4_0, VS_Standard()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_4_0, PS_Reflection()));
+	}
+}
+

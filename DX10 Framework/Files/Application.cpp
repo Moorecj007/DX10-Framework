@@ -235,18 +235,17 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	// Create the Objects
 	m_pObj_Terrain = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "EpicTerrainTexture.png"));
+	m_pObj_Terrain->SetPosition({ 0, 5, 0 });
 
 	m_pObj_Water = new DX10_Obj_Water();
 	VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterTile.png"));
-	m_pObj_Water->SetPosition({ 0, -5, 0 });
 	m_pObj_Water->SetScroll(10, { 0, 1 });
 	m_pObj_Water->SetTransparency(0.5f);
 
 	m_pObj_Wharf = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Wharf->Initialise(m_pDX10_Renderer, m_pMesh_Wharf, m_pShader_LitTex, "WharfTexture.png"));
-	m_pObj_Wharf->SetPosition({ 70, -2, -65 });
+	m_pObj_Wharf->SetPosition({ 70, 3, -70 });
 	m_pObj_Wharf->SetRotationYaw(DegreesToRadians(90));
-
 
 	return true;
 }
@@ -365,8 +364,8 @@ void Application::Render()
 		
 		D3DXPLANE mirrorPlane = { 0.0f, 1.0f, 0.0f, 0.0f };
 		m_pDX10_Renderer->FlipLightsAcrossPlane(mirrorPlane);
-		m_pObj_Wharf->Render(TECH_LITTEX_STANDARD, mirrorPlane, true);
-		//m_pObj_Terrain->Render(TECH_LITTEX_STANDARD, mirrorPlane, true);
+		m_pObj_Wharf->Render(TECH_LITTEX_REFLECT, mirrorPlane);
+		m_pObj_Terrain->Render(TECH_LITTEX_REFLECT, mirrorPlane);
 		m_pDX10_Renderer->FlipLightsAcrossPlane(mirrorPlane);
 
 		// Tell the Renderer the data input is over and present the outcome

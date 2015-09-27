@@ -33,13 +33,15 @@ struct TLitTex
 	ID3D10ShaderResourceView* pTexBase;
 	ID3D10ShaderResourceView* pTex2;
 	float reduceAlpha = 0.0f;
+	D3DXPLANE reflectionPlane;
 };
 
 enum eTech_LitTex
 {
 	TECH_LITTEX_STANDARD,
 	TECH_LITTEX_FADE,
-	TECH_LITTEX_BLENDTEX2
+	TECH_LITTEX_BLENDTEX2,
+	TECH_LITTEX_REFLECT
 };
 
 class DX10_Shader_LitTex
@@ -131,6 +133,10 @@ public:
 				{
 					m_pMapDiffuse2->SetResource(_litTex.pTex2);
 				}
+				if (_eTech == TECH_LITTEX_REFLECT)
+				{
+					m_pReflectionPlane->SetRawValue((float*)&_litTex.reflectionPlane, 0, sizeof(D3DXPLANE));
+				}
 
 				m_pCurrentTech->GetPassByIndex(p)->Apply(0);
 				_litTex.pMesh->Render();			
@@ -151,6 +157,7 @@ private:
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "StandardTech", m_pFX, m_pTech_Standard));
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "FadeTech", m_pFX, m_pTech_Fade));
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "BlendTex2Tech", m_pFX, m_pTech_BlendTex2));
+		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "ReflectionTech", m_pFX, m_pTech_Reflect));
 
 		return true;
 	}
@@ -173,6 +180,7 @@ private:
 		m_pMatWorld = m_pFX->GetVariableByName("g_matWorld")->AsMatrix();
 		m_pMatTex = m_pFX->GetVariableByName("g_matTex")->AsMatrix();
 		m_pReduceAlpha = m_pFX->GetVariableByName("g_reduceAlpha")->AsScalar();
+		m_pReflectionPlane = m_pFX->GetVariableByName("g_reflectionPlane");
 
 		// Globals
 		m_pMapDiffuse = m_pFX->GetVariableByName("g_mapDiffuse")->AsShaderResource();
@@ -186,6 +194,7 @@ private:
 		VALIDATE(m_pMatWorld != 0);
 		VALIDATE(m_pMatTex != 0);
 		VALIDATE(m_pReduceAlpha != 0);
+		VALIDATE(m_pReflectionPlane != 0);
 		VALIDATE(m_pMapDiffuse != 0);
 		VALIDATE(m_pMapDiffuse2 != 0);
 		VALIDATE(m_pMapSpecular != 0);
@@ -212,6 +221,7 @@ private:
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Standard, m_pVertexLayout_Standard);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Fade, m_pVertexLayout_Fade);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_BlendTex2, m_pVertexLayout_BlendTex2);
+		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_BlendTex2, m_pVertexLayout_Reflect);
 	
 		return true;
 	}
@@ -244,6 +254,12 @@ private:
 				m_pCurrentTech = m_pTech_BlendTex2;
 			}
 			break;
+			case TECH_LITTEX_REFLECT:
+			{
+				m_pCurrentVertexLayout = m_pVertexLayout_Reflect;
+				m_pCurrentTech = m_pTech_Reflect;
+			}
+			break;
 			default:
 			{
 				m_pCurrentVertexLayout = 0;
@@ -261,12 +277,13 @@ private:
 	ID3D10InputLayout* m_pVertexLayout_Standard;
 	ID3D10InputLayout* m_pVertexLayout_Fade;
 	ID3D10InputLayout* m_pVertexLayout_BlendTex2;
+	ID3D10InputLayout* m_pVertexLayout_Reflect;
 
 	ID3D10EffectTechnique* m_pCurrentTech;
 	ID3D10EffectTechnique* m_pTech_Standard;
-	ID3D10EffectTechnique* m_pTech_AnimWater;
 	ID3D10EffectTechnique* m_pTech_Fade;
 	ID3D10EffectTechnique* m_pTech_BlendTex2;
+	ID3D10EffectTechnique* m_pTech_Reflect;
 
 	DX10_Renderer*						m_pDX10_Renderer;
 
@@ -278,6 +295,7 @@ private:
 	ID3D10EffectMatrixVariable*			m_pMatWorld;
 	ID3D10EffectMatrixVariable*			m_pMatTex;
 	ID3D10EffectVariable*				m_pReduceAlpha;
+	ID3D10EffectVariable*				m_pReflectionPlane;
 
 	ID3D10EffectShaderResourceVariable* m_pMapDiffuse;
 	ID3D10EffectShaderResourceVariable* m_pMapDiffuse2;
