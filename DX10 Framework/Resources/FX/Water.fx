@@ -20,14 +20,14 @@ cbuffer cbPerObject
 {
 	float4x4 g_matWorld;
 	float4x4 g_matTex;
-	float4x4 g_matReflection;
-	float g_reflectRefractScale;
+	float	 g_transparency;
 };
 
 // Nonnumeric values cannot be added to a cbuffer.
-Texture2D g_mapNormal;
-Texture2D g_mapReflection;
-Texture2D g_mapRefraction;
+Texture2D g_mapDiffuse;
+Texture2D g_mapSpec;
+
+bool g_specularEnabled;
 
 SamplerState g_triLinearSam
 {
@@ -38,94 +38,84 @@ SamplerState g_triLinearSam
 
 struct VS_IN
 {
-	float4 position		: POSITION;
-	float2 texCoord		: TEXCOORD0;
+	float3 position		: POSITION;
+	float3 normal		: NORMAL;
+	float2 texCoord		: TEXCOORD;
 };
 
 struct VS_OUT
 {
-	float4 position    : SV_POSITION;
-    float2 texCoord     : TEXCOORD0;
-	float4 reflectionPos     : TEXCOORD1;
-	float4 refractionPos     : TEXCOORD2;
+	float4 positionH    : SV_POSITION;
+	float3 position     : POSITION;
+	float3 normal		: NORMAL;
+    float2 texCoord     : TEXCOORD;
+};
+
+// For transparency values
+BlendState SrcAlphaBlendingAdd
+{
+	BlendEnable[0] = TRUE;
+	SrcBlend = SRC_COLOR;
+	DestBlend = INV_SRC_ALPHA;
+	BlendOp = ADD;
+	SrcBlendAlpha = ZERO;
+	DestBlendAlpha = ZERO;
+	BlendOpAlpha = ADD;
+	RenderTargetWriteMask[0] = 0x0F;
+};
+
+BlendState AlphaBlendOn
+{
+	BlendEnable[0] = TRUE;
+	SrcBlend = SRC_ALPHA;
+	DestBlend = INV_SRC_ALPHA;
 };
  
 VS_OUT VS_Standard(VS_IN _inputVS)
 {
 	VS_OUT outputVS;
-	matrix reflectProjectWorld;
-	matrix viewProjectWorld;
-
-	// Change the position vector to be 4 units for proper matrix calculations.
-	_inputVS.position.w = 1.0f;
-
-	// Calculate the position of the vertex against the world, view, and projection matrices.
-	outputVS.position = mul(_inputVS.position, g_matWorld);
-	outputVS.position = mul(outputVS.position, g_matView);
-	outputVS.position = mul(outputVS.position, g_matProj);
-
-	// Store the texture coordinates for the pixel shader.
-	outputVS.texCoord = _inputVS.texCoord; // mul(float4(_inputVS.texCoord, 0.0f, 1.0f), g_matTex).xy;
-
-	// Create the reflection projection world matrix.
-	reflectProjectWorld = mul(g_matReflection, g_matProj);
-	reflectProjectWorld = mul(g_matWorld, reflectProjectWorld);
-
-	// Calculate the input position against the reflectProjectWorld matrix.
-	outputVS.reflectionPos = mul(_inputVS.position, reflectProjectWorld);
-
-	// Create the view projection world matrix for refraction.
-	viewProjectWorld = mul(g_matView, g_matProj);
-	viewProjectWorld = mul(g_matWorld, viewProjectWorld);
-
-	// Calculate the input position against the viewProjectWorld matrix.
-	outputVS.refractionPos = mul(_inputVS.position, viewProjectWorld);
-
+	
+	// Transform to world space space.
+	outputVS.position = mul(float4(_inputVS.position, 1.0f), g_matWorld).xyz;
+	outputVS.normal = mul(float4(_inputVS.normal, 0.0f), g_matWorld).xyz;
+		
+	// Transform to homogeneous clip space.
+	outputVS.positionH = mul(float4(_inputVS.position, 1.0f), g_matWorld);
+	outputVS.positionH = mul(outputVS.positionH, g_matView);
+	outputVS.positionH = mul(outputVS.positionH, g_matProj);
+	
+	// Output vertex attributes for interpolation across triangle.
+	outputVS.texCoord = mul(float4(_inputVS.texCoord, 0.0f, 1.0f), g_matTex).xy;
+	
 	return outputVS;
 }
 
 float4 PS_Standard(VS_OUT _inputPS) : SV_Target
 {
-	float2 reflectTexCoord;
-	float2 refractTexCoord;
-	float4 normalMap;
-	float3 normal;
-	float4 reflectionColor;
-	float4 refractionColor;
-	float4 color;
+	// Get materials from texture maps.
+	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
+	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
 
-	// Calculate the projected reflection texture coordinates.
-	reflectTexCoord.x = _inputPS.reflectionPos.x / _inputPS.reflectionPos.w / 2.0f + 0.5f;
-	reflectTexCoord.y = -_inputPS.reflectionPos.y / _inputPS.reflectionPos.w / 2.0f + 0.5f;
+	diffuse.a = g_transparency;
 
-	// Calculate the projected refraction texture coordinates.
-	refractTexCoord.x = _inputPS.refractionPos.x / _inputPS.refractionPos.w / 2.0f + 0.5f;
-	refractTexCoord.y = -_inputPS.refractionPos.y / _inputPS.refractionPos.w / 2.0f + 0.5f;
+	// Map [0,1] --> [0,256]
+	spec.a *= 256.0f;
 
-	// Sample the normal from the normal map texture.
-	normalMap = g_mapNormal.Sample(g_triLinearSam, _inputPS.texCoord);
+	// Interpolating normal can make it not be of unit length so normalize it.
+	float3 normal = normalize(_inputPS.normal);
 
-	// Expand the range of the normal from (0,1) to (-1,+1).
-	normal = (normalMap.xyz * 2.0f) - 1.0f;
+	// Compute the lit color for this pixel.
+	SurfaceInfo surface = { _inputPS.position, normal, diffuse, spec };
+	float3 litColor = ParallelLight(surface, g_light, g_eyePosW);
 
-	// Re-position the texture coordinate sampling position by the normal map value to simulate the rippling wave effect.
-	reflectTexCoord = reflectTexCoord + (normal.xy * g_reflectRefractScale);
-	refractTexCoord = refractTexCoord + (normal.xy * g_reflectRefractScale);
-
-	// Sample the texture pixels from the textures using the updated texture coordinates.
-	reflectionColor = g_mapReflection.Sample(g_triLinearSam, reflectTexCoord);
-	refractionColor = g_mapRefraction.Sample(g_triLinearSam, refractTexCoord);
-
-	// Combine the reflection and refraction results for the final color.
-	color = lerp(reflectionColor, refractionColor, 0.9f);
-
-	return color;
+	return float4(litColor, diffuse.a);
 }
 
 technique10 StandardTech
 {
     pass P0
     {
+		SetBlendState(SrcAlphaBlendingAdd, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xffffffff);
 		SetVertexShader(CompileShader(vs_4_0, VS_Standard()));
        	SetGeometryShader( NULL );
 		SetPixelShader(CompileShader(ps_4_0, PS_Standard()));	

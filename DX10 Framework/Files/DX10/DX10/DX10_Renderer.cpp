@@ -378,54 +378,6 @@ bool DX10_Renderer::InitialiseReflectionStates()
 
 	VALIDATEHR(m_pDX10Device->CreateRasterizerState(&rasterizerDesc, &m_pRasterizerState_Reflection));
 
-
-	// BETTER REFLECTION INITIALISATION
-
-
-	// Initialise the Texture2D description 
-	D3D10_TEXTURE2D_DESC textureDesc;
-	ZeroMemory(&textureDesc, sizeof(textureDesc));
-
-	textureDesc.Width = m_clientWidth;
-	textureDesc.Height = m_clientHeight;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D10_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D10_BIND_RENDER_TARGET | D3D10_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-
-	// Create the Texture resources for both refraction and reflection textures
-	VALIDATEHR(m_pDX10Device->CreateTexture2D(&textureDesc, NULL, &m_refractTextureResource.texture2D));
-	VALIDATEHR(m_pDX10Device->CreateTexture2D(&textureDesc, NULL, &m_reflectTextureResource.texture2D));
-
-	// Initialise the Render Target View Description
-	D3D10_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-	ZeroMemory(&renderTargetViewDesc, sizeof(renderTargetViewDesc));
-
-	renderTargetViewDesc.Format = textureDesc.Format;
-	renderTargetViewDesc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
-	renderTargetViewDesc.Texture2D.MipSlice = 0;
-
-	// Create the Render Target Views for the refraction and reflection textures
-	VALIDATEHR(m_pDX10Device->CreateRenderTargetView(m_refractTextureResource.texture2D, &renderTargetViewDesc, &m_refractTextureResource.renderTargetView));
-	VALIDATEHR(m_pDX10Device->CreateRenderTargetView(m_reflectTextureResource.texture2D, &renderTargetViewDesc, &m_reflectTextureResource.renderTargetView));
-
-	// Initialise the Shader Resource View Description
-	D3D10_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-	ZeroMemory(&shaderResourceViewDesc, sizeof(shaderResourceViewDesc));
-
-	shaderResourceViewDesc.Format = textureDesc.Format;
-	shaderResourceViewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-
-	// Create the Shader Resource View for both the refraction and reflection textures
-	VALIDATEHR(m_pDX10Device->CreateShaderResourceView(m_refractTextureResource.texture2D, &shaderResourceViewDesc, &m_refractTextureResource.shaderResourceView));
-	VALIDATEHR(m_pDX10Device->CreateShaderResourceView(m_reflectTextureResource.texture2D, &shaderResourceViewDesc, &m_reflectTextureResource.shaderResourceView));
-
 	return true;
 }
 
@@ -473,9 +425,9 @@ void DX10_Renderer::ApplyDepthStencilState(eDepthState _depthState)
 void DX10_Renderer::ApplyReflectionStates()
 {
 	m_pDX10Device->RSSetState(m_pRasterizerState_Reflection);
-	//float blendf[] = { 0.40f, 0.40f, 0.40f, 0.40f };
-	//m_pDX10Device->OMSetBlendState(m_blendReflection, blendf, 0xffffffff);
-	//ApplyDepthStencilState(DS_REFLECT);
+	float blendf[] = { 0.40f, 0.40f, 0.40f, 0.40f };
+	m_pDX10Device->OMSetBlendState(m_blendReflection, blendf, 0xffffffff);
+	ApplyDepthStencilState(DS_REFLECT);
 }
 
 void DX10_Renderer::FlipLightsAcrossPlane(D3DXPLANE _plane)
@@ -967,48 +919,4 @@ void DX10_Renderer::CalcProjMatrix()
 {
 	float aspect = float(m_clientWidth) / m_clientHeight;
 	D3DXMatrixPerspectiveFovLH(&m_matProj, 0.25f*PI, aspect, 1.0f, 1000.0f);
-}
-
-void DX10_Renderer::ClearRenderTargetView(eRenderTarget _renderTarget)
-{
-	switch (_renderTarget)
-	{
-		case RT_REFRACT:
-		{
-			m_pDX10Device->ClearRenderTargetView(m_refractTextureResource.renderTargetView, m_clearColor);
-		}
-		break;
-		case RT_REFLECT:
-		{
-			m_pDX10Device->ClearRenderTargetView(m_reflectTextureResource.renderTargetView, m_clearColor);
-		}
-		break;
-		case RT_DEFAULT:	// Fall Through
-		default:
-		{
-			m_pDX10Device->ClearRenderTargetView(m_pRenderTargetView, m_clearColor);
-		}
-	}	// End Switch
-}
-
-void DX10_Renderer::SetRenderTargetView(eRenderTarget _renderTarget)
-{
-	switch (_renderTarget)
-	{
-	case RT_REFRACT:
-	{
-		m_pDX10Device->OMSetRenderTargets(1, &m_refractTextureResource.renderTargetView, m_pDepthStencilView);
-	}
-	break;
-	case RT_REFLECT:
-	{
-		m_pDX10Device->OMSetRenderTargets(1, &m_reflectTextureResource.renderTargetView, m_pDepthStencilView);
-	}
-	break;
-	case RT_DEFAULT:	// Fall Through
-	default:
-	{
-		m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
-	}
-	}	// End Switch
 }

@@ -75,22 +75,21 @@ public:
 	/***********************
 	* Render: Render the Water Object to the screen space
 	* @author: Callan Moore
-	TO DO CAL
 	* @return: void
 	********************/
-	virtual void Render(D3DXPLANE _mirrorPlane, eTech_Water _tech = TECH_WATER_STANDARD);
+	virtual void Render(eTech_Water _tech = TECH_WATER_STANDARD);
 
 	/***********************
-	* SetReflectRefractScale: Set the scale for reflection and refraction
+	* SetTransparency: Set the transparency value of the Water
 	* @author: Callan Moore
-	* @parameter: _reflectRefractScale: 0-1 scale value
+	* @parameter: _transparency: 0-1 transparency value
 	* @return: void
 	********************/
-	virtual void SetReflectRefractScale(float _reflectRefractScale) { m_reflectRefractScale = _reflectRefractScale; };
+	virtual void SetTransparency(float _transparency) { m_transparency = _transparency; };
 
 protected:
 	DX10_Shader_Water* m_pShader;
 
-	float m_reflectRefractScale;
+	float m_transparency;
 };
 #endif	// __DX10_OBJ_WATER_H__

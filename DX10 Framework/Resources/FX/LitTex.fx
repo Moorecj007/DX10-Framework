@@ -18,7 +18,7 @@ cbuffer cbPerFrame
 	Light g_light;
 
 	// Reflection 
-	float4 g_plane;
+	float4 g_reflectionPlane;
 };
 
 cbuffer cbPerObject
@@ -213,8 +213,8 @@ technique10 BlendTex2Tech
 
 float4 PS_Reflection(VS_OUT _inputPS) : SV_Target
 {
-	float numerator = g_plane.x * _inputPS.position.x + g_plane.y * _inputPS.position.y + g_plane.z * _inputPS.position.z + g_plane.w;
-	float denom = sqrt(g_plane.x * g_plane.x + g_plane.y * g_plane.y + g_plane.z * g_plane.z);
+	float numerator = g_reflectionPlane.x * _inputPS.position.x + g_reflectionPlane.y * _inputPS.position.y + g_reflectionPlane.z * _inputPS.position.z + g_reflectionPlane.w;
+	float denom = sqrt(g_reflectionPlane.x * g_reflectionPlane.x + g_reflectionPlane.y * g_reflectionPlane.y + g_reflectionPlane.z * g_reflectionPlane.z);
 
 	float distance = numerator / denom;
 
@@ -223,7 +223,6 @@ float4 PS_Reflection(VS_OUT _inputPS) : SV_Target
 
 	if (distance > 0.0f)
 	{
-		// Guaranteed Clip
 		clip(diffuse.a - 255);
 	}
 	
@@ -249,69 +248,6 @@ technique10 ReflectionTech
 		SetVertexShader(CompileShader(vs_4_0, VS_Standard()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_4_0, PS_Reflection()));
-	}
-}
-
-//--------------------------------------------------------------
-// Refraction
-//--------------------------------------------------------------
-
-// Structure for the Vertex Shader Output and Pixel Shader Input
-struct VS_OUT_REFRACTION
-{
-	float4 positionH    : SV_POSITION;
-	float3 position     : POSITION;
-	float3 normal		: NORMAL;
-	float2 texCoord     : TEXCOORD;
-	float  clip			: SV_ClipDistance0;
-};
-
-VS_OUT_REFRACTION VS_Refraction(VS_IN _inputVS)
-{
-	VS_OUT_REFRACTION outputVS;
-
-	// Transform to world space space.
-	outputVS.position = mul(float4(_inputVS.position, 1.0f), g_matWorld).xyz;
-	outputVS.normal = mul(float4(_inputVS.normal, 0.0f), g_matWorld).xyz;
-	outputVS.normal = normalize(outputVS.normal);
-
-	// Transform to homogeneous clip space.
-	outputVS.positionH = mul(float4(_inputVS.position, 1.0f), g_matWorld);
-	outputVS.positionH = mul(outputVS.positionH, g_matView);
-	outputVS.positionH = mul(outputVS.positionH, g_matProj);
-
-	// Output vertex attributes for interpolation across triangle.
-	outputVS.texCoord = mul(float4(_inputVS.texCoord, 0.0f, 1.0f), g_matTex).xy;
-
-	// TO DO CAL
-	outputVS.clip = dot(mul(float4(_inputVS.position, 1.0f), g_matWorld), g_plane);
-
-	return outputVS;
-}
-
-float4 PS_Refraction(VS_OUT_REFRACTION _inputPS) : SV_Target
-{
-	// Get materials from texture maps.
-	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
-	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
-
-	// Map [0,1] --> [0,256]
-	spec.a *= 256.0f;
-
-	// Compute the lit color for this pixel.
-	SurfaceInfo surface = { _inputPS.position, _inputPS.normal, diffuse, spec };
-	float3 litColor = ParallelLight(surface, g_light, g_eyePosW);
-
-	return float4(litColor, diffuse.a);
-}
-
-technique10 RefractionTech
-{
-	pass P0
-	{
-		SetVertexShader(CompileShader(vs_4_0, VS_Refraction()));
-		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_4_0, PS_Refraction()));
 	}
 }
 

@@ -99,14 +99,31 @@ void DX10_Obj_LitTex::Process(float _dt)
 	}
 }
 
-void DX10_Obj_LitTex::Render(eTech_LitTex _tech, D3DXPLANE _reflectionPlane)
+void DX10_Obj_LitTex::Render(eTech_LitTex _tech, D3DXPLANE _mirrorPlane)
 {
 	TLitTex litTex;
-
-	litTex.pMatWorld = &m_matWorld;
 	litTex.pMesh = m_pMesh;
 	litTex.pTexBase = (*m_pTextures)[m_texIndex];
-	litTex.plane = _reflectionPlane;
 
-	m_pShader->Render(litTex, _tech);
+	if (_tech == TECH_LITTEX_REFLECT)
+	{
+		D3DXMATRIX* pMatWorldTemp = new D3DXMATRIX();
+		m_pRenderer->ApplyReflectionStates();
+		D3DXMATRIX matReflection = CreateReflectionMatrix(_mirrorPlane);
+
+		*pMatWorldTemp = m_matWorld*matReflection;
+		litTex.pMatWorld = pMatWorldTemp;
+		litTex.reflectionPlane = _mirrorPlane;
+
+		m_pShader->Render(litTex, _tech);
+		ReleasePtr(pMatWorldTemp);
+	}
+	else
+	{
+		litTex.pMatWorld = &m_matWorld;
+		m_pShader->Render(litTex, _tech);
+	}
+
+	
+	
 }
