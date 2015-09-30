@@ -211,9 +211,11 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	// Initialise the Objects
 	m_pCamera = new DX10_Camera_Debug();
 	VALIDATE(m_pCamera->Initialise(m_pDX10_Renderer));
-	m_pCamera->SetPostionVec({ 0, 20, -50.0f });
+	m_pCamera->SetPostionVec({ 0, 20, -150.0f });
 	m_pCamera->SetTargetVec({ 0, 0, 0 });
 	m_pCamera->SetUpVec({ 0, 1, 0 });
+	m_pCamera->SetMoveSpeed(30);
+	m_pCamera->SetTurnSpeed(40);
 
 	// Create the Shaders
 	m_pShader_LitTex = new DX10_Shader_LitTex();
@@ -237,15 +239,27 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "EpicTerrainTexture.png"));
 	m_pObj_Terrain->SetPosition({ 0, 5, 0 });
 
-	m_pObj_Water = new DX10_Obj_Water();
-	VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterTile.png"));
-	m_pObj_Water->SetScroll(10, { 0, 1 });
-	m_pObj_Water->SetTransparency(0.5f);
-
 	m_pObj_Wharf = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Wharf->Initialise(m_pDX10_Renderer, m_pMesh_Wharf, m_pShader_LitTex, "WharfTexture.png"));
 	m_pObj_Wharf->SetPosition({ 70, 3, -70 });
 	m_pObj_Wharf->SetRotationYaw(DegreesToRadians(90));
+
+	m_budgetReflect = false;
+
+	if (m_budgetReflect == true)
+	{
+		m_pObj_Water = new DX10_Obj_Water();
+		VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterTile.png"));
+		m_pObj_Water->SetScroll(10, { 0, 1 });
+		m_pObj_Water->SetReflectRefractScale(0.5f);
+	}
+	else
+	{
+		m_pObj_Water = new DX10_Obj_Water();
+		VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterMap.png"));
+		m_pObj_Water->SetScroll(10, { 0, 1 });
+		m_pObj_Water->SetReflectRefractScale(0.01f);
+	}
 
 	return true;
 }
@@ -351,26 +365,64 @@ void Application::Render()
 	// Render calls when using the DX10 Renderer
 	if (m_pDX10_Renderer != 0)
 	{
+
+		
+
+		// Render Refraction Texture
+		RenderRefraction();
+
 		// Get the Renderer Ready to receive new data
 		m_pDX10_Renderer->StartRender();
+
+		// Render Reflection Texture
+		RenderReflection();
+
+		m_pShader_LitTex->SetUpPerFrame();
+		
 		
 
-		m_pObj_Terrain->Render();	
+		// Render the whole scene
+		m_pObj_Terrain->Render();
 		m_pObj_Wharf->Render();
-
-		m_pDX10_Renderer->ApplyDepthStencilState(DS_MIRROR);
-		m_pObj_Water->Render();
-		m_pDX10_Renderer->ApplyDepthStencilState(DS_DEFAULT);
-		
-		D3DXPLANE mirrorPlane = { 0.0f, 1.0f, 0.0f, 0.0f };
-		m_pDX10_Renderer->FlipLightsAcrossPlane(mirrorPlane);
-		m_pObj_Wharf->Render(TECH_LITTEX_REFLECT, mirrorPlane);
-		m_pObj_Terrain->Render(TECH_LITTEX_REFLECT, mirrorPlane);
-		m_pDX10_Renderer->FlipLightsAcrossPlane(mirrorPlane);
+		m_pObj_Water->Render({ 0.0f, -1.0f, 0.0f, 0.0f });
 
 		// Tell the Renderer the data input is over and present the outcome
-		m_pDX10_Renderer->EndRender();	
+		m_pDX10_Renderer->EndRender();
 	}
+}
+
+void Application::RenderRefraction()
+{
+	// Create a clipping plane based on the equation of the plane
+	D3DXPLANE clippingPlane = { 0.0f, -1.0f, 0.0f, 0.0f };
+
+	// Set the Render Target of the device to be the Refraction Texture
+	m_pDX10_Renderer->SetRenderTargetView(RT_REFRACT);
+	m_pDX10_Renderer->ClearRenderTargetView(RT_REFRACT);
+
+	// Render the Objects in the scene to be Refracted
+	m_pObj_Terrain->Render(TECH_LITTEX_REFRACT, clippingPlane);
+	m_pObj_Wharf->Render(TECH_LITTEX_REFRACT, clippingPlane);
+
+	// Set the Render Target back to the Back Buffer
+	m_pDX10_Renderer->SetRenderTargetView();
+}
+
+void Application::RenderReflection()
+{
+	// Create a Reflection plane based on the equation of the plane
+	D3DXPLANE reflectionPlane = { 0.0f, -1.0f, 0.0f, 0.0f };
+
+	// Set the Render Target of the device to be the Reflection Texture
+	m_pDX10_Renderer->SetRenderTargetView(RT_REFLECT);
+	m_pDX10_Renderer->ClearRenderTargetView(RT_REFLECT);
+
+	// Render the Objects in the scene to be Reflected
+	m_pObj_Terrain->Render(TECH_LITTEX_REFLECT, reflectionPlane);
+	m_pObj_Wharf->Render(TECH_LITTEX_REFLECT, reflectionPlane);
+
+	// Set the Render Target back to the Back Buffer
+	m_pDX10_Renderer->SetRenderTargetView();
 }
 
 bool Application::HandleInput()
@@ -395,32 +447,32 @@ bool Application::HandleInput()
 		SetKeyDown(VK_F2, false);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD4]) && !(m_pKeyDown[VK_NUMPAD6]))
+	if ((m_pKeyDown[0x41]) && !(m_pKeyDown[0x44]))
 	{
 		m_pCamera->Strafe(-1 * m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD6]) && !(m_pKeyDown[VK_NUMPAD4]))
+	if ((m_pKeyDown[0x44]) && !(m_pKeyDown[0x41]))
 	{
 		m_pCamera->Strafe(m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD8]) && !(m_pKeyDown[VK_NUMPAD2]))
+	if ((m_pKeyDown[0x57]) && !(m_pKeyDown[0x53]))
 	{
 		m_pCamera->Move(m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD2]) && !(m_pKeyDown[VK_NUMPAD8]))
+	if ((m_pKeyDown[0x53]) && !(m_pKeyDown[0x57]))
 	{
 		m_pCamera->Move(-1 * m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD1]) && !(m_pKeyDown[VK_NUMPAD0]))
+	if ((m_pKeyDown[0x45]) && !(m_pKeyDown[0x51]))
 	{
 		m_pCamera->Fly(m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD0]) && !(m_pKeyDown[VK_NUMPAD1]))
+	if ((m_pKeyDown[0x51]) && !(m_pKeyDown[0x45]))
 	{
 		m_pCamera->Fly(-1 * m_deltaTick);
 	}

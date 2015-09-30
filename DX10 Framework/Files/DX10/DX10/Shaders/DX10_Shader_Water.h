@@ -30,9 +30,10 @@ struct TWater
 {
 	DX10_Mesh* pMesh;
 	D3DXMATRIX* pMatWorld;
-	ID3D10ShaderResourceView* pTexBase;
+	ID3D10ShaderResourceView* pMapNormal;
 	D3DXMATRIX* pMatTexTranslation;
-	float transparency = 0.0f;
+	D3DXPLANE reflectionPlane;
+	float reflectRefractScale;
 };
 
 enum eTech_Water
@@ -115,12 +116,15 @@ public:
 			{
 				D3DXMATRIX matWorld = *_water.pMatWorld;
 				D3DXMATRIX matTex = *_water.pMatTexTranslation;
+				D3DXMATRIX matReflection = CreateReflectionMatrix(_water.reflectionPlane);
 
 				m_pMatWorld->SetMatrix((float*)&matWorld);
 				m_pMatTex->SetMatrix((float*)&matTex);
-				m_pMapDiffuse->SetResource(_water.pTexBase);
-				m_pMapSpecular->SetResource(m_pSpecularTex);
-				m_pTransparency->SetFloat(_water.transparency);
+				m_pMatReflection->SetMatrix((float*)&matReflection);
+				m_pReflectRefractScale->SetFloat(_water.reflectRefractScale);
+				m_pMapNormal->SetResource(_water.pMapNormal);
+				m_pMapReflection->SetResource(m_pDX10_Renderer->GetReflectShaderResourceView());
+				m_pMapRefraction->SetResource(m_pDX10_Renderer->GetRefractShaderResourceView());
 
 				m_pCurrentTech->GetPassByIndex(p)->Apply(0);
 				_water.pMesh->Render();
@@ -160,21 +164,27 @@ private:
 		// Per Object
 		m_pMatWorld = m_pFX->GetVariableByName("g_matWorld")->AsMatrix();
 		m_pMatTex = m_pFX->GetVariableByName("g_matTex")->AsMatrix();
-		m_pTransparency = m_pFX->GetVariableByName("g_transparency")->AsScalar();
+		m_pMatReflection = m_pFX->GetVariableByName("g_matReflection")->AsMatrix();
+		m_pReflectRefractScale = m_pFX->GetVariableByName("reflectRefractScale")->AsScalar();
 
 		// Globals
-		m_pMapDiffuse = m_pFX->GetVariableByName("g_mapDiffuse")->AsShaderResource();
-		m_pMapSpecular = m_pFX->GetVariableByName("g_mapSpec")->AsShaderResource();
+		m_pMapNormal = m_pFX->GetVariableByName("g_mapNormal")->AsShaderResource();
+		m_pMapReflection = m_pFX->GetVariableByName("g_mapReflection")->AsShaderResource();
+		m_pMapRefraction = m_pFX->GetVariableByName("g_mapRefraction")->AsShaderResource();
 
 		VALIDATE(m_pLight != 0);
 		VALIDATE(m_pEyePos != 0);
 		VALIDATE(m_pMatView != 0);
 		VALIDATE(m_pMatProj != 0);
+
 		VALIDATE(m_pMatWorld != 0);
 		VALIDATE(m_pMatTex != 0);
-		VALIDATE(m_pTransparency != 0);
-		VALIDATE(m_pMapDiffuse != 0);
-		VALIDATE(m_pMapSpecular != 0);
+		VALIDATE(m_pMatReflection != 0);
+		VALIDATE(m_pReflectRefractScale != 0);
+
+		VALIDATE(m_pMapNormal != 0);
+		VALIDATE(m_pMapReflection != 0);
+		VALIDATE(m_pMapRefraction != 0);
 
 		return true;
 	}
@@ -190,8 +200,7 @@ private:
 		D3D10_INPUT_ELEMENT_DESC vertexDesc[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D10_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D10_APPEND_ALIGNED_ELEMENT, D3D10_INPUT_PER_VERTEX_DATA, 0 },
 		};
 		UINT elementNum = sizeof(vertexDesc) / sizeof(vertexDesc[0]);
 		
@@ -226,7 +235,7 @@ private:
 
 private:
 
-	DX10_Renderer*						m_pDX10_Renderer;
+	DX10_Renderer* m_pDX10_Renderer;
 
 	ID3D10Effect* m_pFX;
 	ID3D10ShaderResourceView* m_pSpecularTex;
@@ -244,11 +253,14 @@ private:
 
 	ID3D10EffectMatrixVariable*			m_pMatWorld;
 	ID3D10EffectMatrixVariable*			m_pMatTex;
+	ID3D10EffectMatrixVariable*			m_pMatReflection;
+	ID3D10EffectScalarVariable*			m_pReflectRefractScale;
 
-	ID3D10EffectShaderResourceVariable* m_pMapDiffuse;
-	ID3D10EffectShaderResourceVariable* m_pMapSpecular;
+	ID3D10EffectShaderResourceVariable* m_pMapNormal;
+	ID3D10EffectShaderResourceVariable* m_pMapReflection;
+	ID3D10EffectShaderResourceVariable* m_pMapRefraction;
 
-	ID3D10EffectScalarVariable*			m_pTransparency;
+	
 };
 
 #endif	// __DX10_SHADER_WATER_H__

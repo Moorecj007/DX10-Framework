@@ -248,6 +248,14 @@ enum eDepthState
 };
 
 // TO DO CAL
+struct TTextureResource
+{
+	ID3D10Texture2D* texture2D;
+	ID3D10RenderTargetView* renderTargetView;
+	ID3D10ShaderResourceView* shaderResourceView;
+};
+
+// TO DO CAL
 inline D3DXMATRIX CreateReflectionMatrix(D3DXPLANE _plane)
 {
 	D3DXMATRIX matReflect;

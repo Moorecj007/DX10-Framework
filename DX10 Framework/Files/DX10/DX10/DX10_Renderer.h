@@ -29,11 +29,20 @@
 #include "DX10_Vertex.h"
 #include "Systems/DX10_Buffer.h"
 
+// TO DO
 struct PolygonType
 {
 	int vIndex1, vIndex2, vIndex3;
 	int tIndex1, tIndex2, tIndex3;
 	int nIndex1, nIndex2, nIndex3;
+};
+
+// TO DO CAL
+enum eRenderTarget
+{
+	RT_DEFAULT,
+	RT_REFRACT,
+	RT_REFLECT
 };
 
 class DX10_Renderer
@@ -311,6 +320,12 @@ public:
 	********************/
 	Light* GetActiveLight() { return &m_activeLight; };
 
+	// TO DO CAL
+	ID3D10ShaderResourceView* GetRefractShaderResourceView() { return m_refractTextureResource.shaderResourceView; };
+	ID3D10ShaderResourceView* GetReflectShaderResourceView() { return m_reflectTextureResource.shaderResourceView; };
+	void ClearRenderTargetView(eRenderTarget _renderTarget = RT_DEFAULT);
+	void SetRenderTargetView(eRenderTarget _renderTarget = RT_DEFAULT);
+
 private:
 	// Window Variables
 	HWND m_hWnd;
@@ -343,6 +358,10 @@ private:
 	ID3D10DepthStencilState* m_pDepthStencilStateMirror;
 	ID3D10RasterizerState* m_pRasterizerState_Reflection;
 	ID3D10BlendState* m_blendReflection;
+
+	/// Better Reflection
+	TTextureResource m_refractTextureResource;
+	TTextureResource m_reflectTextureResource;
 
 	// Map of FX files
 	std::map<std::string, ID3D10Effect*> m_fxFiles;

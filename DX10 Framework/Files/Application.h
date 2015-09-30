@@ -156,6 +156,10 @@ public:
 	********************/
 	void Render();
 
+	// TO DO CAL
+	void RenderRefraction();
+	void RenderReflection();
+
 	/***********************
 	* HandleInput: Handle all input for the application
 	* @author: Callan Moore
@@ -233,6 +237,8 @@ private:
 	DX10_Obj_LitTex* m_pObj_Terrain;
 	DX10_Obj_Water* m_pObj_Water;
 	DX10_Obj_LitTex* m_pObj_Wharf; // TO DO CAL
+
+	bool m_budgetReflect;
 };
 
 #endif // __APPLICATION_H__

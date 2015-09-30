@@ -22,7 +22,7 @@ DX10_Obj_Water::DX10_Obj_Water()
 	// Nullify Pointers
 	m_pShader = 0;
 
-	m_transparency = 0.5f;
+	m_reflectRefractScale = 0.5f;
 }
 
 DX10_Obj_Water::~DX10_Obj_Water()
@@ -91,14 +91,15 @@ void DX10_Obj_Water::Process(float _dt)
 	BaseProcess(_dt);
 }
 
-void DX10_Obj_Water::Render(eTech_Water _tech)
+void DX10_Obj_Water::Render(D3DXPLANE _reflectionPlane, eTech_Water _tech)
 {
 	TWater water;
 	water.pMesh = m_pMesh;
 	water.pMatWorld = &m_matWorld;
-	water.pTexBase = (*m_pTextures)[m_texIndex];
+	water.pMapNormal = (*m_pTextures)[m_texIndex];
 	water.pMatTexTranslation = &m_matTexTranslation;
-	water.transparency = m_transparency;
+	water.reflectRefractScale = m_reflectRefractScale;
+	water.reflectionPlane = _reflectionPlane;
 
 	m_pShader->Render(water, _tech);
 }
