@@ -108,7 +108,6 @@ void DX10_Obj_LitTex::Render(eTech_LitTex _tech, D3DXPLANE _mirrorPlane)
 	if (_tech == TECH_LITTEX_REFLECT)
 	{
 		D3DXMATRIX* pMatWorldTemp = new D3DXMATRIX();
-		m_pRenderer->ApplyReflectionStates();
 		D3DXMATRIX matReflection = CreateReflectionMatrix(_mirrorPlane);
 
 		*pMatWorldTemp = m_matWorld*matReflection;

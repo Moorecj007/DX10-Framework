@@ -96,7 +96,7 @@ float4 PS_Standard(VS_OUT _inputPS) : SV_Target
 	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
 	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
 
-	diffuse.a = g_transparency;
+	diffuse.a = diffuse.a * g_transparency;
 
 	// Map [0,1] --> [0,256]
 	spec.a *= 256.0f;

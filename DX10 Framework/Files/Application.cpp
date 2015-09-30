@@ -211,9 +211,11 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	// Initialise the Objects
 	m_pCamera = new DX10_Camera_Debug();
 	VALIDATE(m_pCamera->Initialise(m_pDX10_Renderer));
-	m_pCamera->SetPostionVec({ 0, 20, -50.0f });
+	m_pCamera->SetPostionVec({ 0, 20, -60.0f });
 	m_pCamera->SetTargetVec({ 0, 0, 0 });
 	m_pCamera->SetUpVec({ 0, 1, 0 });
+	m_pCamera->SetMoveSpeed(30.0f);
+	m_pCamera->SetTurnSpeed(40.0f);
 
 	// Create the Shaders
 	m_pShader_LitTex = new DX10_Shader_LitTex();
@@ -224,10 +226,10 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Meshes
 	m_pMesh_Terrain = new DX10_Mesh();
-	VALIDATE(m_pMesh_Terrain->Initialise(m_pDX10_Renderer, MT_EPICTERRAIN, { 30, 30, 30 }));
+	VALIDATE(m_pMesh_Terrain->Initialise(m_pDX10_Renderer, MT_EPICTERRAIN, { 10, 10, 10 }));
 
 	m_pMesh_WaterPlane = new DX10_Mesh();
-	VALIDATE(m_pMesh_WaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 300, 1, 300 }));
+	VALIDATE(m_pMesh_WaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 70, 1, 100 }));
 
 	m_pMesh_Wharf = new DX10_Mesh();
 	VALIDATE(m_pMesh_Wharf->Initialise(m_pDX10_Renderer, MT_WHARF, { 3, 3, 3 }));
@@ -235,12 +237,12 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	// Create the Objects
 	m_pObj_Terrain = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "EpicTerrainTexture.png"));
-	m_pObj_Terrain->SetPosition({ 0, 5, 0 });
+	m_pObj_Terrain->SetPosition({ 0, -8, 0 });
 
 	m_pObj_Water = new DX10_Obj_Water();
-	VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterTile.png"));
-	m_pObj_Water->SetScroll(10, { 0, 1 });
-	m_pObj_Water->SetTransparency(0.5f);
+	VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterMap2.png"));
+	m_pObj_Water->SetScroll(50, { 0, 1 });
+	m_pObj_Water->SetTransparency(0.4f);
 
 	m_pObj_Wharf = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Wharf->Initialise(m_pDX10_Renderer, m_pMesh_Wharf, m_pShader_LitTex, "WharfTexture.png"));
@@ -395,32 +397,32 @@ bool Application::HandleInput()
 		SetKeyDown(VK_F2, false);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD4]) && !(m_pKeyDown[VK_NUMPAD6]))
+	if ((m_pKeyDown[0x41]) && !(m_pKeyDown[0x44]))
 	{
 		m_pCamera->Strafe(-1 * m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD6]) && !(m_pKeyDown[VK_NUMPAD4]))
+	if ((m_pKeyDown[0x44]) && !(m_pKeyDown[0x41]))
 	{
 		m_pCamera->Strafe(m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD8]) && !(m_pKeyDown[VK_NUMPAD2]))
+	if ((m_pKeyDown[0x57]) && !(m_pKeyDown[0x53]))
 	{
 		m_pCamera->Move(m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD2]) && !(m_pKeyDown[VK_NUMPAD8]))
+	if ((m_pKeyDown[0x53]) && !(m_pKeyDown[0x57]))
 	{
 		m_pCamera->Move(-1 * m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD1]) && !(m_pKeyDown[VK_NUMPAD0]))
+	if ((m_pKeyDown[0x45]) && !(m_pKeyDown[0x51]))
 	{
 		m_pCamera->Fly(m_deltaTick);
 	}
 
-	if ((m_pKeyDown[VK_NUMPAD0]) && !(m_pKeyDown[VK_NUMPAD1]))
+	if ((m_pKeyDown[0x51]) && !(m_pKeyDown[0x45]))
 	{
 		m_pCamera->Fly(-1 * m_deltaTick);
 	}

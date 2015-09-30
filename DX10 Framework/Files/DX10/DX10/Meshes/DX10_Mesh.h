@@ -115,7 +115,7 @@ public:
 			break;
 			case MT_EPICTERRAIN:
 			{
-				return "Resources/Meshes/Mesh_EpicTerrain.txt";
+				return "Resources/Meshes/Mesh_Terrain.txt";
 			}
 			break;
 			case MT_WHARF:

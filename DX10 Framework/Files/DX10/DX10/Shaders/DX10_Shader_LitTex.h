@@ -135,6 +135,7 @@ public:
 				}
 				if (_eTech == TECH_LITTEX_REFLECT)
 				{
+					m_pDX10_Renderer->ApplyReflectionStates();
 					m_pReflectionPlane->SetRawValue((float*)&_litTex.reflectionPlane, 0, sizeof(D3DXPLANE));
 				}
 
