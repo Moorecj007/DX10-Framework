@@ -316,4 +316,95 @@ technique10 ReflectTech
 	}
 }
 
+//--------------------------------------------------------------
+// Star Shading
+//--------------------------------------------------------------
+
+// Star Structure for the Vertex Shader Output and Pixel Shader Input
+
+struct VS_OUT_STAR
+{
+	float3 position		: POSITION;
+};
+
+struct GS_OUT_STAR
+{
+	float4 positionH    : SV_POSITION;
+};
+
+VS_OUT_STAR VS_Star(VS_IN _inputVS)
+{
+	VS_OUT_STAR outputVS;
+
+	// Transform to world space space.
+	outputVS.position = mul(float4(_inputVS.position, 1.0f), g_matWorld).xyz;
+
+	return outputVS;
+}
+
+[maxvertexcount(6)]
+void GS_Star(point VS_OUT_STAR gInput[1], inout TriangleStream<GS_OUT_STAR> TriStream)
+{
+	// Calculate a look, right and up vector from the camera position to the vertex position (Billboard effect)
+	float3 vecLook = normalize(g_eyePosW.xyz - gInput[0].position);
+	float3 vecRight = normalize(cross(float3(0, 1, 0), vecLook));
+	float3 vecUp = cross(vecLook, vecRight);
+	
+	// Calculate a new world matrix
+	float4x4 matWorld;
+	matWorld[0] = float4(vecRight, 0.0f);
+	matWorld[1] = float4(vecUp, 0.0f);
+	matWorld[2] = float4(vecLook, 0.0f);
+	matWorld[3] = float4(gInput[0].position, 1.0f);
+	
+	// Calculate the new World, View, Projection Matrix using the new world matrix
+	float4x4 matViewProj = mul(g_matView, g_matProj);
+	float4x4 matWVP = mul(matWorld, matViewProj);
+
+	// Create two triangles around the vertex point position
+	float4 starPoints[6];
+	// Triangle One
+	starPoints[0] = float4(gInput[0].position.x + 0.0f, gInput[0].position.y - (1.732 * 6), 0, 1.0f);
+	starPoints[1] = float4(gInput[0].position.x + 9.0f, gInput[0].position.y + (1.732 * 3.0f), 0, 1.0f);
+	starPoints[2] = float4(gInput[0].position.x - 9.0f, gInput[0].position.y + (1.732 * 3.0f), 0, 1.0f);
+	
+	// Triangle Two
+	starPoints[3] = float4(gInput[0].position.x - 0.0f, gInput[0].position.y + (1.732 * 6), 0, 1.0f);
+	starPoints[4] = float4(gInput[0].position.x - 9.0f, gInput[0].position.y - (1.732 * 3.0f), 0, 1.0f);
+	starPoints[5] = float4(gInput[0].position.x + 9.0f, gInput[0].position.y - (1.732 * 3.0f), 0, 1.0f);
+
+	// Add each point of the star to the triangleStream
+	GS_OUT_STAR outputGS;
+	[unroll]
+	for (int j = 0; j < 6; j++)
+	{
+		outputGS.positionH = mul(starPoints[j], matWVP);	// Calculate the position in world space of the star point
+		TriStream.Append(outputGS);	// Append the star point
+
+		if (j == 2)
+		{
+			TriStream.RestartStrip();	// First triangle ended
+		}
+	}
+	TriStream.RestartStrip();	// Second triangle ended
+}
+
+float4 PS_Star(GS_OUT_STAR _inputPS) : SV_Target
+{
+	// return yellow a the color
+	return float4(1.0f, 1.0f, 0.0f, 1.0f);
+}
+
+
+
+technique10 StarTech
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_4_0, VS_Star()));
+		SetGeometryShader(CompileShader(gs_4_0, GS_Star()));
+		SetPixelShader(CompileShader(ps_4_0, PS_Star()));
+	}
+}
+
 

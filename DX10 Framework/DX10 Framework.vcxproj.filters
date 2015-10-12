@@ -28,9 +28,6 @@
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{deded43c-a4d0-48b9-b8c6-6f51de4918eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Physics\2D Physics">
-      <UniqueIdentifier>{3d6970b1-2480-46ea-9856-002a5cf3739e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Physics">
       <UniqueIdentifier>{6f751dd8-19c3-4e70-b158-20e93dceebf5}</UniqueIdentifier>
     </Filter>
@@ -196,21 +193,6 @@
     </ClCompile>
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.cpp">
       <Filter>Source Files\DX10\Cameras</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Body_2D.cpp">
-      <Filter>Source Files\Physics\2D Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Pulley_2D.cpp">
-      <Filter>Source Files\Physics\2D Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Rope_2D.cpp">
-      <Filter>Source Files\Physics\2D Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Physics\2D Physics\Physics_World_2D.cpp">
-      <Filter>Source Files\Physics\2D Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Collision_Listener.cpp">
-      <Filter>Source Files\Physics\2D Physics</Filter>
     </ClCompile>
     <ClCompile Include="Files\DX10\DX10\3D Objects\DX10_Obj_LitTex.cpp">
       <Filter>Source Files\DX10\3D Objects</Filter>

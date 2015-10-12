@@ -34,7 +34,7 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 
 	VALIDATE(InitialiseDeviceAndSwapChain());
 
-	m_clearColor = d3dxColors::Turquoise;
+	m_clearColor = d3dxColors::Black;
 
 	//Initialise the ID Keys for the Maps
 	m_nextInputLayoutID = 0;
@@ -851,5 +851,5 @@ bool DX10_Renderer::SetInputLayout(ID3D10InputLayout* _pVertexLayout)
 void DX10_Renderer::CalcProjMatrix()
 {
 	float aspect = float(m_clientWidth) / float(m_clientHeight);
-	D3DXMatrixPerspectiveFovLH(&m_matProj, 0.25f*PI, aspect, 1.0f, 1000.0f);
+	D3DXMatrixPerspectiveFovLH(&m_matProj, 0.25f*PI, aspect, 1.0f, 6000.0f);
 }

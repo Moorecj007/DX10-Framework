@@ -26,7 +26,8 @@ enum eMeshType
 	MT_RECTPRISM,
 	MT_SPHERE,
 	MT_EPICTERRAIN,
-	MT_WHARF
+	MT_WHARF,
+	MT_STARMAP
 };
 
 class DX10_Mesh
@@ -121,6 +122,11 @@ public:
 				return "Resources/Meshes/Mesh_Wharf.txt";
 			}
 			break;
+			case MT_STARMAP:
+			{
+				return "Resources/Meshes/Mesh_StarMap.txt";
+			}
+				break;
 			default: return "";
 		}	// End Switch
 	}

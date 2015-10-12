@@ -47,7 +47,8 @@ enum eTech_LitTex
 	TECH_LITTEX_FADE,
 	TECH_LITTEX_BLENDTEX2,
 	TECH_LITTEX_REFRACT,
-	TECH_LITTEX_REFLECT
+	TECH_LITTEX_REFLECT,
+	TECH_LITTEX_STAR
 };
 
 class DX10_Shader_LitTex
@@ -172,6 +173,7 @@ private:
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "BlendTex2Tech", m_pFX, m_pTech_BlendTex2));
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "RefractTech", m_pFX, m_pTech_Refract));
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "ReflectTech", m_pFX, m_pTech_Reflect));
+		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "StarTech", m_pFX, m_pTech_Star));
 
 		return true;
 	}
@@ -238,6 +240,7 @@ private:
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_BlendTex2, m_pVertexLayout_BlendTex2);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Refract, m_pVertexLayout_Refract);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Refract, m_pVertexLayout_Reflect);
+		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Star, m_pVertexLayout_Star);
 	
 		return true;
 	}
@@ -282,6 +285,12 @@ private:
 				m_pCurrentTech = m_pTech_Refract;
 			}
 			break;
+			case TECH_LITTEX_STAR:
+			{
+				m_pCurrentVertexLayout = m_pVertexLayout_Star;
+				m_pCurrentTech = m_pTech_Star;
+			}
+			break;
 			default:
 			{
 				m_pCurrentVertexLayout = 0;
@@ -301,6 +310,7 @@ private:
 	ID3D10InputLayout* m_pVertexLayout_BlendTex2;
 	ID3D10InputLayout* m_pVertexLayout_Refract;
 	ID3D10InputLayout* m_pVertexLayout_Reflect;
+	ID3D10InputLayout* m_pVertexLayout_Star;
 
 	ID3D10EffectTechnique* m_pCurrentTech;
 	ID3D10EffectTechnique* m_pTech_Standard;
@@ -308,6 +318,7 @@ private:
 	ID3D10EffectTechnique* m_pTech_BlendTex2;
 	ID3D10EffectTechnique* m_pTech_Refract;
 	ID3D10EffectTechnique* m_pTech_Reflect;
+	ID3D10EffectTechnique* m_pTech_Star;
 
 
 	DX10_Renderer*						m_pDX10_Renderer;

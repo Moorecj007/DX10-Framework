@@ -244,12 +244,14 @@ private:
 	DX10_Mesh* m_pMesh_Terrain;
 	DX10_Mesh* m_pMesh_WaterPlane;
 	DX10_Mesh* m_pMesh_Wharf;
+	DX10_Mesh* m_pMesh_StarPlane;
 
 	// Objects
 	DX10_Obj_LitTex* m_pObj_Terrain;
 	DX10_Obj_Water* m_pObj_Water;
 	DX10_Obj_LitTex* m_pObj_Wharf;
 	DXSprite* m_pSprite_Instructions;
+	DX10_Obj_LitTex* m_pObj_Stars;
 
 	// Texture Resources
 	TextureResource* m_pRefractionTexture;

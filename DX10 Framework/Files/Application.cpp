@@ -232,6 +232,9 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pMesh_Wharf = new DX10_Mesh();
 	VALIDATE(m_pMesh_Wharf->Initialise(m_pDX10_Renderer, MT_WHARF, { 3, 3, 3 }));
 
+	m_pMesh_StarPlane = new DX10_Mesh();
+	VALIDATE(m_pMesh_StarPlane->Initialise(m_pDX10_Renderer, MT_STARMAP, { 300, 50, 300 }));
+
 	// Create the Objects
 	m_pObj_Terrain = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "EpicTerrainTexture.png"));
@@ -248,8 +251,13 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pObj_Water->SetRippleScale(0.07f);
 
 	m_pSprite_Instructions = new DXSprite();
-	VALIDATE(m_pSprite_Instructions->Initialize(&m_hWnd, m_pDX10_Renderer, m_pShader_Sprite, "Instructions.png", 384, 140));
+	VALIDATE(m_pSprite_Instructions->Initialize(&m_hWnd, m_pDX10_Renderer, m_pShader_Sprite, "InstructionsBlue.png", 384, 140));
 	m_pSprite_Instructions->SetPosition(5, -10);
+
+	m_pObj_Stars = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Stars->Initialise(m_pDX10_Renderer, m_pMesh_StarPlane, m_pShader_LitTex, "WharfTexture.png"));
+	m_pObj_Stars->SetPosition({ 0, 1500, 0 });
+	m_pObj_Stars->SetRotationPitch(DegreesToRadians(180));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
@@ -286,12 +294,14 @@ void Application::ShutDown()
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Terrain);
 		ReleasePtr(m_pMesh_WaterPlane);
-		ReleasePtr(m_pMesh_Wharf);
+		ReleasePtr(m_pMesh_Wharf); 
+		ReleasePtr(m_pMesh_StarPlane);
 		// Release the Objects
 		ReleasePtr(m_pObj_Terrain);
 		ReleasePtr(m_pObj_Water);
 		ReleasePtr(m_pObj_Wharf);
 		ReleasePtr(m_pSprite_Instructions);
+		ReleasePtr(m_pObj_Stars);
 		// Release the Texture Resources
 		ReleasePtr(m_pRefractionTexture);
 		ReleasePtr(m_pReflectionTexture);
@@ -347,6 +357,7 @@ bool Application::Process(float _dt)
 		m_pObj_Terrain->Process(_dt);		
 		m_pObj_Wharf->Process(_dt);
 		m_pObj_Water->Process(_dt);
+		m_pObj_Stars->Process(_dt);
 	}
 
 	return true;
@@ -374,6 +385,7 @@ void Application::Render()
 		// Render the Objects of the Scene
 		m_pObj_Terrain->Render();
 		m_pObj_Wharf->Render();
+		m_pObj_Stars->Render(TECH_LITTEX_STAR);
 		m_pObj_Water->Render(m_pRefractionTexture->GetShaderResource(), m_pReflectionTexture->GetShaderResource());
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
@@ -408,7 +420,7 @@ void Application::RenderReflection()
 	m_pReflectionTexture->SetRenderTarget();
 	m_pReflectionTexture->ClearRenderTarget();
 
-	// Create a mirror plane for the reflective surface ( the Water)
+	// Create a mirror plane for the reflective surface
 	D3DXPLANE mirrorPlane = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 	// Reflect the Lights across the plane so they are lighting the correct sides of the reflected objects

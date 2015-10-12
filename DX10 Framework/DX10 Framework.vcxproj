@@ -123,11 +123,6 @@
     <ClCompile Include="Files\DX10\DX10\Systems\TextureResource.cpp" />
     <ClCompile Include="Files\Input\InputGamePad.cpp" />
     <ClCompile Include="Files\Menus\Menu.cpp" />
-    <ClCompile Include="Files\Physics\2D Physics\Physics_World_2D.cpp" />
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Body_2D.cpp" />
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Collision_Listener.cpp" />
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Rope_2D.cpp" />
-    <ClCompile Include="Files\Physics\2D Physics\Physics_Pulley_2D.cpp" />
     <ClCompile Include="Files\Utility\DirectInput.cpp" />
     <ClCompile Include="Files\Utility\Mutex_Semaphore.cpp" />
     <ClCompile Include="Files\Utility\Timer.cpp" />
