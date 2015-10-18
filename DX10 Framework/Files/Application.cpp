@@ -224,44 +224,24 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Meshes
 	m_pMesh_Terrain = new DX10_Mesh();
-	VALIDATE(m_pMesh_Terrain->Initialise(m_pDX10_Renderer, MT_EPICTERRAIN, { 30, 30, 30 }));
-
-	m_pMesh_WaterPlane = new DX10_Mesh();
-	VALIDATE(m_pMesh_WaterPlane->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 300, 1, 300 }));
-
-	m_pMesh_Wharf = new DX10_Mesh();
-	VALIDATE(m_pMesh_Wharf->Initialise(m_pDX10_Renderer, MT_WHARF, { 3, 3, 3 }));
-
-	m_pMesh_StarPlane = new DX10_Mesh();
-	VALIDATE(m_pMesh_StarPlane->Initialise(m_pDX10_Renderer, MT_STARMAP, { 300, 50, 300 }));
+	VALIDATE(m_pMesh_Terrain->InitialisePlane(m_pDX10_Renderer, 5, { 10, 10, 10 }));
 
 	// Create the Objects
-	m_pObj_Terrain = new DX10_Obj_LitTex();
-	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "EpicTerrainTexture.png"));
-	m_pObj_Terrain->SetPosition({ 0, 5, 0 });
-
-	m_pObj_Wharf = new DX10_Obj_LitTex();
-	VALIDATE(m_pObj_Wharf->Initialise(m_pDX10_Renderer, m_pMesh_Wharf, m_pShader_LitTex, "WharfTexture.png"));
-	m_pObj_Wharf->SetPosition({ 70, 2, -70 });
-	m_pObj_Wharf->SetRotationYaw(DegreesToRadians(90));
-
-	m_pObj_Water = new DX10_Obj_Water();
-	VALIDATE(m_pObj_Water->Initialise(m_pDX10_Renderer, m_pMesh_WaterPlane, m_pShader_Water, "WaterMap.png"));
-	m_pObj_Water->SetScroll(40, { 0, 1 });
-	m_pObj_Water->SetRippleScale(0.07f);
-
 	m_pSprite_Instructions = new DXSprite();
 	VALIDATE(m_pSprite_Instructions->Initialize(&m_hWnd, m_pDX10_Renderer, m_pShader_Sprite, "InstructionsBlue.png", 384, 140));
 	m_pSprite_Instructions->SetPosition(5, -10);
 
-	m_pObj_Stars = new DX10_Obj_LitTex();
-	VALIDATE(m_pObj_Stars->Initialise(m_pDX10_Renderer, m_pMesh_StarPlane, m_pShader_LitTex, "WharfTexture.png"));
-	m_pObj_Stars->SetPosition({ 0, 1500, 0 });
-	m_pObj_Stars->SetRotationPitch(DegreesToRadians(180));
+	m_pObj_Terrain = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "WaterMap.png"));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
 	m_pDX10_Renderer->CreateTextureResource(m_pReflectionTexture);
+
+
+
+	// TO DO CAL
+	m_pMesh_Terrain->DiamondSquare(0);
 
 	return true;
 }
@@ -293,15 +273,9 @@ void Application::ShutDown()
 		ReleasePtr(m_pShader_Sprite);
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Terrain);
-		ReleasePtr(m_pMesh_WaterPlane);
-		ReleasePtr(m_pMesh_Wharf); 
-		ReleasePtr(m_pMesh_StarPlane);
 		// Release the Objects
-		ReleasePtr(m_pObj_Terrain);
-		ReleasePtr(m_pObj_Water);
-		ReleasePtr(m_pObj_Wharf);
 		ReleasePtr(m_pSprite_Instructions);
-		ReleasePtr(m_pObj_Stars);
+		ReleasePtr(m_pObj_Terrain);
 		// Release the Texture Resources
 		ReleasePtr(m_pRefractionTexture);
 		ReleasePtr(m_pReflectionTexture);
@@ -354,10 +328,8 @@ bool Application::Process(float _dt)
 
 		ProcessShaders();
 
-		m_pObj_Terrain->Process(_dt);		
-		m_pObj_Wharf->Process(_dt);
-		m_pObj_Water->Process(_dt);
-		m_pObj_Stars->Process(_dt);
+		m_pObj_Terrain->Process(_dt);
+
 	}
 
 	return true;
@@ -376,17 +348,15 @@ void Application::Render()
 	if (m_pDX10_Renderer != 0)
 	{
 		// Render the Refraction and Reflection Textures
-		RenderRefraction();
-		RenderReflection();
+		//RenderRefraction();
+		//RenderReflection();
 		
 		// Tell the Renderer that the data input for the back buffer is about to commence
 		m_pDX10_Renderer->StartRender();
 
 		// Render the Objects of the Scene
 		m_pObj_Terrain->Render();
-		m_pObj_Wharf->Render();
-		m_pObj_Stars->Render(TECH_LITTEX_STAR);
-		m_pObj_Water->Render(m_pRefractionTexture->GetShaderResource(), m_pReflectionTexture->GetShaderResource());
+		
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		m_pSprite_Instructions->Render();
@@ -407,8 +377,7 @@ void Application::RenderRefraction()
 	m_pRefractionTexture->ClearRenderTarget();
 
 	// Render all objects that will be refracted
-	m_pObj_Terrain->Render(TECH_LITTEX_REFRACT, clipPlane);
-	m_pObj_Wharf->Render(TECH_LITTEX_REFRACT, clipPlane);
+
 
 	// Reset the Devices Render Target to be the default back buffer on the swap chain
 	m_pDX10_Renderer->ResetRenderTarget();
@@ -427,8 +396,7 @@ void Application::RenderReflection()
 	m_pDX10_Renderer->ReflectLightsAcrossPlane(mirrorPlane);
 
 	// Render all objects that will be reflected
-	m_pObj_Terrain->Render(TECH_LITTEX_REFLECT, mirrorPlane);
-	m_pObj_Wharf->Render(TECH_LITTEX_REFLECT, mirrorPlane);
+
 
 	// Reflect the Lights back across the plane to resume normal lighting
 	m_pDX10_Renderer->ReflectLightsAcrossPlane(mirrorPlane);

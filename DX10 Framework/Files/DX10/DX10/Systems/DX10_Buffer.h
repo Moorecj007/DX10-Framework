@@ -133,6 +133,16 @@ public:
 		return m_pVertexBuffer;
 	}
 
+	/***********************
+	* GetIndexBuffer: Retrieve the Index Buffer
+	* @author: Callan Moore
+	* @return: ID3D10Buffer*: The Index Buffer
+	********************/
+	ID3D10Buffer* GetIndexBuffer()
+	{
+		return m_pIndexBuffer;
+	}
+
 private:
 	ID3D10Device* m_pDX10Device;
 	ID3D10Buffer* m_pVertexBuffer;

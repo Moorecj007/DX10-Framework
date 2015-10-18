@@ -27,7 +27,8 @@ enum eMeshType
 	MT_SPHERE,
 	MT_EPICTERRAIN,
 	MT_WHARF,
-	MT_STARMAP
+	MT_STARMAP,
+	MT_5X5
 };
 
 class DX10_Mesh
@@ -43,7 +44,10 @@ public:
 	* ~DX10_Mesh: Default Destructor for Mesh class
 	* @author: Callan Moore
 	********************/
-	virtual ~DX10_Mesh() {}
+	virtual ~DX10_Mesh() 
+	{
+		ReleasePtr(m_pVertexBuffer);
+	}
 
 	/***********************
 	* Initialise: Initialise a new mesh
@@ -73,6 +77,81 @@ public:
 
 		ReleasePtrArray(pVertexBuffer);
 		ReleasePtrArray(pIndexBuffer);
+
+		return true;
+	}
+
+	/***********************
+	* InitialisePlane: Initialise a new mesh for a Plane
+	* @author: Callan Moore
+	* @parameter: _pRenderer: The renderer for the mesh
+	* @parameter: _size: How many vertices to have on each side (Create a square plane)
+	* @parameter: _scale: 3D scalar for the mesh
+	* @return: bool: Successful or not
+	********************/
+	bool DX10_Mesh::InitialisePlane(DX10_Renderer* _pRenderer, int _size, v3float _scale)
+	{
+		m_pRenderer = _pRenderer;
+		m_scale = _scale;
+		m_primTopology = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+
+		m_vertexCount = (int)pow(_size, 2);
+		m_pVertexBuffer = new TVertexNormalUV[m_vertexCount];
+		int stride = sizeof(TVertexNormalUV);
+	
+		for (int i = 0; i < m_vertexCount; i++)
+		{
+			int row = (int)(i / _size);
+			int col = i % _size;
+
+			m_pVertexBuffer[i].pos = D3DXVECTOR3((((row * _size) - ((float)_size / 2.0f)) * m_scale.x), 0.0f, (((col * _size) - ((float)_size / 2.0f)) * m_scale.z));
+			m_pVertexBuffer[i].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+			m_pVertexBuffer[i].uv = v2float(((float)row / (float)_size), ((float)col / (float)_size));
+		}
+
+		m_indexCount = (_size * 2) * (_size - 1) + (_size - 2);
+		DWORD* pIndexBuffer = new DWORD[m_indexCount];
+		int index = 0;
+
+		// Cycle through all rows except last one
+		for (int row = 0; row < _size - 1; row++)
+		{
+			if (row % 2 == 0)	// Even Row
+			{
+				// Even Rows go Right to Left for Clockwise winding order
+				for (int col = (int)(_size - 1); col >= 0; col--)
+				{
+					pIndexBuffer[index++] = (col + (row * _size));
+					pIndexBuffer[index++] = (col + ((row + 1) * _size));
+				}
+
+				// Add Degenerate triangle at end of each row
+				if (row != _size - 2)
+				{
+					pIndexBuffer[index++] = (0 + ((row + 1) * _size));
+				}
+			}
+			else	// Odd Row
+			{
+				// Even Rows go Left to Right for Clockwise winding order
+				for (int col = 0; col < _size; col++)
+				{
+					pIndexBuffer[index++] = (col + (row * _size));
+					pIndexBuffer[index++] = (col + ((row + 1) * _size));
+				}
+
+				// Add Degenerate triangle at end of each row
+				if (row != _size - 2)
+				{
+					pIndexBuffer[index++] = ((_size - 1) + ((row + 1)  * _size));
+				}
+			}
+		}
+
+		// Create the buffer
+		VALIDATE(m_pRenderer->CreateBuffer(m_pVertexBuffer, pIndexBuffer, m_vertexCount, m_indexCount, stride, m_pBuffer, D3D10_USAGE_DYNAMIC, D3D10_USAGE_DEFAULT));
+
+		ReleasePtr(pIndexBuffer);
 
 		return true;
 	}
@@ -127,6 +206,11 @@ public:
 				return "Resources/Meshes/Mesh_StarMap.txt";
 			}
 				break;
+			case MT_5X5:
+			{
+				return "Resources/Meshes/Mesh_5x5.txt";
+			}
+			break;
 			default: return "";
 		}	// End Switch
 	}
@@ -145,6 +229,33 @@ public:
 	********************/
 	v3float GetScale(){ return m_scale; };
 
+	// TO DO CAL
+	void DiamondSquare(int _iterNum)
+	{
+		if (_iterNum == 0)
+		{
+			ID3D10Buffer* pVertexBuff = m_pBuffer->GetVertexBuffer();
+			void* verticesPtr;
+
+			m_pVertexBuffer->pos.y = 20.0f;
+			m_pVertexBuffer[2].pos.y = 30;
+
+			HRESULT meh = pVertexBuff->Map(D3D10_MAP_WRITE_DISCARD, 0, (void**)&verticesPtr);
+			//TVertexNormalUV* vert = new TVertexNormalUV();
+			//vert->pos = { 20, 20, 20 };
+			//vert->normal = { 0, 1, 0 };
+		
+			memcpy(verticesPtr, (void*)m_pVertexBuffer, sizeof(TVertexNormalUV) * m_vertexCount);
+		
+			pVertexBuff->Unmap();
+		}
+		else
+		{
+		
+		}
+	}
+
+
 private:
 	DX10_Renderer* m_pRenderer;
 	DX10_Buffer* m_pBuffer;
@@ -152,6 +263,8 @@ private:
 	v3float m_scale;
 	int m_vertexCount;
 	int m_indexCount;
+
+	TVertexNormalUV* m_pVertexBuffer;
 };
 
 #endif	// __DX10_MESH_GENERIC_H__
