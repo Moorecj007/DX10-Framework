@@ -191,7 +191,7 @@ void Menu::Draw()
 bool Menu::AddSprite(std::string _filename, UINT _imageWidth, UINT _imageHeight, UINT _sliceWidth, UINT _sliceHeight)
 {
 	m_sprites.push_back(new DXSprite());
-	VALIDATE(m_sprites.back()->Initialize(m_pHWnd, m_pDX10_Renderer, m_pShader_Sprite, _filename, _imageWidth, _imageHeight, _sliceWidth, _sliceHeight));
+	VALIDATE(m_sprites.back()->Initialise(m_pDX10_Renderer, m_pShader_Sprite, _filename, _imageWidth, _imageHeight, _sliceWidth, _sliceHeight));
 
 	return true;
 }

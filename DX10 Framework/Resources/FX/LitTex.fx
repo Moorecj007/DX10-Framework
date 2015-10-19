@@ -7,6 +7,9 @@
 // Local Includes
 #include "LightStructures.fx"
 
+// Defines
+#define MAX_LIGHTS 5
+
 cbuffer cbPerFrame
 {
 	float3 g_eyePosW;
@@ -17,7 +20,8 @@ cbuffer cbPerFrame
 cbuffer cbPerObject
 {
 	// Standard
-	Light g_light;
+	Light g_light[MAX_LIGHTS];
+	int g_lightCount;
 	float4x4 g_matWorld;
 	float4x4 g_matTex;
 
@@ -33,7 +37,6 @@ Texture2D g_mapDiffuse;
 Texture2D g_mapDiffuse2;
 Texture2D g_mapSpec;
 
-// Sampler using Linear for all filters and Wrapping address mode
 SamplerState g_triLinearSam
 {
 	Filter = MIN_MAG_MIP_LINEAR;
@@ -41,7 +44,6 @@ SamplerState g_triLinearSam
 	AddressV = WRAP;
 };
 
-// Standard Structure for the Vertex Shader Input
 struct VS_IN
 {
 	float3 position		: POSITION;
@@ -49,7 +51,6 @@ struct VS_IN
 	float2 texCoord		: TEXCOORD;
 };
 
-// Standard Structure for the Vertex Shader Output and Pixel Shader Input
 struct VS_OUT
 {
 	float4 positionH    : SV_POSITION;
@@ -58,7 +59,7 @@ struct VS_OUT
     float2 texCoord     : TEXCOORD;
 };
 
-// Blend state for Transparency Values
+// For transparency values
 BlendState SrcAlphaBlendingAdd
 {
 	BlendEnable[0] = TRUE;
@@ -71,10 +72,6 @@ BlendState SrcAlphaBlendingAdd
 	RenderTargetWriteMask[0] = 0x0F;
 };
  
-//--------------------------------------------------------------
-// Standard Shading
-//--------------------------------------------------------------
-
 VS_OUT VS_Standard(VS_IN _inputVS)
 {
 	VS_OUT outputVS;
@@ -96,10 +93,10 @@ VS_OUT VS_Standard(VS_IN _inputVS)
 
 float4 PS_Standard(VS_OUT _inputPS) : SV_Target
 {
-	// Retrieve the color of the pixel at the texture coordinates on the texture maps
+	// Get materials from texture maps.
 	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
 	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
-
+	
 	// Map [0,1] --> [0,256]
 	spec.a *= 256.0f;
 	
@@ -108,8 +105,36 @@ float4 PS_Standard(VS_OUT _inputPS) : SV_Target
     
 	// Compute the lit color for this pixel.
 	SurfaceInfo surface = { _inputPS.position, normal, diffuse, spec };
-	float3 litColor = ParallelLight(surface, g_light, g_eyePosW);
-    
+
+	float3 litColor = float3(0.0f, 0.0f, 0.0f);
+	for (int i = 0; i < g_lightCount; i++)
+	{
+		if (g_light[i].active == true)
+		{
+			if (g_light[i].type == 0)
+			{
+				litColor += ParallelLight(surface, g_light[i], g_eyePosW);
+			}
+			else if (g_light[i].type == 1)
+			{
+				litColor += PointLight(surface, g_light[i], g_eyePosW);
+			}
+			else if (g_light[i].type == 2)
+			{
+				litColor += SpotLight(surface, g_light[i], g_eyePosW);
+			}
+			else if (g_light[i].type == 3)
+			{
+				float glowLerp = GlowLight(surface, g_light[i]);
+
+				if (glowLerp > 0.0f)
+				{
+					litColor = lerp(litColor, g_light[i].diffuse.xyz, glowLerp);
+				}
+			}
+		}
+	}
+
 	return float4(litColor, diffuse.a);
 }
 
@@ -129,7 +154,7 @@ technique10 StandardTech
 
 float4 PS_Fade(VS_OUT _inputPS) : SV_Target
 {
-	// Retrieve the color of the pixel at the texture coordinates on the texture maps
+	// Get materials from texture maps.
 	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
 	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
 
@@ -143,7 +168,7 @@ float4 PS_Fade(VS_OUT _inputPS) : SV_Target
 
 	// Compute the lit color for this pixel.
 	SurfaceInfo surface = { _inputPS.position, normal, diffuse, spec };
-	float3 litColor = ParallelLight(surface, g_light, g_eyePosW);
+	float3 litColor = ParallelLight(surface, g_light[0], g_eyePosW);
 
 	return float4(litColor, diffuse.a);
 }
@@ -167,7 +192,7 @@ technique10 FadeTech
 
 float4 PS_BlendTex2(VS_OUT _inputPS) : SV_Target
 {
-	// Retrieve the color of the pixel at the texture coordinates on the texture maps
+	// Get materials from texture maps.
 	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
 	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
 
@@ -181,7 +206,36 @@ float4 PS_BlendTex2(VS_OUT _inputPS) : SV_Target
 
 	// Compute the lit color for this pixel.
 	SurfaceInfo surface = { _inputPS.position, normal, diffuse, spec };
-	float3 litColor = ParallelLight(surface, g_light, g_eyePosW);
+
+	float3 litColor = float3(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < g_lightCount; i++)
+	{
+		if (g_light[i].active == true)
+		{
+			if (g_light[i].type == 0)
+			{
+				litColor += ParallelLight(surface, g_light[i], g_eyePosW);
+			}
+			else if (g_light[i].type == 1)
+			{
+				litColor += PointLight(surface, g_light[i], g_eyePosW);
+			}
+			else if (g_light[i].type == 2)
+			{
+				litColor += SpotLight(surface, g_light[i], g_eyePosW);
+			}
+			else if (g_light[i].type == 3)
+			{
+				float glowLerp = GlowLight(surface, g_light[i]);
+
+				if (glowLerp > 0.0f)
+				{
+					litColor = lerp(litColor, g_light[i].diffuse.xyz, glowLerp);
+				}
+			}
+		}
+	}
 
 	return float4(litColor, diffuse.a);
 }
@@ -217,13 +271,13 @@ struct VS_OUT_REFRACT
 	float4 position : SV_POSITION;
 	float2 texCoord	: TEXCOORD0;
 	float3 normal	: NORMAL;
-	float  clipDist	: SV_ClipDistance0;
+	float  clipDist : SV_ClipDistance0;
 };
 
 VS_OUT_REFRACT VS_Refract(VS_IN_REFRACT _inputVS)
 {
 	VS_OUT_REFRACT outputVS;
-	
+
 	// Homogenise the Input position vector
 	_inputVS.position.w = 1.0f;
 
@@ -241,7 +295,7 @@ VS_OUT_REFRACT VS_Refract(VS_IN_REFRACT _inputVS)
 
 	// Set the clipping distance
 	outputVS.clipDist = dot(mul(_inputVS.position, g_matWorld), g_plane);
-	
+
 	return outputVS;
 }
 
@@ -256,7 +310,35 @@ float4 PS_Refract(VS_OUT_REFRACT _inputPS) : SV_Target
 
 	// Calculate the lit color for this pixel using the lighting Structure
 	SurfaceInfo surface = { _inputPS.position.xyz, _inputPS.normal, diffuse, spec };
-	float3 litColor = ParallelLight(surface, g_light, g_eyePosW);
+	float3 litColor = float3(0.0f, 0.0f, 0.0f);
+
+		for (int i = 0; i < g_lightCount; i++)
+		{
+			if (g_light[i].active == true)
+			{
+				if (g_light[i].type == 0)
+				{
+					litColor += ParallelLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 1)
+				{
+					litColor += PointLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 2)
+				{
+					litColor += SpotLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 3)
+				{
+					float glowLerp = GlowLight(surface, g_light[i]);
+
+					if (glowLerp > 0.0f)
+					{
+						litColor = lerp(litColor, g_light[i].diffuse.xyz, glowLerp);
+					}
+				}
+			}
+		}
 
 	return float4(litColor, diffuse.a);
 }
@@ -284,14 +366,14 @@ float4 PS_Reflect(VS_OUT _inputPS) : SV_Target
 
 	// Retrieve the color of the pixel at the texture coordinates on the texture maps
 	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
-	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
+		float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
 
-	// If the distance is greater than zero then the pixel is not within the reflective surface boundarys so clip it
-	if (distance > 0.0f)
-	{
-		// Guarantees Clipping
-		clip(diffuse.a - 256);
-	}
+		// If the distance is greater than zero then the pixel is not within the reflective surface boundarys so clip it
+		if (distance > 0.0f)
+		{
+			// Guarantees Clipping
+			clip(diffuse.a - 256);
+		}
 
 	// Map [0,1] --> [0,256]
 	spec.a *= 256.0f;
@@ -299,9 +381,37 @@ float4 PS_Reflect(VS_OUT _inputPS) : SV_Target
 	// Normalise the normal
 	float3 normal = normalize(_inputPS.normal);
 
-		// Calculate the lit color for this pixel using the lighting Structure
+	// Calculate the lit color for this pixel using the lighting Structure
 	SurfaceInfo surface = { _inputPS.position, normal, diffuse, spec };
-	float3 litColor = ParallelLight(surface, g_light, g_eyePosW);
+	float3 litColor = float3(0.0f, 0.0f, 0.0f);
+
+		for (int i = 0; i < g_lightCount; i++)
+		{
+			if (g_light[i].active == true)
+			{
+				if (g_light[i].type == 0)
+				{
+					litColor += ParallelLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 1)
+				{
+					litColor += PointLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 2)
+				{
+					litColor += SpotLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 3)
+				{
+					float glowLerp = GlowLight(surface, g_light[i]);
+
+					if (glowLerp > 0.0f)
+					{
+						litColor = lerp(litColor, g_light[i].diffuse.xyz, glowLerp);
+					}
+				}
+			}
+		}
 
 	return float4(litColor, diffuse.a);
 }
@@ -347,27 +457,27 @@ void GS_Star(point VS_OUT_STAR gInput[1], inout TriangleStream<GS_OUT_STAR> TriS
 {
 	// Calculate a look, right and up vector from the camera position to the vertex position (Billboard effect)
 	float3 vecLook = normalize(g_eyePosW.xyz - gInput[0].position);
-	float3 vecRight = normalize(cross(float3(0, 1, 0), vecLook));
-	float3 vecUp = cross(vecLook, vecRight);
-	
-	// Calculate a new world matrix
-	float4x4 matWorld;
+		float3 vecRight = normalize(cross(float3(0, 1, 0), vecLook));
+		float3 vecUp = cross(vecLook, vecRight);
+
+		// Calculate a new world matrix
+		float4x4 matWorld;
 	matWorld[0] = float4(vecRight, 0.0f);
 	matWorld[1] = float4(vecUp, 0.0f);
 	matWorld[2] = float4(vecLook, 0.0f);
 	matWorld[3] = float4(gInput[0].position, 1.0f);
-	
+
 	// Calculate the new World, View, Projection Matrix using the new world matrix
 	float4x4 matViewProj = mul(g_matView, g_matProj);
-	float4x4 matWVP = mul(matWorld, matViewProj);
+		float4x4 matWVP = mul(matWorld, matViewProj);
 
-	// Create two triangles around the vertex point position
-	float4 starPoints[6];
+		// Create two triangles around the vertex point position
+		float4 starPoints[6];
 	// Triangle One
 	starPoints[0] = float4(gInput[0].position.x + 0.0f, gInput[0].position.y - (1.732 * 6), 0, 1.0f);
 	starPoints[1] = float4(gInput[0].position.x + 9.0f, gInput[0].position.y + (1.732 * 3.0f), 0, 1.0f);
 	starPoints[2] = float4(gInput[0].position.x - 9.0f, gInput[0].position.y + (1.732 * 3.0f), 0, 1.0f);
-	
+
 	// Triangle Two
 	starPoints[3] = float4(gInput[0].position.x - 0.0f, gInput[0].position.y + (1.732 * 6), 0, 1.0f);
 	starPoints[4] = float4(gInput[0].position.x - 9.0f, gInput[0].position.y - (1.732 * 3.0f), 0, 1.0f);
@@ -395,8 +505,6 @@ float4 PS_Star(GS_OUT_STAR _inputPS) : SV_Target
 	return float4(1.0f, 1.0f, 0.0f, 1.0f);
 }
 
-
-
 technique10 StarTech
 {
 	pass P0
@@ -406,5 +514,3 @@ technique10 StarTech
 		SetPixelShader(CompileShader(ps_4_0, PS_Star()));
 	}
 }
-
-

@@ -422,6 +422,21 @@ struct v3float
 		}
 		return (*this);
 	}
+
+	// TO DO CAL
+	bool ApproxEqual(const v3float _v3, const float _apx)
+	{
+		if ((abs(_v3.x - x) <= _apx)
+			&& (abs(_v3.y - y) <= _apx)
+			&& (abs(_v3.z - z) <= _apx))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 };
 
 /***********************

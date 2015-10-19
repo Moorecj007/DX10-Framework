@@ -245,7 +245,8 @@ private:
 
 	// Objects
 	DX10_Obj_LitTex* m_pObj_Terrain;
-	DXSprite* m_pSprite_Instructions;
+	DXSprite* m_pSprite_InstructionsLeft;
+	DXSprite* m_pSprite_InstructionsRight;
 
 	// Texture Resources
 	TextureResource* m_pRefractionTexture;

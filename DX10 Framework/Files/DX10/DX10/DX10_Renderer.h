@@ -90,14 +90,6 @@ public:
 	* @return: void
 	********************/
 	void ClearScreen();
-	
-	/***********************
-	* ApplyDepthStencilState: Apply a selected DepthStencilState
-	* @author: Callan Moore
-	* @parameter: _depthState: Indicator which DepthStencil to load onto the device
-	* @return: void
-	********************/
-	void ApplyDepthStencilState(eDepthState _depthState);
 
 	/***********************
 	* ToggleFullscreen: Toggle Full screen on and off
@@ -112,6 +104,14 @@ public:
 	* @return: void
 	********************/
 	void ToggleFillMode();
+
+	/***********************
+	* ApplyDepthStencilState: Apply a selected DepthStencilState
+	* @author: Callan Moore
+	* @parameter: _depthState: Indicator which DepthStencil to load onto the device
+	* @return: void
+	********************/
+	void ApplyDepthStencilState(eDepthState _depthState);
 
 	/***********************
 	* BuildFX: Build a FX file and Technique and store on the Renderer
@@ -241,21 +241,21 @@ public:
 	* @return: bool
 	********************/
 	bool CreateTextureResource(TextureResource*& _prTextureResource);
-	
+
 	/***********************
 	* ResetRenderTarget: Reset the Devices Render Target to be the default back buffer on the swap chain
 	* @author: Callan Moore
 	* @return: void
 	********************/
 	void ResetRenderTarget() { m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView); };
-	
+
 	/***********************
 	* ApplyFrontCCWCullingRS: Apply the Rasterizer state for Front Counter-clockwise culling
 	* @author: Callan Moore
 	* @return: void
 	********************/
 	void ApplyFrontCCWCullingRS();
-	
+
 	/***********************
 	* ReflectLightsAcrossPlane: Reflect all the current active light across a plane
 	* @author: Callan Moore
@@ -263,6 +263,30 @@ public:
 	* @return: void
 	********************/
 	void ReflectLightsAcrossPlane(D3DXPLANE _plane);
+
+	/***********************
+	* AddLight: Add a new light to the Renderer
+	* @author: Callan Moore
+	* @parameter: _lightName: Name of the light for referencing and updating
+	* @parameter: _light: The light structure
+	* @return: bool: Successful or not
+	********************/
+	bool AddLight(std::string _lightName, Light* _light);
+	
+	/***********************
+	* RemoveLight: Remove a light from the Renderer
+	* @author: Callan Moore
+	* @parameter: _lightName: Name of the light to remove
+	* @return: void
+	********************/
+	void RemoveLight(std::string _lightName);
+
+	/***********************
+	* GetActiveLights: Retrieve the current active light in the scene
+	* @author: Callan Moore
+	* @return: Light*: The current active lights
+	********************/
+	Light* GetActiveLights();
 
 	/***********************
 	* SetPrimitiveTopology: Sets the primitive topology for a Mesh before drawing
@@ -286,7 +310,7 @@ public:
 	* @parameter: _view: The new View matrix
 	* @return: void
 	********************/
-	void SetViewMatrix(D3DXMATRIX _view) { m_matView = _view;};
+	void SetViewMatrix(D3DXMATRIX _view);
 
 	/***********************
 	* SetEyePosition: Sets the Eye of the view (Camera position)
@@ -318,6 +342,13 @@ public:
 	D3DXMATRIX* GetProjMatrix() { return &m_matProj; };
 
 	/***********************
+	* GetOrthographicMatrix: Retrieve the Orthographic Matrix for 2D rendering
+	* @author: Juran Griffith
+	* @return: D3DXMATRIX*: The Orthographic Matrix
+	********************/
+	D3DXMATRIX* GetOrthographicMatrix() { return &m_matOrtho; };
+
+	/***********************
 	* GetFullScreenState: Retrieve the state of full screen
 	* @author: Callan Moore
 	* @return: bool: True if full screen is active, false otherwise
@@ -330,17 +361,30 @@ public:
 	* @return: D3DXVECTOR3; The Eye Position
 	********************/
 	D3DXVECTOR3 GetEyePos() { return m_eyePos; };
-	
+
 	/***********************
-	* GetActiveLight: Retrieve the current active light in the scene
+	* GetLightCount: Retrieve the current amount of active lights
 	* @author: Callan Moore
-	* @return: Light*: The current active light
+	* @return: int: Light count
 	********************/
-	Light* GetActiveLight() { return &m_activeLight; };
+	int GetLightCount() { return m_lightCount; };
+
+	// TO DO CAL
+	int GetWidth() { return m_clientWidth; };
+	int GetHeight() { return m_clientHeight; };
+
+	/***********************
+	* IsFullscreen: Retrieve the current full screen state
+	* @author: Juran Griffith
+	* @return: bool: true when fullscreen is set otherwise false.
+	********************/
+	bool IsFullscreen() { return m_fullScreen; };
 
 private:
 	// Window Variables
 	HWND m_hWnd;
+	int m_windowedWidth;
+	int m_windowedHeight;
 	int m_clientWidth;
 	int m_clientHeight;
 	bool m_fullScreen;
@@ -353,16 +397,16 @@ private:
 
 	// DX10 Variables
 	ID3D10Device*    m_pDX10Device;
-	ID3D10DepthStencilView* m_pDepthStencilView;
-	ID3D10RenderTargetView* m_pRenderTargetView;
 	IDXGISwapChain*  m_pDX10SwapChain;
-	
+	ID3D10RenderTargetView* m_pRenderTargetView;
+	ID3D10DepthStencilView* m_pDepthStencilView;
+
 	ID3D10DepthStencilState* m_pDepthStencilStateNormal;
 	ID3D10DepthStencilState* m_pDepthStencilStateZDisabled;
 
 	// Reflection States
 	ID3D10RasterizerState* m_pRasterizerState_Reflection;
-	
+
 	ID3D10Texture2D* m_pDepthStencilBuffer;
 	D3D10_RASTERIZER_DESC m_rasterizerDesc;
 	ID3D10RasterizerState* m_pRasterizerState;
@@ -389,6 +433,9 @@ private:
 
 	// Lighting
 	Light m_activeLight;
+	std::map<std::string, Light*> m_mapLights;
+	Light* m_pArrLights;
+	int m_lightCount;
 };
 
 #endif // __DX10_RENDERER_H__

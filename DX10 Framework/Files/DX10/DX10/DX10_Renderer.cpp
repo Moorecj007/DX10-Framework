@@ -29,23 +29,26 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 
 	// Save Window Variables
 	m_hWnd = _hWND;
-	m_clientWidth = _clientWidth;
-	m_clientHeight = _clientHeight;
+	m_windowedWidth = _clientWidth;
+	m_windowedHeight = _clientHeight;
 
 	VALIDATE(InitialiseDeviceAndSwapChain());
 
-	m_clearColor = d3dxColors::Black;
+	m_clearColor = BLACK;
 
 	//Initialise the ID Keys for the Maps
 	m_nextInputLayoutID = 0;
 	m_nextBufferID = 0;
 	m_nextTextureID = 0;
 
-	m_activeLight.dir = D3DXVECTOR3(-1.0f, -1.0f, 0);
-	m_activeLight.ambient = D3DXCOLOR(0.05f, 0.05f, 0.05f, 0.05f);
-	m_activeLight.diffuse = D3DXCOLOR(0.7f, 0.7f, 0.7f, 0.7f);
-	m_activeLight.specular = D3DXCOLOR(0.01f, 0.01f, 0.01f, 0.01f);
-
+	Light* pLight = new Light();
+	pLight->type = LT_DIRECTIONAL;
+	pLight->dir_spotPow = D3DXVECTOR4(-1.0f, -1.0f, 0, 0.0f);
+	pLight->ambient = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);
+	pLight->diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	pLight->specular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	AddLight("Main", pLight);
+	
 	return true;
 }
 
@@ -91,6 +94,16 @@ void DX10_Renderer::ShutDown()
 		ReleasePtr(iterBuffers->second);
 		iterBuffers++;
 	}
+
+	// Delete the Graphics memory stored as Lights
+	std::map<std::string, Light*>::iterator iterLights = m_mapLights.begin();
+	while (iterLights != m_mapLights.end())
+	{
+		ReleasePtr(iterLights->second);
+		iterLights++;
+	}
+	
+	ReleasePtr(m_pArrLights);
 	ReleaseCOM(m_pDepthStencilStateNormal);
 	ReleaseCOM(m_pDepthStencilStateZDisabled);
 	ReleaseCOM(m_pDepthStencilView);
@@ -98,8 +111,6 @@ void DX10_Renderer::ShutDown()
 	ReleaseCOM(m_pRenderTargetView);
 	ReleaseCOM(m_pDX10SwapChain);
 	ReleaseCOM(m_pRasterizerState);
-	ReleaseCOM(m_pRasterizerState_Reflection);
-
 	if (m_pDX10Device != 0)
 	{
 		m_pDX10Device->ClearState();
@@ -114,16 +125,15 @@ bool DX10_Renderer::InitialiseDeviceAndSwapChain()
 
 	// Fill out the DXGI Swap Chain Description structure
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
-	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 	swapChainDesc.BufferDesc.Width = m_clientWidth;
 	swapChainDesc.BufferDesc.Height = m_clientHeight;
-	swapChainDesc.BufferDesc.RefreshRate.Numerator = 59;
+	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
-	// Multi sampling per pixel
+	// multi sampling per pixel ( 4 sample only) and High quality
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SampleDesc.Quality = 0;
 
@@ -154,13 +164,13 @@ bool DX10_Renderer::InitialiseDeviceAndSwapChain()
 	m_rasterizerDesc.CullMode = D3D10_CULL_BACK; 
 	m_rasterizerDesc.FillMode = D3D10_FILL_SOLID;
 	m_rasterizerDesc.FrontCounterClockwise = false;
-	m_rasterizerDesc.DepthBias = 0;					
+	m_rasterizerDesc.DepthBias = true;
 	m_rasterizerDesc.DepthBiasClamp = 0;
 	m_rasterizerDesc.SlopeScaledDepthBias = 0;
 	m_rasterizerDesc.DepthClipEnable = true;
 	m_rasterizerDesc.ScissorEnable = false;
 	m_rasterizerDesc.MultisampleEnable = false;
-	m_rasterizerDesc.AntialiasedLineEnable = false;
+	m_rasterizerDesc.AntialiasedLineEnable = true;
 
 	m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc, &m_pRasterizerState);
 	m_pDX10Device->RSSetState(m_pRasterizerState);
@@ -186,7 +196,27 @@ bool DX10_Renderer::onResize()
 	ReleaseCOM(m_pRenderTargetView);
 	ReleaseCOM(m_pDepthStencilView);
 	ReleaseCOM(m_pDepthStencilBuffer);
+	ReleaseCOM(m_pDepthStencilStateNormal);
+	ReleaseCOM(m_pDepthStencilStateZDisabled);
 
+	/*if (m_fullScreen == true)
+	{
+		m_clientWidth = GetSystemMetrics(SM_CXSCREEN);
+		m_clientHeight = GetSystemMetrics(SM_CYSCREEN);
+	}
+	else
+	{
+		m_clientWidth = m_windowedWidth;
+		m_clientHeight = m_windowedHeight;
+	}*/
+
+	RECT rect;
+	if (GetClientRect(m_hWnd, &rect))
+	{
+		m_clientWidth = rect.right - rect.left;
+		m_clientHeight = rect.bottom - rect.top;
+	}
+	
 	// Resize the buffers of the Swap Chain and create the new render target view
 	VALIDATEHR(m_pDX10SwapChain->ResizeBuffers(1, m_clientWidth, m_clientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 
@@ -295,6 +325,11 @@ bool DX10_Renderer::onResize()
 	// Create the state using the device.
 	VALIDATEHR(m_pDX10Device->CreateDepthStencilState(&depthDisabledStencilDesc, &m_pDepthStencilStateZDisabled));
 
+	//VALIDATEHR(m_pDX10Device->CreateDepthStencilView(m_pDepthStencilBuffer, NULL, &m_pDepthStencilView));
+	
+	// Bind the Render Target View to the output-merger stage of the pipeline
+	//m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
+	
 	// Set the View Port for the Device
 	D3D10_VIEWPORT viewPort;
 	viewPort.TopLeftX = 0;
@@ -325,29 +360,6 @@ void DX10_Renderer::ClearScreen()
 	m_pDX10SwapChain->Present(0, 0);
 }
 
-void DX10_Renderer::ApplyDepthStencilState(eDepthState _depthState)
-{
-	switch (_depthState)
-	{
-		case DS_NORMAL:
-		{
-			m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateNormal, 1);
-		}
-		break;
-		case DS_ZDISABLED:
-		{
-			m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateZDisabled, 1);
-		}
-		break;
-		case DS_DEFAULT:	// Fall Through
-		default:
-		{
-			m_pDX10Device->OMSetDepthStencilState(0, 0);
-		}
-		break;
-	}	// End Switch
-}
-
 void DX10_Renderer::ToggleFullscreen()
 {
 	m_fullScreen = !m_fullScreen;
@@ -369,6 +381,29 @@ void DX10_Renderer::ToggleFillMode()
 	ReleaseCOM(m_pRasterizerState);
 	m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc, &m_pRasterizerState);
 	m_pDX10Device->RSSetState(m_pRasterizerState);
+}
+
+void DX10_Renderer::ApplyDepthStencilState(eDepthState _depthState)
+{
+	switch (_depthState)
+	{
+	case DS_NORMAL:
+	{
+		m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateNormal, 1);
+	}
+	break;
+	case DS_ZDISABLED:
+	{
+		m_pDX10Device->OMSetDepthStencilState(m_pDepthStencilStateZDisabled, 1);
+	}
+	break;
+	case DS_DEFAULT:	// Fall Through
+	default:
+	{
+		m_pDX10Device->OMSetDepthStencilState(0, 0);
+	}
+	break;
+	}	// End Switch
 }
 
 bool DX10_Renderer::BuildFX(std::string _fxFileName, std::string _techniqueName, ID3D10Effect*& _prFX, ID3D10EffectTechnique*& _prTech)
@@ -546,7 +581,7 @@ void DX10_Renderer::RestoreDefaultRenderStates()
 	float blendFactors[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	m_pDX10Device->OMSetDepthStencilState(0, 0);
 	m_pDX10Device->OMSetBlendState(0, blendFactors, 0xFFFFFFFF);
-	m_pDX10Device->RSSetState(m_pRasterizerState); 
+	m_pDX10Device->RSSetState(m_pRasterizerState);
 }
 
 bool DX10_Renderer::ReadFileCounts(std::string _fileName, int& _rVertexCount, int& _rTexCount, int& _rNormalCount, int& _rPolygonCount)
@@ -623,6 +658,7 @@ bool DX10_Renderer::LoadMeshObj(std::string _fileName, TVertexNormalUV*& _prVert
 	int nIndex;
 	char input;
 	char input2;
+	//ofstream fout;
 
 	// Initialize the four data structures.
 	pVertices = new v3float[vertexCount];
@@ -715,8 +751,6 @@ bool DX10_Renderer::LoadMeshObj(std::string _fileName, TVertexNormalUV*& _prVert
 
 	// Close the file.
 	fin.close();
-
-
 
 	TVertexNormalUV* pVertexBuffer = new TVertexNormalUV[polygonCount * 3];
 	DWORD* pIndexBuffer = new DWORD[polygonCount * 3];
@@ -834,8 +868,73 @@ void DX10_Renderer::ReflectLightsAcrossPlane(D3DXPLANE _plane)
 {
 	// Create a reflection matrix and reflect all active lights
 	D3DXMATRIX matReflect = CreateReflectionMatrix(_plane);
-	D3DXVec3TransformNormal(&m_activeLight.dir, &m_activeLight.dir, &matReflect);
+
+	std::map<std::string, Light*>::iterator iterLights = m_mapLights.begin();
+	while (iterLights != m_mapLights.end())
+	{
+		D3DXVECTOR4 tempDirPow = iterLights->second->dir_spotPow;
+		D3DXVECTOR3 tempDir = { tempDirPow.x, tempDirPow.y, tempDirPow.z };
+		D3DXVec3TransformNormal(&tempDir, &tempDir, &matReflect);
+
+		tempDirPow = { tempDir.x, tempDir.y, tempDir.z, tempDirPow.w };
+		iterLights->second->dir_spotPow = tempDirPow;
+
+		iterLights++;
+	}
 }
+
+bool DX10_Renderer::AddLight(std::string _lightName, Light* _light)
+{
+	// Delete the pointer to current array of lights
+	ReleasePtr(m_pArrLights);
+
+	// Create a pair of the Light name and the Light
+	std::pair<std::string, Light*> pairLight(_lightName, _light);
+
+	// Insert the pair and validate the insertion
+	VALIDATE(m_mapLights.insert(pairLight).second);
+
+	// Re-create the array of lights for passing to shaders
+	m_pArrLights = new Light[m_mapLights.size()];
+	std::map<std::string, Light*>::iterator iterLights = m_mapLights.begin();
+	int index = 0;
+	while (iterLights != m_mapLights.end())
+	{
+		m_pArrLights[index] = *iterLights->second;
+
+		index++;
+		iterLights++;
+	}
+	m_lightCount = index;
+
+	return true;
+}
+
+void DX10_Renderer::RemoveLight(std::string _lightName)
+{
+	ReleasePtr(m_mapLights.find(_lightName)->second);
+	m_mapLights.erase(_lightName);
+}
+
+Light* DX10_Renderer::GetActiveLights()
+{
+	// Delete the pointer to current array of lights
+	ReleasePtr(m_pArrLights);
+
+	m_pArrLights = new Light[m_mapLights.size()];
+	std::map<std::string, Light*>::iterator iterLights = m_mapLights.begin();
+	int index = 0;
+	while (iterLights != m_mapLights.end())
+	{
+		m_pArrLights[index] = *iterLights->second;
+
+		index++;
+		iterLights++;
+	}
+	m_lightCount = index;
+
+	return m_pArrLights;
+};
 
 void DX10_Renderer::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY _primitiveType)
 {
@@ -848,8 +947,13 @@ bool DX10_Renderer::SetInputLayout(ID3D10InputLayout* _pVertexLayout)
 	return true;
 }
 
+void DX10_Renderer::SetViewMatrix(D3DXMATRIX _view)
+{
+	m_matView = _view;
+}
+
 void DX10_Renderer::CalcProjMatrix()
 {
-	float aspect = float(m_clientWidth) / float(m_clientHeight);
-	D3DXMatrixPerspectiveFovLH(&m_matProj, 0.25f*PI, aspect, 1.0f, 6000.0f);
+	float aspect = float(m_clientWidth) / m_clientHeight;
+	D3DXMatrixPerspectiveFovLH(&m_matProj, 0.25f*PI, aspect, 1.0f, 10000.0f);
 }

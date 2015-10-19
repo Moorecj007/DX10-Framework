@@ -31,7 +31,7 @@ DX10_Obj_LitTex::~DX10_Obj_LitTex()
 
 bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, DX10_Shader_LitTex* _pShader, std::vector<std::string>* _pTexNames, float _animationSpeed)
 {
-	if (_pRenderer == 0 || _pMesh == 0 || _pShader == 0 || _pTexNames == 0|| _animationSpeed <= 0)
+	if (_pRenderer == 0 || _pMesh == 0 || _pShader == 0 || _pTexNames == 0 || _animationSpeed <= 0)
 	{
 		// If any pointers are NULL, Object cannot be initialized
 		return false;
@@ -52,7 +52,7 @@ bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, D
 	m_animating = true;
 
 	// Create each Texture as a ShaderResourceViews
-	m_pTextures = new std::vector<ID3D10ShaderResourceView*>;
+	m_pTextures = new std::vector < ID3D10ShaderResourceView* > ;
 	for (UINT i = 0; i < _pTexNames->size(); i++)
 	{
 		ID3D10ShaderResourceView* pTempTex = 0;
@@ -79,7 +79,7 @@ bool DX10_Obj_LitTex::Initialise(DX10_Renderer* _pRenderer, DX10_Mesh* _pMesh, D
 	m_pShader = _pShader;
 
 	// Create the Texture as a ShaderResourceView
-	m_pTextures = new std::vector<ID3D10ShaderResourceView*>;
+	m_pTextures = new std::vector < ID3D10ShaderResourceView* > ;
 	ID3D10ShaderResourceView* pTempTex = 0;
 	VALIDATE(m_pRenderer->CreateTexture(_texName, pTempTex));
 	m_pTextures->push_back(pTempTex);
@@ -104,7 +104,7 @@ void DX10_Obj_LitTex::Render(eTech_LitTex _tech, D3DXPLANE _plane)
 
 	D3DXMATRIX* pMatWorldTemp = new D3DXMATRIX();
 	if (_tech == TECH_LITTEX_REFLECT)
-	{	
+	{
 		// Apply Rasterizer state for the Reflection Technique
 		m_pRenderer->ApplyFrontCCWCullingRS();
 

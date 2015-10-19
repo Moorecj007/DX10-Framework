@@ -1,13 +1,17 @@
+//=============================================================================
+// Sprite.fx                                                                                                   
+// Author: Juran Griffith.
+// Handles all sprite rendering.
+//=============================================================================
+
 //--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
-cbuffer cbPerFrame
-{
-	matrix World			: WORLD;
-	matrix View				: VIEW;
-	matrix Projection		: PROJECTION;
-	float DeltaTime			: TIME;
-}
+matrix World			: WORLD;
+matrix View				: VIEW;
+matrix Projection		: PROJECTION;
+
+float DeltaTime			: TIME;
 
 Texture2D Texture;
 
@@ -26,8 +30,8 @@ SamplerState SampleType // The sampler state allows us to modify how the pixels 
 //--------------------------------------------------------------------------------------
 struct PS_INPUT
 {
-	float4 Pos : SV_POSITION;
-	float2 Tex : TEXCOORD0;
+	float4 position : SV_POSITION;
+	float2 texC : TEXCOORD0;
 };
 
 // For transparency values
@@ -46,20 +50,16 @@ BlendState SrcAlphaBlendingAdd
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
-PS_INPUT VS(float4 Pos : POSITION, float2 Tex : TEXCOORD0)
+PS_INPUT VS_Default(float3 position : POSITION, float2 texC : TEXCOORD0)
 {
 	PS_INPUT output;
 
-	// Change the position vector to be 4 units for proper matrix calculations.
-	Pos.w = 1.0f;
-
 	// Calculate the position of the vertex against the world, view, and projection matrices.
-	output.Pos = mul(Pos, World);
-	output.Pos = mul(output.Pos, View);
-	output.Pos = mul(output.Pos, Projection);
+	output.position = mul(float4(position, 1.0f), World);
+	output.position = mul(output.position, View);
+	output.position = mul(output.position, Projection);
 
-	// Store the texture coordinates for the pixel shader.
-	output.Tex = Tex;
+	output.texC = texC;
 
 	return output;
 }
@@ -67,26 +67,26 @@ PS_INPUT VS(float4 Pos : POSITION, float2 Tex : TEXCOORD0)
 //--------------------------------------------------------------------------------------
 // Pixel Shader
 //--------------------------------------------------------------------------------------
-float4 PS(PS_INPUT _input) : SV_Target
+float4 PS_Default(PS_INPUT _input) : SV_Target
 {
 	float4 textureColor;
 
 	// Sample the pixel color from the texture using the sampler at this texture coordinate location.
-	textureColor = Texture.Sample(SampleType, _input.Tex);
+	textureColor = Texture.Sample(SampleType, _input.texC);
 
 	return textureColor;
 }
 
 //--------------------------------------------------------------------------------------
-// Technique
+// Render Technique
 //--------------------------------------------------------------------------------------
 technique10 Render
 {
 	pass P0
 	{
-		SetVertexShader(CompileShader(vs_4_0, VS()));
+		SetVertexShader(CompileShader(vs_4_0, VS_Default()));
 		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_4_0, PS()));
+		SetPixelShader(CompileShader(ps_4_0, PS_Default()));
 
 		// For transparency values
 		SetBlendState(SrcAlphaBlendingAdd, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);

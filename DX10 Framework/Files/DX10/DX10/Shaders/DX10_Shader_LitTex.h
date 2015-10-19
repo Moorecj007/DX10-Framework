@@ -37,10 +37,6 @@ struct TLitTex
 	D3DXPLANE plane;
 };
 
-/***********************
-* eTech_LitTex: Enum for the different Techniques available for this shader
-* @author: Callan Moore
-********************/
 enum eTech_LitTex
 {
 	TECH_LITTEX_STANDARD,
@@ -130,9 +126,12 @@ public:
 			for (UINT p = 0; p < techDesc.Passes; ++p)
 			{
 				D3DXMATRIX matWorld = *_litTex.pMatWorld;
-				
+
 				// Prepare the Input Variables to be sent to the GPU
-				m_pLight->SetRawValue(m_pDX10_Renderer->GetActiveLight(), 0, sizeof(Light));
+				int lightCount = m_pDX10_Renderer->GetLightCount();
+
+				m_pLight->SetRawValue(m_pDX10_Renderer->GetActiveLights(), 0, lightCount * sizeof(Light));
+				m_pLightCount->SetInt(lightCount);
 				m_pMatView->SetMatrix((float*)m_pDX10_Renderer->GetViewMatrix());
 				m_pMatWorld->SetMatrix((float*)&matWorld);
 				m_pMatTex->SetMatrix((float*)&matTex);
@@ -140,7 +139,7 @@ public:
 				m_pMapSpecular->SetResource(m_pSpecularTex);
 				m_pReduceAlpha->SetRawValue(&_litTex.reduceAlpha, 0, sizeof(float));
 				m_pPlane->SetFloatVector(_litTex.plane);
-						
+
 				if (_eTech == TECH_LITTEX_BLENDTEX2)
 				{
 					// Additional Variable for BlendTex2 technique
@@ -151,7 +150,7 @@ public:
 				m_pCurrentTech->GetPassByIndex(p)->Apply(0);
 
 				// Render the Objects Mesh using the loaded technique
-				_litTex.pMesh->Render();			
+				_litTex.pMesh->Render();
 			}
 		}
 
@@ -186,12 +185,14 @@ private:
 	bool CreateFXVarPointers()
 	{
 		// Per Frame	
-		m_pLight = m_pFX->GetVariableByName("g_light");
+		
 		m_pEyePos = m_pFX->GetVariableByName("g_eyePosW");
 		m_pMatView = m_pFX->GetVariableByName("g_matView")->AsMatrix();
 		m_pMatProj = m_pFX->GetVariableByName("g_matProj")->AsMatrix();
 
 		// Per Object	
+		m_pLight = m_pFX->GetVariableByName("g_light");
+		m_pLightCount = m_pFX->GetVariableByName("g_lightCount")->AsScalar();
 		m_pMatWorld = m_pFX->GetVariableByName("g_matWorld")->AsMatrix();
 		m_pMatTex = m_pFX->GetVariableByName("g_matTex")->AsMatrix();
 		m_pReduceAlpha = m_pFX->GetVariableByName("g_reduceAlpha")->AsScalar();
@@ -234,7 +235,7 @@ private:
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D10_INPUT_PER_VERTEX_DATA, 0 }
 		};
 		UINT elementNum = sizeof(vertexDesc) / sizeof(vertexDesc[0]);
-		
+
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Standard, m_pVertexLayout_Standard);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Fade, m_pVertexLayout_Fade);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_BlendTex2, m_pVertexLayout_BlendTex2);
@@ -255,12 +256,6 @@ private:
 	{
 		switch (_tech)
 		{
-			case TECH_LITTEX_REFLECT:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_Reflect;
-				m_pCurrentTech = m_pTech_Reflect;
-			}
-			break;
 			case TECH_LITTEX_STANDARD:
 			{
 				m_pCurrentVertexLayout = m_pVertexLayout_Standard;
@@ -278,7 +273,11 @@ private:
 				m_pCurrentVertexLayout = m_pVertexLayout_BlendTex2;
 				m_pCurrentTech = m_pTech_BlendTex2;
 			}
-			break;
+			case TECH_LITTEX_REFLECT:
+			{
+				m_pCurrentVertexLayout = m_pVertexLayout_Reflect;
+				m_pCurrentTech = m_pTech_Reflect;
+			}
 			case TECH_LITTEX_REFRACT:
 			{
 				m_pCurrentVertexLayout = m_pVertexLayout_Refract;
@@ -320,10 +319,10 @@ private:
 	ID3D10EffectTechnique* m_pTech_Reflect;
 	ID3D10EffectTechnique* m_pTech_Star;
 
-
 	DX10_Renderer*						m_pDX10_Renderer;
 
 	ID3D10EffectVariable*				m_pLight;
+	ID3D10EffectScalarVariable*			m_pLightCount;
 	ID3D10EffectVariable*				m_pEyePos;
 	ID3D10EffectMatrixVariable*			m_pMatView;
 	ID3D10EffectMatrixVariable*			m_pMatProj;
@@ -332,6 +331,7 @@ private:
 	ID3D10EffectMatrixVariable*			m_pMatTex;
 	ID3D10EffectVariable*				m_pReduceAlpha;
 	ID3D10EffectVectorVariable*			m_pPlane;
+	
 
 	ID3D10EffectShaderResourceVariable* m_pMapDiffuse;
 	ID3D10EffectShaderResourceVariable* m_pMapDiffuse2;

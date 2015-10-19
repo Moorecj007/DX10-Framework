@@ -217,7 +217,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pShader_LitTex->Initialise(m_pDX10_Renderer));
 
 	m_pShader_Sprite = new DX10_Shader_Sprite();
-	VALIDATE(m_pShader_Sprite->Initialize(m_pDX10_Renderer, &m_hWnd));
+	VALIDATE(m_pShader_Sprite->Initialise(m_pDX10_Renderer, &m_hWnd));
 
 	m_pShader_Water = new DX10_Shader_Water();
 	VALIDATE(m_pShader_Water->Initialise(m_pDX10_Renderer));
@@ -227,9 +227,13 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pMesh_Terrain->InitialisePlane(m_pDX10_Renderer, 65, { 10, 10, 10 }));
 
 	// Create the Objects
-	m_pSprite_Instructions = new DXSprite();
-	VALIDATE(m_pSprite_Instructions->Initialize(&m_hWnd, m_pDX10_Renderer, m_pShader_Sprite, "InstructionsBlue.png", 384, 140));
-	m_pSprite_Instructions->SetPosition(0, 1);
+	m_pSprite_InstructionsLeft = new DXSprite();
+	VALIDATE(m_pSprite_InstructionsLeft->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsBlue.png", 384, 140));
+	m_pSprite_InstructionsLeft->SetPosition(5, 5);
+
+	m_pSprite_InstructionsRight = new DXSprite();
+	VALIDATE(m_pSprite_InstructionsRight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsBlue.png", 384, 140));
+	m_pSprite_InstructionsRight->SetPosition(600, 5);
 
 	m_pObj_Terrain = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "WaterMap.png"));
@@ -269,7 +273,8 @@ void Application::ShutDown()
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Terrain);
 		// Release the Objects
-		ReleasePtr(m_pSprite_Instructions);
+		ReleasePtr(m_pSprite_InstructionsLeft);
+		ReleasePtr(m_pSprite_InstructionsRight);
 		ReleasePtr(m_pObj_Terrain);
 		// Release the Texture Resources
 		ReleasePtr(m_pRefractionTexture);
@@ -324,7 +329,6 @@ bool Application::Process(float _dt)
 		ProcessShaders();
 
 		m_pObj_Terrain->Process(_dt);
-
 	}
 
 	return true;
@@ -343,8 +347,8 @@ void Application::Render()
 	if (m_pDX10_Renderer != 0)
 	{
 		// Render the Refraction and Reflection Textures
-		//RenderRefraction();
-		//RenderReflection();
+		RenderRefraction();
+		RenderReflection();
 		
 		// Tell the Renderer that the data input for the back buffer is about to commence
 		m_pDX10_Renderer->StartRender();
@@ -353,7 +357,8 @@ void Application::Render()
 		m_pObj_Terrain->Render();
 		
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
-		m_pSprite_Instructions->Render();
+		m_pSprite_InstructionsLeft->Render();
+		m_pSprite_InstructionsRight->Render();
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_NORMAL);
 		
 		// Tell the Renderer the data input is over and present the outcome
@@ -384,7 +389,7 @@ void Application::RenderReflection()
 	m_pReflectionTexture->ClearRenderTarget();
 
 	// Create a mirror plane for the reflective surface
-	D3DXPLANE mirrorPlane = { 0.0f, 1.0f, 0.0f, 0.0f };
+	D3DXPLANE mirrorPlane = { 0.0f, -1.0f, 0.0f, 0.0f };
 
 	// Reflect the Lights across the plane so they are lighting the correct sides of the reflected objects
 	m_pDX10_Renderer->ReflectLightsAcrossPlane(mirrorPlane);
