@@ -62,7 +62,7 @@ bool Menu::Initialize(DX10_Renderer*_pDX10_Renderer, HWND* _pHWnd, InputGamePad*
 	m_menuItem = 0;
 
 	m_pShader_Sprite = new DX10_Shader_Sprite();
-	VALIDATE(m_pShader_Sprite->Initialize(m_pDX10_Renderer, m_pHWnd));
+	VALIDATE(m_pShader_Sprite->Initialise(m_pDX10_Renderer, m_pHWnd));
 
 	return true;
 }

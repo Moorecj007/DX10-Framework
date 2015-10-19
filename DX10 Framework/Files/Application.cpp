@@ -224,12 +224,12 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Meshes
 	m_pMesh_Terrain = new DX10_Mesh();
-	VALIDATE(m_pMesh_Terrain->InitialisePlane(m_pDX10_Renderer, 5, { 10, 10, 10 }));
+	VALIDATE(m_pMesh_Terrain->InitialisePlane(m_pDX10_Renderer, 65, { 10, 10, 10 }));
 
 	// Create the Objects
 	m_pSprite_Instructions = new DXSprite();
 	VALIDATE(m_pSprite_Instructions->Initialize(&m_hWnd, m_pDX10_Renderer, m_pShader_Sprite, "InstructionsBlue.png", 384, 140));
-	m_pSprite_Instructions->SetPosition(5, -10);
+	m_pSprite_Instructions->SetPosition(0, 1);
 
 	m_pObj_Terrain = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "WaterMap.png"));
@@ -237,11 +237,6 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
 	m_pDX10_Renderer->CreateTextureResource(m_pReflectionTexture);
-
-
-
-	// TO DO CAL
-	m_pMesh_Terrain->DiamondSquare(0);
 
 	return true;
 }
@@ -357,7 +352,6 @@ void Application::Render()
 		// Render the Objects of the Scene
 		m_pObj_Terrain->Render();
 		
-
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		m_pSprite_Instructions->Render();
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_NORMAL);
@@ -425,6 +419,24 @@ bool Application::HandleInput()
 		m_pDX10_Renderer->ToggleFillMode();
 
 		SetKeyDown(VK_F2, false);
+	}
+
+	if (m_pKeyDown[0x31])
+	{
+		m_pMesh_Terrain->DiamondSquare();
+		SetKeyDown(0x31, false);
+	}
+
+	if (m_pKeyDown[0x32])
+	{
+		m_pMesh_Terrain->Smooth();
+		SetKeyDown(0x32, false);
+	}
+
+	if (m_pKeyDown[0x33])
+	{
+		m_pMesh_Terrain->ResetPlane();
+		SetKeyDown(0x33, false);
 	}
 
 	// Camera Controls

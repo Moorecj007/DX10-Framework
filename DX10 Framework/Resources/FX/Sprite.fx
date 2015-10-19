@@ -1,11 +1,13 @@
 //--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
-matrix World			: WORLD;
-matrix View				: VIEW;
-matrix Projection		: PROJECTION;
-
-float DeltaTime : TIME;
+cbuffer cbPerFrame
+{
+	matrix World			: WORLD;
+	matrix View				: VIEW;
+	matrix Projection		: PROJECTION;
+	float DeltaTime			: TIME;
+}
 
 Texture2D Texture;
 

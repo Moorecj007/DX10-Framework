@@ -30,19 +30,19 @@ bool DX10_Camera_FirstPerson::Initialise(DX10_Renderer* _pRenderer, HINSTANCE _h
 	m_pDirectInput = new DirectInput();
 	VALIDATE(m_pDirectInput->Initialise(_hInstance, _hWnd));
 
-	m_position = D3DXVECTOR3(0.0f, 20.0f, -00.0f);
+	m_position = D3DXVECTOR3(00.0f, 1500.0f, -1000.0f);
 	m_target = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	m_forward = D3DXVECTOR3(1.0f, 0.0f, 1.0f);
+	m_right = D3DXVECTOR3(1.0f, 0.0f, -1.0f);
 	m_defaultForward = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 	m_defaultRight = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
-	m_forward = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
-	m_right = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
 
 	m_moveStrafe = 0.0f;
 	m_moveForwards = 0.0f;
 	m_moveFly = 0.0f;
 	m_yaw = 0.0f;
-	m_pitch = 0.0f;
+	m_pitch = DegreesToRadians(45);
 	m_yawChange = 0.0f;
 	m_pitchChange = 0.0f;
 
