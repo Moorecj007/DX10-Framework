@@ -111,6 +111,7 @@ void DX10_Renderer::ShutDown()
 	ReleaseCOM(m_pRenderTargetView);
 	ReleaseCOM(m_pDX10SwapChain);
 	ReleaseCOM(m_pRasterizerState);
+	ReleaseCOM(m_pRasterizerState_Reflection);
 	if (m_pDX10Device != 0)
 	{
 		m_pDX10Device->ClearState();

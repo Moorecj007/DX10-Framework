@@ -46,7 +46,7 @@ bool DX10_Camera_FirstPerson::Initialise(DX10_Renderer* _pRenderer, HINSTANCE _h
 	m_yawChange = 0.0f;
 	m_pitchChange = 0.0f;
 
-	m_speed = 20.0f;
+	m_speed = 200.0f;
 	m_rotSpeed = DegreesToRadians(90.0f);
 
 	m_maxRotation = DegreesToRadians(89.0f);

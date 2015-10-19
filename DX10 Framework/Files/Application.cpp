@@ -219,20 +219,17 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pShader_Sprite = new DX10_Shader_Sprite();
 	VALIDATE(m_pShader_Sprite->Initialise(m_pDX10_Renderer, &m_hWnd));
 
-	m_pShader_Water = new DX10_Shader_Water();
-	VALIDATE(m_pShader_Water->Initialise(m_pDX10_Renderer));
-
 	// Create the Meshes
 	m_pMesh_Terrain = new DX10_Mesh();
 	VALIDATE(m_pMesh_Terrain->InitialisePlane(m_pDX10_Renderer, 65, { 10, 10, 10 }));
 
 	// Create the Objects
 	m_pSprite_InstructionsLeft = new DXSprite();
-	VALIDATE(m_pSprite_InstructionsLeft->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsBlue.png", 384, 140));
+	VALIDATE(m_pSprite_InstructionsLeft->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsRed.png", 384, 140));
 	m_pSprite_InstructionsLeft->SetPosition(5, 5);
 
 	m_pSprite_InstructionsRight = new DXSprite();
-	VALIDATE(m_pSprite_InstructionsRight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsBlue.png", 384, 140));
+	VALIDATE(m_pSprite_InstructionsRight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsRightRed.png", 384, 140));
 	m_pSprite_InstructionsRight->SetPosition(600, 5);
 
 	m_pObj_Terrain = new DX10_Obj_LitTex();
@@ -268,7 +265,6 @@ void Application::ShutDown()
 		ReleasePtr(m_pCamera);
 		// Release the Shaders
 		ReleasePtr(m_pShader_LitTex);
-		ReleasePtr(m_pShader_Water);
 		ReleasePtr(m_pShader_Sprite);
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Terrain);
@@ -337,7 +333,6 @@ bool Application::Process(float _dt)
 void Application::ProcessShaders()
 {
 	m_pShader_LitTex->SetUpPerFrame();
-	m_pShader_Water->SetUpPerFrame();
 	m_pShader_Sprite->Update(m_deltaTick);
 }
 
@@ -347,8 +342,8 @@ void Application::Render()
 	if (m_pDX10_Renderer != 0)
 	{
 		// Render the Refraction and Reflection Textures
-		RenderRefraction();
-		RenderReflection();
+		//RenderRefraction();
+		//RenderReflection();
 		
 		// Tell the Renderer that the data input for the back buffer is about to commence
 		m_pDX10_Renderer->StartRender();
@@ -414,9 +409,10 @@ bool Application::HandleInput()
 	// Template Inputs
 	if (m_pKeyDown[VK_F1])
 	{
-		m_pDX10_Renderer->ToggleFullscreen();
-
-		SetKeyDown(VK_F1, false);
+		//m_pDX10_Renderer->ToggleFullscreen();
+		//UpdateClientSize();
+		//
+		//SetKeyDown(VK_F1, false);
 	}
 
 	if (m_pKeyDown[VK_F2])
@@ -428,7 +424,11 @@ bool Application::HandleInput()
 
 	if (m_pKeyDown[0x31])
 	{
-		m_pMesh_Terrain->DiamondSquare();
+		if (m_pMesh_Terrain->DiamondSquare() == false)
+		{
+			MessageBoxA(m_hWnd, "Maximum iterations have been reached. Try applying the smoothing algorithm by pressing '2'", "Information", MB_OK | MB_ICONINFORMATION);
+			memset(m_pKeyDown, false, 255);
+		}
 		SetKeyDown(0x31, false);
 	}
 
@@ -490,7 +490,7 @@ bool Application::HandleInput()
 	if ((m_pKeyDown[VK_DOWN]) && !(m_pKeyDown[VK_UP]))
 	{
 		// Up arrow pressed
-		m_pCamera->RotatePitch(1);
+		m_pCamera->RotatePitch(1); 
 	}
 
 	if ((m_pKeyDown[VK_LEFT]) && !(m_pKeyDown[VK_RIGHT]))
@@ -519,4 +519,24 @@ void Application::ExitApp()
 		}
 	}
 	m_online = false;	// Changing this to false will cause the main application loop to end -> quitting the application
+}
+
+void Application::UpdateClientSize()
+{
+	float width = static_cast<float>(m_pDX10_Renderer->GetWidth());
+	float height = static_cast<float>(m_pDX10_Renderer->GetHeight());
+
+
+	float diff = max(width, height) - min(width, height);
+
+	if (max(width, height) == width)
+	{
+		m_pSprite_InstructionsLeft->SetPosition((diff / 2.0f), 0.0f);
+		m_pSprite_InstructionsRight->SetPosition(width - 400.0f, 0.0f);
+	}
+	else
+	{
+		m_pSprite_InstructionsLeft->SetPosition(0.0f, (diff / 2.0f));
+		m_pSprite_InstructionsRight->SetPosition(0.0f, height - 400.0f);
+	}
 }

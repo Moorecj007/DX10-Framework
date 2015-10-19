@@ -53,6 +53,7 @@ public:
 		ReleasePtr(m_pIndexBuffer);
 		ReleasePtr(m_pReadCornerIndices);
 		ReleasePtr(m_pWriteCornerIndices);
+		ReleasePtrArray(m_pVertexCalculated);
 	}
 
 	/***********************
@@ -240,6 +241,9 @@ public:
 		m_pWriteCornerIndices = new std::vector<UINT>;
 		m_pReadCornerIndices = new std::vector<UINT>;
 
+		m_pVertexCalculated = new bool[m_vertexCount];
+		memset(m_pVertexCalculated, false, m_vertexCount);
+
 		// Seed the four corners to half of the plane size
 		m_pVertexBuffer[0].pos.y = (float)(m_size - 1) * m_scale.y / 2.0f;
 		m_pVertexBuffer[m_size - 1].pos.y = (float)(m_size - 1) * m_scale.y / 2.0f;
@@ -262,16 +266,16 @@ public:
 	/***********************
 	* DiamondSquare: Calculates the next step of the Diamond-Square algorithm
 	* @author: Callan Moore
-	* @return: void
+	* @return: bool: Successful or not
 	********************/
-	void DiamondSquare()
+	bool DiamondSquare()
 	{
-		// Check if the Initialisation for the DS alorithm has happened
+		// Check if the Initialization for the DS algorithm has happened
 		if (m_initialisedDS == false)
 		{
 			DiamondSquareInit();
 			m_initialisedDS = true;
-			return;
+			return true;
 		}
 
 		// Run only if they max iterations has not happened
@@ -308,32 +312,40 @@ public:
 				m_pVertexBuffer[centre].pos.y += (m_pVertexBuffer[topLeft].pos.y + m_pVertexBuffer[topRight].pos.y + m_pVertexBuffer[bottomLeft].pos.y + m_pVertexBuffer[bottomRight].pos.y) / 4;
 
 				//Check if the Left middle position of the square has already been calculated
-				if (m_pVertexBuffer[left].pos.y == 0.0f)
+				if (m_pVertexCalculated[left] == false)
 				{
 					float random = (float)(rand() % 1000 - 500) / 500;
 					float modifier = random * roughness;
+
 					m_pVertexBuffer[left].pos.y += (m_pVertexBuffer[topLeft].pos.y + m_pVertexBuffer[topRight].pos.y) / 2 + modifier;
+					m_pVertexCalculated[left] = true;
 				}
 				//Check if the top middle position of the square has already been calculated
-				if (m_pVertexBuffer[top].pos.y == 0.0f)
+				if (m_pVertexCalculated[top] == false)
 				{
 					float random = (float)(rand() % 1000 - 500) / 500;
 					float modifier = random * roughness;
+
 					m_pVertexBuffer[top].pos.y += (m_pVertexBuffer[topLeft].pos.y + m_pVertexBuffer[bottomLeft].pos.y) / 2 + modifier;
+					m_pVertexCalculated[top] = true;
 				}
 				//Check if the right middle position of the square has already been calculated
-				if (m_pVertexBuffer[right].pos.y == 0.0f)
+				if (m_pVertexCalculated[right] == false)
 				{
 					float random = (float)(rand() % 1000 - 500) / 500;
 					float modifier = random * roughness;
+
 					m_pVertexBuffer[right].pos.y += (m_pVertexBuffer[bottomLeft].pos.y + m_pVertexBuffer[bottomRight].pos.y) / 2 + modifier;
+					m_pVertexCalculated[right] = true;
 				}
 				//Check if the bottom middle position of the square has already been calculated
-				if (m_pVertexBuffer[bottom].pos.y == 0.0f)
+				if (m_pVertexCalculated[bottom] == false)
 				{
 					float random = (float)(rand() % 1000 - 500) / 500;
 					float modifier = random * roughness;
+
 					m_pVertexBuffer[bottom].pos.y += (m_pVertexBuffer[topRight].pos.y + m_pVertexBuffer[bottomRight].pos.y) / 2 + modifier;
+					m_pVertexCalculated[bottom] = true;
 				}
 
 				// Update the Buffer to reflect the changes
@@ -376,8 +388,10 @@ public:
 		}
 		else
 		{
-			MessageBoxA(NULL, "Maximum iterations have been reached. Try applying the smoothing algorithm by pressing '2'", "Information", MB_OK | MB_ICONINFORMATION);
+			return false;
 		}
+
+		return true;
 	}
 
 	/***********************
@@ -417,6 +431,7 @@ public:
 
 		ReleasePtr(m_pWriteCornerIndices);
 		ReleasePtr(m_pReadCornerIndices);
+		ReleasePtrArray(m_pVertexCalculated);
 		m_initialisedDS = false;
 	}
 	
@@ -591,6 +606,7 @@ private:
 	int m_size;
 	std::vector<UINT>* m_pWriteCornerIndices;
 	std::vector<UINT>* m_pReadCornerIndices;
+	bool* m_pVertexCalculated;
 	bool m_initialisedDS;
 	int m_iterationsLeft;
 };

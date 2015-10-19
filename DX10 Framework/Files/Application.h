@@ -207,6 +207,13 @@ private:
 	@return:	void
 	********************/
 	void ExitApp();
+	
+	/***********************
+	* UpdateClientSize: Update the client size for all components that use screen size
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void UpdateClientSize();
 
 private:
 	// Singleton Instance
@@ -237,7 +244,6 @@ private:
 
 	// Shaders
 	DX10_Shader_LitTex* m_pShader_LitTex;
-	DX10_Shader_Water* m_pShader_Water;
 	DX10_Shader_Sprite* m_pShader_Sprite;
 
 	// Meshes
