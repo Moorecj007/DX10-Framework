@@ -34,7 +34,7 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 
 	VALIDATE(InitialiseDeviceAndSwapChain());
 
-	m_clearColor = BLACK;
+	m_clearColor = YELLOW;
 
 	//Initialise the ID Keys for the Maps
 	m_nextInputLayoutID = 0;
@@ -43,7 +43,7 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 
 	Light* pLight = new Light();
 	pLight->type = LT_DIRECTIONAL;
-	pLight->dir_spotPow = D3DXVECTOR4(-1.0f, -1.0f, 0, 0.0f);
+	pLight->dir_spotPow = D3DXVECTOR4(-1.0f, 1.0f, 0, 0.0f);
 	pLight->ambient = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);
 	pLight->diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	pLight->specular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);

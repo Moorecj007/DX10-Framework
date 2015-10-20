@@ -66,6 +66,11 @@ public:
 	********************/
 	bool DX10_Mesh::Initialise(DX10_Renderer* _pRenderer, eMeshType _meshType, v3float _scale)
 	{
+		if (_pRenderer == 0)
+		{
+			return false;
+		}
+
 		// Save the renderer on the Rectangular Prism
 		m_pRenderer = _pRenderer;
 		m_scale = _scale;
@@ -92,6 +97,11 @@ public:
 	********************/
 	bool DX10_Mesh::InitialisePlane(DX10_Renderer* _pRenderer, int _size, v3float _scale)
 	{
+		if (_pRenderer == 0)
+		{
+			return false;
+		}
+
 		m_pRenderer = _pRenderer;
 		m_scale = _scale;
 		m_primTopology = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
@@ -103,8 +113,8 @@ public:
 	
 		for (int i = 0; i < m_vertexCount; i++)
 		{
-			int col = (int)(i / _size);
-			int row = i % _size;
+			int row = (int)(i / _size);
+			int col = i % _size;
 
 			m_pVertexBuffer[i].pos = D3DXVECTOR3(((col - (float)(_size - 1) / 2.0f) * m_scale.x), 0.0f, ((row - (float)(_size - 1) / 2.0f) * m_scale.z));
 			m_pVertexBuffer[i].normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
@@ -117,36 +127,36 @@ public:
 		int index = 0;
 
 		// Cycle through all rows except last one
-		for (int col = 0; col < _size - 1; col++)
+		for (int row = 0; row < _size - 1; row++)
 		{
-			if (col % 2 == 0)	// Even Col
+			if (row % 2 == 0)	// Even Row
 			{
-				// Even Col go Right to Left for Clockwise winding order
-				for (int row = (int)(_size - 1); row >= 0; row--)
+				// Even Row go Right to Left for Clockwise winding order
+				for (int col = (int)(_size - 1); col >= 0; col--)
 				{
-					m_pIndexBuffer[index++] = (row + (col * _size));
-					m_pIndexBuffer[index++] = (row + ((col + 1) * _size));
+					m_pIndexBuffer[index++] = (col + (row * _size));
+					m_pIndexBuffer[index++] = (col + ((row + 1) * _size));
 				}
 
-				// Add Degenerate triangle at end of each Col
-				if (col != _size - 2)
+				// Add Degenerate triangle at end of each Row
+				if (row != _size - 2)
 				{
-					m_pIndexBuffer[index++] = (0 + ((col + 1) * _size));
+					m_pIndexBuffer[index++] = (0 + ((row + 1) * _size));
 				}
 			}
-			else	// Odd Col
+			else	// Odd Row
 			{
-				// Even Col go Left to Right for Clockwise winding order
-				for (int row = 0; row < _size; row++)
+				// Even Row go Left to Right for Clockwise winding order
+				for (int col = 0; col < _size; col++)
 				{
-					m_pIndexBuffer[index++] = (row + (col * _size));
-					m_pIndexBuffer[index++] = (row + ((col + 1) * _size));
+					m_pIndexBuffer[index++] = (col + (row * _size));
+					m_pIndexBuffer[index++] = (col + ((row + 1) * _size));
 				}
 
-				// Add Degenerate triangle at end of each Col
-				if (col != _size - 2)
+				// Add Degenerate triangle at end of each Row
+				if (row != _size - 2)
 				{
-					m_pIndexBuffer[index++] = ((_size - 1) + ((col + 1)  * _size));
+					m_pIndexBuffer[index++] = ((_size - 1) + ((row + 1)  * _size));
 				}
 			}
 		}
@@ -229,6 +239,9 @@ public:
 	* @return: float: The Scale of the Mesh
 	********************/
 	v3float GetScale(){ return m_scale; };
+
+	// TO DO CAL
+	TVertexNormalUV* GetVertexBuffer() { return m_pVertexBuffer; };
 
 	/***********************
 	* DiamondSquareInit: Initialise the Mesh to be able to handle Diamond Square algorithm

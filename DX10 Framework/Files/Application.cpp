@@ -220,8 +220,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pShader_Sprite->Initialise(m_pDX10_Renderer, &m_hWnd));
 
 	// Create the Meshes
-	m_pMesh_Terrain = new DX10_Mesh();
-	VALIDATE(m_pMesh_Terrain->InitialisePlane(m_pDX10_Renderer, 65, { 10, 10, 10 }));
+
 
 	// Create the Objects
 	m_pSprite_InstructionsLeft = new DXSprite();
@@ -232,8 +231,9 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pSprite_InstructionsRight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsRightRed.png", 384, 140));
 	m_pSprite_InstructionsRight->SetPosition(600, 5);
 
-	m_pObj_Terrain = new DX10_Obj_LitTex();
-	VALIDATE(m_pObj_Terrain->Initialise(m_pDX10_Renderer, m_pMesh_Terrain, m_pShader_LitTex, "WaterMap.png"));
+	// Create the Cloth
+	m_pCloth = new Physics_Cloth();
+	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_LitTex, 10.0f, 10.0f, 11, 11));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
@@ -267,16 +267,16 @@ void Application::ShutDown()
 		ReleasePtr(m_pShader_LitTex);
 		ReleasePtr(m_pShader_Sprite);
 		// Release the Meshes
-		ReleasePtr(m_pMesh_Terrain);
 		// Release the Objects
 		ReleasePtr(m_pSprite_InstructionsLeft);
 		ReleasePtr(m_pSprite_InstructionsRight);
-		ReleasePtr(m_pObj_Terrain);
 		// Release the Texture Resources
 		ReleasePtr(m_pRefractionTexture);
 		ReleasePtr(m_pReflectionTexture);
+		// Release the Cloth
+		ReleasePtr(m_pCloth);
 
-		// Release the renderers resources
+		// Release the Renderers resources
 		m_pDX10_Renderer->ShutDown();
 		ReleasePtr(m_pDX10_Renderer);
 	}	
@@ -324,7 +324,9 @@ bool Application::Process(float _dt)
 
 		ProcessShaders();
 
-		m_pObj_Terrain->Process(_dt);
+		//m_pCloth->AddForce({ 1.0f, 1.0f, 800.0f });
+		//m_pCloth->WindForce({ 1.0f, 1.0f, 800.0f });
+		m_pCloth->Process();
 	}
 
 	return true;
@@ -349,11 +351,11 @@ void Application::Render()
 		m_pDX10_Renderer->StartRender();
 
 		// Render the Objects of the Scene
-		m_pObj_Terrain->Render();
+		m_pCloth->Render();
 		
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
-		m_pSprite_InstructionsLeft->Render();
-		m_pSprite_InstructionsRight->Render();
+		//m_pSprite_InstructionsLeft->Render();
+		//m_pSprite_InstructionsRight->Render();
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_NORMAL);
 		
 		// Tell the Renderer the data input is over and present the outcome
@@ -420,28 +422,6 @@ bool Application::HandleInput()
 		m_pDX10_Renderer->ToggleFillMode();
 
 		SetKeyDown(VK_F2, false);
-	}
-
-	if (m_pKeyDown[0x31])
-	{
-		if (m_pMesh_Terrain->DiamondSquare() == false)
-		{
-			MessageBoxA(m_hWnd, "Maximum iterations have been reached. Try applying the smoothing algorithm by pressing '2'", "Information", MB_OK | MB_ICONINFORMATION);
-			memset(m_pKeyDown, false, 255);
-		}
-		SetKeyDown(0x31, false);
-	}
-
-	if (m_pKeyDown[0x32])
-	{
-		m_pMesh_Terrain->Smooth();
-		SetKeyDown(0x32, false);
-	}
-
-	if (m_pKeyDown[0x33])
-	{
-		m_pMesh_Terrain->ResetPlane();
-		SetKeyDown(0x33, false);
 	}
 
 	// Camera Controls

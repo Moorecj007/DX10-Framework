@@ -123,6 +123,9 @@
     <ClCompile Include="Files\DX10\DX10\Systems\TextureResource.cpp" />
     <ClCompile Include="Files\Input\InputGamePad.cpp" />
     <ClCompile Include="Files\Menus\Menu.cpp" />
+    <ClCompile Include="Files\Physics\3D Physics\Physics_Cloth.cpp" />
+    <ClCompile Include="Files\Physics\3D Physics\Physics_Constraint.cpp" />
+    <ClCompile Include="Files\Physics\3D Physics\Physics_Particle.cpp" />
     <ClCompile Include="Files\Utility\DirectInput.cpp" />
     <ClCompile Include="Files\Utility\Mutex_Semaphore.cpp" />
     <ClCompile Include="Files\Utility\Timer.cpp" />
@@ -148,13 +151,10 @@
     <ClInclude Include="Files\DX10\DX10\Systems\TextureResource.h" />
     <ClInclude Include="Files\Input\InputGamePad.h" />
     <ClInclude Include="Files\Menus\Menu.h" />
-    <ClInclude Include="Files\Physics\2D Physics\Physics_World_2D.h" />
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Body_2D.h" />
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Collision_Listener.h" />
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Rope_2D.h" />
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Pulley_2D.h" />
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Utilities.h" />
-    <ClInclude Include="Files\Physics\Physics_2D.h" />
+    <ClInclude Include="Files\Physics\3D Physics\Physics_Cloth.h" />
+    <ClInclude Include="Files\Physics\3D Physics\Physics_Constraint.h" />
+    <ClInclude Include="Files\Physics\3D Physics\Physics_Particle.h" />
+    <ClInclude Include="Files\Physics\Physics_3D.h" />
     <ClInclude Include="Files\Utility\DirectInput.h" />
     <ClInclude Include="Files\Utility\Mutex_Semaphore.h" />
     <ClInclude Include="Files\Utility\Timer.h" />

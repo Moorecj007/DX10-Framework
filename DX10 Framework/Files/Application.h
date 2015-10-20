@@ -38,6 +38,7 @@
 #include "DX10\DX10\2D Objects\GUI_Button.h"
 #include "Input\InputGamePad.h"
 #include "Menus\Menu.h"
+#include "Physics\Physics_3D.h"
 
 enum APP_STATE
 {
@@ -247,16 +248,18 @@ private:
 	DX10_Shader_Sprite* m_pShader_Sprite;
 
 	// Meshes
-	DX10_Mesh* m_pMesh_Terrain;
+
 
 	// Objects
-	DX10_Obj_LitTex* m_pObj_Terrain;
 	DXSprite* m_pSprite_InstructionsLeft;
 	DXSprite* m_pSprite_InstructionsRight;
 
 	// Texture Resources
 	TextureResource* m_pRefractionTexture;
 	TextureResource* m_pReflectionTexture;
+
+	// Cloth Simulation
+	Physics_Cloth* m_pCloth;
 };
 
 #endif // __APPLICATION_H__

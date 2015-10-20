@@ -105,7 +105,7 @@ public:
 	* @parameter: _eTech: Technique Identifier to determine which technique to use
 	* @return: void
 	********************/
-	void Render(TLitTex _litTex, eTech_LitTex _eTech)
+	void Render(TLitTex _litTex, eTech_LitTex _eTech = TECH_LITTEX_STANDARD)
 	{
 		// Load the correct Technique onto the Current pointers
 		SetCurrentPtrs(_eTech);

@@ -79,6 +79,15 @@
     <Filter Include="Source Files\DX10\Systems">
       <UniqueIdentifier>{849dd413-ff80-4b4d-a5aa-bcddba6dd082}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Physics\3D Physics">
+      <UniqueIdentifier>{531e599b-0cd5-4316-a0de-988db96fe229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics\2D Physics">
+      <UniqueIdentifier>{dbac09e0-bb52-42b9-b629-91b1776e7037}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics\3D Physics">
+      <UniqueIdentifier>{5b401e86-2030-4c3d-a514-6e3053bfbf65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Application.h">
@@ -107,27 +116,6 @@
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h">
       <Filter>Header Files\DX10\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Body_2D.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Utilities.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\Physics_2D.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Pulley_2D.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Rope_2D.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\Physics_World_2D.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Files\Physics\2D Physics\Physics_Collision_Listener.h">
-      <Filter>Header Files\Physics\2D Physics</Filter>
     </ClInclude>
     <ClInclude Include="Files\Utility\Utility_Math.h">
       <Filter>Header Files\Utilities</Filter>
@@ -177,6 +165,18 @@
     <ClInclude Include="Files\DX10\DX10\Systems\TextureResource.h">
       <Filter>Header Files\DX10\Systems</Filter>
     </ClInclude>
+    <ClInclude Include="Files\Physics\Physics_3D.h">
+      <Filter>Header Files\Physics\3D Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Physics\3D Physics\Physics_Cloth.h">
+      <Filter>Header Files\Physics\3D Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Physics\3D Physics\Physics_Constraint.h">
+      <Filter>Header Files\Physics\3D Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\Physics\3D Physics\Physics_Particle.h">
+      <Filter>Header Files\Physics\3D Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
@@ -220,6 +220,15 @@
     </ClCompile>
     <ClCompile Include="Files\DX10\DX10\Systems\TextureResource.cpp">
       <Filter>Source Files\DX10\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Physics\3D Physics\Physics_Cloth.cpp">
+      <Filter>Source Files\Physics\3D Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Physics\3D Physics\Physics_Constraint.cpp">
+      <Filter>Source Files\Physics\3D Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\Physics\3D Physics\Physics_Particle.cpp">
+      <Filter>Source Files\Physics\3D Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

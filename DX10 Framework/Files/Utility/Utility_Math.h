@@ -323,6 +323,16 @@ struct v3float
 	}
 
 	/***********************
+	* operator-: Negate the following v3float
+	* @author: Callan Moore
+	* @return: v3float: The result of the negation
+	********************/
+	v3float operator- () const
+	{
+		return v3float{ -x, -y, -z };
+	}
+
+	/***********************
 	* operator-=: Subtraction Assignment Operator for the v3float struct minus a v3float
 	* @author: Callan Moore
 	* @parameter: _v3: Right hand side of the subtraction
@@ -423,7 +433,13 @@ struct v3float
 		return (*this);
 	}
 
-	// TO DO CAL
+	/***********************
+	* ApproxEqual: Check if two vectors difference is within the approximation value therefore approximately equal
+	* @author: Callan Moore
+	* @parameter: _v3: second vector for comparison
+	* @parameter: _apx: approximation value
+	* @return: bool: True if the vectors are approximately equal
+	********************/
 	bool ApproxEqual(const v3float _v3, const float _apx)
 	{
 		if ((abs(_v3.x - x) <= _apx)
@@ -436,6 +452,28 @@ struct v3float
 		{
 			return false;
 		}
+	}
+
+	/***********************
+	* Cross: Calculate the cross product of two vectors
+	* @author: Callan Moore
+	* @parameter: const v3float & _v3: The second vector
+	* @return: v3float: The result of the cross product
+	********************/
+	v3float Cross(const v3float& _v3)
+	{
+		return v3float(y * _v3.z - z * _v3.y, z * _v3.x - x * _v3.z, x * _v3.y - y * _v3.x);
+	}
+	
+	/***********************
+	* Dot: Calculate the Dot product of two vectors
+	* @author: Callan Moore
+	* @parameter: const v3float & _v3: The second vector
+	* @return: float: The result of the Dot product
+	********************/
+	float Dot(const v3float& _v3)
+	{
+		return (x * _v3.x + y * _v3.y + z * _v3.z);
 	}
 };
 
