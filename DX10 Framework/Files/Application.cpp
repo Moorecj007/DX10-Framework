@@ -401,6 +401,7 @@ void Application::RenderReflection()
 
 bool Application::HandleInput()
 {
+	// Exit the application
 	if (m_pKeyDown[VK_ESCAPE])
 	{
 		ExitApp();
