@@ -44,7 +44,8 @@ enum eTech_LitTex
 	TECH_LITTEX_BLENDTEX2,
 	TECH_LITTEX_REFRACT,
 	TECH_LITTEX_REFLECT,
-	TECH_LITTEX_STAR
+	TECH_LITTEX_STAR,
+	TECH_LITTEX_NOCULL
 };
 
 class DX10_Shader_LitTex
@@ -117,6 +118,11 @@ public:
 		// Don't transform texture coordinates
 		D3DXMATRIX matTex;
 		D3DXMatrixIdentity(&matTex);
+
+		if (_eTech == TECH_LITTEX_NOCULL)
+		{
+			m_pDX10_Renderer->ApplyRasterizerState(RS_NOCULL);
+		}
 
 		if (m_pCurrentTech != NULL)
 		{
@@ -256,6 +262,7 @@ private:
 	{
 		switch (_tech)
 		{
+			case TECH_LITTEX_NOCULL:	// Fall Through
 			case TECH_LITTEX_STANDARD:
 			{
 				m_pCurrentVertexLayout = m_pVertexLayout_Standard;
@@ -310,6 +317,7 @@ private:
 	ID3D10InputLayout* m_pVertexLayout_Refract;
 	ID3D10InputLayout* m_pVertexLayout_Reflect;
 	ID3D10InputLayout* m_pVertexLayout_Star;
+	ID3D10InputLayout* m_pVertexLayout_NoCull;
 
 	ID3D10EffectTechnique* m_pCurrentTech;
 	ID3D10EffectTechnique* m_pTech_Standard;
@@ -318,6 +326,7 @@ private:
 	ID3D10EffectTechnique* m_pTech_Refract;
 	ID3D10EffectTechnique* m_pTech_Reflect;
 	ID3D10EffectTechnique* m_pTech_Star;
+	ID3D10EffectTechnique* m_pTech_NoCull;
 
 	DX10_Renderer*						m_pDX10_Renderer;
 

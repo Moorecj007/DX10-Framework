@@ -43,7 +43,7 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 
 	Light* pLight = new Light();
 	pLight->type = LT_DIRECTIONAL;
-	pLight->dir_spotPow = D3DXVECTOR4(-1.0f, 1.0f, 0, 0.0f);
+	pLight->dir_spotPow = D3DXVECTOR4(0.0f, 0.0f, 1.0f, 0.0f);
 	pLight->ambient = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);
 	pLight->diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	pLight->specular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -112,6 +112,7 @@ void DX10_Renderer::ShutDown()
 	ReleaseCOM(m_pDX10SwapChain);
 	ReleaseCOM(m_pRasterizerState);
 	ReleaseCOM(m_pRasterizerState_Reflection);
+	ReleaseCOM(m_pRasterizerState_NoCull);
 	if (m_pDX10Device != 0)
 	{
 		m_pDX10Device->ClearState();
@@ -177,14 +178,21 @@ bool DX10_Renderer::InitialiseDeviceAndSwapChain()
 	m_pDX10Device->RSSetState(m_pRasterizerState);
 
 	// Create the Rasterizer description for culling clockwise when using reflection
-	D3D10_RASTERIZER_DESC rasterizerDesc;
-	ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
-	rasterizerDesc.FillMode = D3D10_FILL_SOLID;
-	rasterizerDesc.CullMode = D3D10_CULL_BACK;
-	rasterizerDesc.FrontCounterClockwise = true;
+	ZeroMemory(&m_rasterizerDesc_Reflection, sizeof(m_rasterizerDesc_Reflection));
+	m_rasterizerDesc_Reflection.FillMode = D3D10_FILL_SOLID;
+	m_rasterizerDesc_Reflection.CullMode = D3D10_CULL_BACK;
+	m_rasterizerDesc_Reflection.FrontCounterClockwise = true;
 
-	VALIDATEHR(m_pDX10Device->CreateRasterizerState(&rasterizerDesc, &m_pRasterizerState_Reflection));
+	VALIDATEHR(m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc_Reflection, &m_pRasterizerState_Reflection));
 	
+	// Create the Rasterizer description for No Culling
+	ZeroMemory(&m_rasterizerDesc_NoCull, sizeof(m_rasterizerDesc_NoCull));
+	m_rasterizerDesc_NoCull.FillMode = D3D10_FILL_SOLID;
+	m_rasterizerDesc_NoCull.CullMode = D3D10_CULL_NONE;
+	m_rasterizerDesc_NoCull.FrontCounterClockwise = false;
+
+	VALIDATEHR(m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc_NoCull, &m_pRasterizerState_NoCull));
+
 	// Invoke functionality that deals with changing size of the window
 	VALIDATE(onResize());
 
@@ -373,14 +381,25 @@ void DX10_Renderer::ToggleFillMode()
 	if (m_rasterizerDesc.FillMode == D3D10_FILL_SOLID)
 	{
 		m_rasterizerDesc.FillMode = D3D10_FILL_WIREFRAME;
+		m_rasterizerDesc_Reflection.FillMode = D3D10_FILL_WIREFRAME;
+		m_rasterizerDesc_NoCull.FillMode = D3D10_FILL_WIREFRAME;
 	}
 	else
 	{
 		m_rasterizerDesc.FillMode = D3D10_FILL_SOLID;
+		m_rasterizerDesc_Reflection.FillMode = D3D10_FILL_SOLID;
+		m_rasterizerDesc_NoCull.FillMode = D3D10_FILL_SOLID;
 	}
 
 	ReleaseCOM(m_pRasterizerState);
-	m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc, &m_pRasterizerState);
+	HRESULT hr = m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc, &m_pRasterizerState);
+
+	ReleaseCOM(m_pRasterizerState_Reflection);
+	hr = m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc_Reflection, &m_pRasterizerState_Reflection);
+
+	ReleaseCOM(m_pRasterizerState_NoCull);
+	hr = m_pDX10Device->CreateRasterizerState(&m_rasterizerDesc_NoCull, &m_pRasterizerState_NoCull);
+
 	m_pDX10Device->RSSetState(m_pRasterizerState);
 }
 
@@ -860,9 +879,28 @@ bool DX10_Renderer::CreateTextureResource(TextureResource*& _prTextureResource)
 	return true;
 }
 
-void DX10_Renderer::ApplyFrontCCWCullingRS()
+void DX10_Renderer::ApplyRasterizerState(eRasterizerState _rs)
 {
-	m_pDX10Device->RSSetState(m_pRasterizerState_Reflection);
+	switch (_rs)
+	{
+		case RS_REFLECTION:
+		{
+		m_pDX10Device->RSSetState(m_pRasterizerState_Reflection);
+		}
+			break;
+		case RS_NOCULL:
+		{
+			m_pDX10Device->RSSetState(m_pRasterizerState_NoCull);
+		}
+		break;
+		case RS_STANDARD:	// Fall Through
+		default:
+		{
+			m_pDX10Device->RSSetState(m_pRasterizerState);
+		}
+		break;
+	}
+	
 }
 
 void DX10_Renderer::ReflectLightsAcrossPlane(D3DXPLANE _plane)

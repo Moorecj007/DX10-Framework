@@ -233,7 +233,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Cloth
 	m_pCloth = new Physics_Cloth();
-	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_LitTex, 10.0f, 10.0f, 11, 11));
+	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_LitTex, 20.0f, 20.0f, 21, 21));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
@@ -324,8 +324,6 @@ bool Application::Process(float _dt)
 
 		ProcessShaders();
 
-		//m_pCloth->AddForce({ 1.0f, 1.0f, 800.0f });
-		//m_pCloth->WindForce({ 1.0f, 1.0f, 800.0f });
 		m_pCloth->Process();
 	}
 
@@ -422,6 +420,35 @@ bool Application::HandleInput()
 		m_pDX10_Renderer->ToggleFillMode();
 
 		SetKeyDown(VK_F2, false);
+	}
+
+	if (m_pKeyDown[0x31])	// 1 Key
+	{
+		m_pCloth->WindForce({ 0.0f, 0.0f, 10.0f });
+	}
+
+	if (m_pKeyDown[0x32])	// 2 Key
+	{
+		m_pCloth->ReleaseCloth();
+		SetKeyDown(0x32, false);
+	}
+
+	if (m_pKeyDown[0x33])	// 3 Key
+	{
+		m_pCloth->MovePinned(true);
+		//SetKeyDown(0x33, false);
+	}
+
+	if (m_pKeyDown[0x34])	// 4 Key
+	{
+		m_pCloth->MovePinned(false);
+		//SetKeyDown(0x34, false);
+	}
+
+	if (m_pKeyDown[0x35])	// 5 Key
+	{
+		m_pCloth->ResetCloth();
+		SetKeyDown(0x35, false);
 	}
 
 	// Camera Controls

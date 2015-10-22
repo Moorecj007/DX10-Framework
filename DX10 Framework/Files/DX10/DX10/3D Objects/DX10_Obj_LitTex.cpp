@@ -106,7 +106,7 @@ void DX10_Obj_LitTex::Render(eTech_LitTex _tech, D3DXPLANE _plane)
 	if (_tech == TECH_LITTEX_REFLECT)
 	{
 		// Apply Rasterizer state for the Reflection Technique
-		m_pRenderer->ApplyFrontCCWCullingRS();
+		m_pRenderer->ApplyRasterizerState(RS_REFLECTION);
 
 		// Create a reflection matrix based of the input plane
 		D3DXMATRIX matReflection = CreateReflectionMatrix(_plane);

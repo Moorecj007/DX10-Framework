@@ -51,6 +51,7 @@ public:
 	void StaticState(bool _state) { m_static = _state; };
 	void ResetAcceleration() { m_acceleration = { 0.0f, 0.0f, 0.0f }; };
 	v3float* GetPosition() { return &m_pos; };
+	void SetPosition(v3float _pos) { m_pos = m_prevPos = _pos; };
 
 private:
 	bool m_static;

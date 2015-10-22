@@ -44,10 +44,14 @@ public:
 	void Render();
 	void AddForce(v3float _forceDir);
 	void WindForce(v3float _forceDir);
+	void ReleaseCloth();
+	void MovePinned(bool _closer);
+	void PinParticle(Physics_Particle* _particle);
+	bool ResetCloth();
 
 private:
 	// TO DO CAL
-	Physics_Particle* GetParticle(int _x, int _y) { return &m_particles[_y * m_numParticlesWidth + _x]; };
+	Physics_Particle* GetParticle(int _x, int _y) { return &m_pParticles[_y * m_numParticlesWidth + _x]; };
 	bool MakeConstraint(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, float _restDist = -1.0f);
 
 	v3float CalcTriangleNormal(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC);
@@ -70,10 +74,15 @@ private:
 	D3DXMATRIX m_matWorld;
 	ID3D10ShaderResourceView* m_pTex;
 
-	std::vector<Physics_Particle> m_particles;
+	bool m_initialisedParticles;
+	Physics_Particle* m_pParticles;
+	int m_particleCount;
 	std::vector<Physics_Constraint> m_contraints;
+	std::vector<Physics_Particle*> m_pinnedParticles;
 
 	int m_constraintIterations;
+	float m_damping;
+	float m_timeStep;
 
 	
 

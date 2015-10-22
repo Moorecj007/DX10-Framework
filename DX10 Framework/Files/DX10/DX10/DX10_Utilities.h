@@ -260,6 +260,17 @@ enum eDepthState
 };
 
 /***********************
+* eDepthState: Enum for the different Rasterizer States available for the graphics device
+* @author: Callan Moore
+********************/
+enum eRasterizerState
+{
+	RS_STANDARD,
+	RS_REFLECTION,
+	RS_NOCULL
+};
+
+/***********************
 * eDepthState: Enum for the different DepthStencilState available for the graphics device
 * @author: Callan Moore
 * @parameter: _plane: The plane to be used to reflect around

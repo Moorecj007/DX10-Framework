@@ -250,11 +250,11 @@ public:
 	void ResetRenderTarget() { m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView); };
 
 	/***********************
-	* ApplyFrontCCWCullingRS: Apply the Rasterizer state for Front Counter-clockwise culling
+	* ApplyRasterizerState: Apply a Rasterizer state to the device
 	* @author: Callan Moore
 	* @return: void
 	********************/
-	void ApplyFrontCCWCullingRS();
+	void ApplyRasterizerState(eRasterizerState _rs);
 
 	/***********************
 	* ReflectLightsAcrossPlane: Reflect all the current active light across a plane
@@ -403,13 +403,17 @@ private:
 
 	ID3D10DepthStencilState* m_pDepthStencilStateNormal;
 	ID3D10DepthStencilState* m_pDepthStencilStateZDisabled;
-
-	// Reflection States
-	ID3D10RasterizerState* m_pRasterizerState_Reflection;
-
 	ID3D10Texture2D* m_pDepthStencilBuffer;
+
+	// Main Rasterizer States
 	D3D10_RASTERIZER_DESC m_rasterizerDesc;
 	ID3D10RasterizerState* m_pRasterizerState;
+	// Additional Rasterizer States
+	D3D10_RASTERIZER_DESC m_rasterizerDesc_Reflection;
+	ID3D10RasterizerState* m_pRasterizerState_Reflection;
+	D3D10_RASTERIZER_DESC m_rasterizerDesc_NoCull;
+	ID3D10RasterizerState* m_pRasterizerState_NoCull;
+	
 	D3D10_DRIVER_TYPE m_dx10DriverType;
 	D3DXCOLOR m_clearColor;
 
