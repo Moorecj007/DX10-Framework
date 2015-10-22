@@ -233,7 +233,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Cloth
 	m_pCloth = new Physics_Cloth();
-	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_LitTex, 20.0f, 20.0f, 21, 21));
+	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_LitTex, 20, 20, 0.01f, 0.033f));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
@@ -290,8 +290,8 @@ void Application::ExecuteOneFrame()
 	m_deltaTick += dt;
 	m_fpsTimer += dt;
 
-	// Limit to 60 FPS for Renderering
-	if (m_deltaTick > (1.0 / 60.0f))
+	// Limit to 30 FPS for Renderering Physics
+	if (m_deltaTick > (1.0 / 30.0f))
 	{
 		if (Process(m_deltaTick) == false)
 		{
@@ -406,15 +406,16 @@ bool Application::HandleInput()
 		ExitApp();
 	}
 
-	// Template Inputs
+	// Toggling on Full screen
 	if (m_pKeyDown[VK_F1])
 	{
-		//m_pDX10_Renderer->ToggleFullscreen();
-		//UpdateClientSize();
-		//
-		//SetKeyDown(VK_F1, false);
+		m_pDX10_Renderer->ToggleFullscreen();
+		UpdateClientSize();
+		
+		SetKeyDown(VK_F1, false);
 	}
 
+	// Toggling on Wire frame mode
 	if (m_pKeyDown[VK_F2])
 	{
 		m_pDX10_Renderer->ToggleFillMode();
@@ -422,69 +423,40 @@ bool Application::HandleInput()
 		SetKeyDown(VK_F2, false);
 	}
 
-	if (m_pKeyDown[0x31])	// 1 Key
-	{
-		m_pCloth->WindForce({ 0.0f, 0.0f, 10.0f });
-	}
-
-	if (m_pKeyDown[0x32])	// 2 Key
-	{
-		m_pCloth->ReleaseCloth();
-		SetKeyDown(0x32, false);
-	}
-
-	if (m_pKeyDown[0x33])	// 3 Key
-	{
-		m_pCloth->MovePinned(true);
-		//SetKeyDown(0x33, false);
-	}
-
-	if (m_pKeyDown[0x34])	// 4 Key
-	{
-		m_pCloth->MovePinned(false);
-		//SetKeyDown(0x34, false);
-	}
-
-	if (m_pKeyDown[0x35])	// 5 Key
-	{
-		m_pCloth->ResetCloth();
-		SetKeyDown(0x35, false);
-	}
-
 	// Camera Controls
-	if ((m_pKeyDown[0x41]) && !(m_pKeyDown[0x44]))
+	if ((m_pKeyDown[input::VK_A]) && !(m_pKeyDown[input::VK_D]))
 	{
-		// A pressed
+		// A Key pressed
 		m_pCamera->Strafe(-1);
 	}
 
-	if ((m_pKeyDown[0x44]) && !(m_pKeyDown[0x41]))
+	if ((m_pKeyDown[input::VK_D]) && !(m_pKeyDown[input::VK_A]))
 	{
-		// D pressed
+		// D Key pressed
 		m_pCamera->Strafe(1);
 	}
 
-	if ((m_pKeyDown[0x57]) && !(m_pKeyDown[0x53]))
+	if ((m_pKeyDown[input::VK_W]) && !(m_pKeyDown[input::VK_S]))
 	{
-		// W pressed
+		// W Key pressed
 		m_pCamera->MoveForwards(1);
 	}
 
-	if ((m_pKeyDown[0x53]) && !(m_pKeyDown[0x57]))
+	if ((m_pKeyDown[input::VK_S]) && !(m_pKeyDown[input::VK_W]))
 	{
-		// S pressed
+		// S Key pressed
 		m_pCamera->MoveForwards(-1);
 	}
 
-	if ((m_pKeyDown[0x45]) && !(m_pKeyDown[0x51]))
+	if ((m_pKeyDown[input::VK_E]) && !(m_pKeyDown[input::VK_Q]))
 	{
-		// E pressed
+		// E Key pressed
 		m_pCamera->Fly(1);
 	}
 
-	if ((m_pKeyDown[0x51]) && !(m_pKeyDown[0x45]))
+	if ((m_pKeyDown[input::VK_Q]) && !(m_pKeyDown[input::VK_E]))
 	{
-		// Q pressed
+		// Q Key pressed
 		m_pCamera->Fly(-1);
 	}
 
@@ -497,7 +469,7 @@ bool Application::HandleInput()
 	if ((m_pKeyDown[VK_DOWN]) && !(m_pKeyDown[VK_UP]))
 	{
 		// Up arrow pressed
-		m_pCamera->RotatePitch(1); 
+		m_pCamera->RotatePitch(1);
 	}
 
 	if ((m_pKeyDown[VK_LEFT]) && !(m_pKeyDown[VK_RIGHT]))
@@ -511,6 +483,37 @@ bool Application::HandleInput()
 		// Right arrow pressed
 		m_pCamera->RotateYaw(1);
 	}
+
+	// Application Specific Keys
+
+	if (m_pKeyDown[input::VK_1])
+	{
+		m_pCloth->WindForce({ 0.0f, 0.0f, 10.0f });
+	}
+
+	if (m_pKeyDown[input::VK_2])
+	{
+		m_pCloth->ReleaseCloth();
+		SetKeyDown(input::VK_2, false);
+	}
+
+	if (m_pKeyDown[input::VK_3])
+	{
+		m_pCloth->MovePinned(true);
+	}
+
+	if (m_pKeyDown[input::VK_4])
+	{
+		m_pCloth->MovePinned(false);
+	}
+
+	if (m_pKeyDown[input::VK_5])
+	{
+		m_pCloth->ResetCloth();
+		SetKeyDown(input::VK_5, false);
+	}
+
+	
 
 	return true;
 }

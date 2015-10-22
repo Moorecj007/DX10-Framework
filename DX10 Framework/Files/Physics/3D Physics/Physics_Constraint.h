@@ -34,15 +34,27 @@ public:
 	* @author: Callan Moore
 	********************/
 	~Physics_Constraint();
-
-	// TO DO CAL
+	
+	/***********************
+	* Initialise: Initialise the constraint for use
+	* @author: Callan Moore
+	* @parameter: _pA: The first particle to constrain
+	* @parameter: _pB: The second particle to constrain
+	* @parameter: _restDist: The resting distance of the particles (Default: calculates the initial distance as resting distance)
+	* @return: bool: Successful or not
+	********************/
 	bool Initialise(Physics_Particle* _pA, Physics_Particle* _pB, float _restDist = -1.0f);
+	
+	/***********************
+	* SatisfyConstraint: Manipulate the particles and correct them to satisfy the constraints
+	* @author: Callan Moore
+	* @return: void
+	********************/
 	void SatisfyConstraint();
 
-public:
+private:
 	Physics_Particle* m_pParticleA;
 	Physics_Particle* m_pParticleB;
-private:
 	float m_restDist;
 
 

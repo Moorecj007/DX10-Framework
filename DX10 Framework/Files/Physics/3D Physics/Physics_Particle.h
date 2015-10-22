@@ -41,25 +41,79 @@ public:
 	* @author: Callan Moore
 	********************/
 	~Physics_Particle();
-
-	// TO DO CAL
+	
+	/***********************
+	* Initialise: Initialise the Physics Particle for use
+	* @author: Callan Moore
+	* @parameter: _pos: The first position for the particle
+	* @parameter: _timeStep: The time step used for physics calculations
+	* @parameter: _damping: The damping of the particle
+	* @parameter: _static: Whether the particle is affected by forces
+	* @return: bool: Successful or not
+	********************/
 	bool Initialise(v3float _pos, float _timeStep, float _damping, bool _static = false);
+	
+	/***********************
+	* Process: Process the Particle
+	* @author: Callan Moore
+	* @return: void
+	********************/
 	void Process();
-
-	void AddForce(v3float _force) { m_acceleration += (_force / m_mass); };
+	
+	/***********************
+	* Move: The the particle by the input amount (only if the particle is not static)
+	* @author: Callan Moore
+	* @parameter: _movement: Vector to move the particle by
+	* @return: void
+	********************/
 	void Move(v3float _movement);
-	void StaticState(bool _state) { m_static = _state; };
+
+	/***********************
+	* AddForce: Add force to the particle in the input direction
+	* @author: Callan Moore
+	* @parameter: _force: A directional force to apply to the particle
+	* @return: void
+	********************/
+	void AddForce(v3float _force) { m_acceleration += (_force / m_mass); };
+	
+	/***********************
+	* SetStaticState: Set the static state of the particle
+	* @author: Callan Moore
+	* @parameter: _state: The new state
+	* @return: void
+	********************/
+	void SetStaticState(bool _state) { m_static = _state; };
+	
+	/***********************
+	* ResetAcceleration: Reset the acceleration of the particle to zero
+	* @author: Callan Moore
+	* @return: void
+	********************/
 	void ResetAcceleration() { m_acceleration = { 0.0f, 0.0f, 0.0f }; };
+	
+	/***********************
+	* GetPosition: Retrieve the position of the particle
+	* @author: Callan Moore
+	* @return: v3float*: The position of the particle in world space
+	********************/
 	v3float* GetPosition() { return &m_pos; };
+	
+	/***********************
+	* SetPosition: Set the position of the particle
+	* @author: Callan Moore
+	* @parameter: _pos: Particles new position
+	* @return: void
+	********************/
 	void SetPosition(v3float _pos) { m_pos = m_prevPos = _pos; };
 
 private:
 	bool m_static;
-	float m_mass;
+	
 	v3float m_pos;
 	v3float m_prevPos;
 	v3float m_acceleration;
 
+	float m_mass;
 	float m_timeStepSquared;
 	float m_damping;
 	float m_dampingInverse;

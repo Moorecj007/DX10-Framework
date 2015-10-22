@@ -25,7 +25,7 @@ Physics_Cloth::~Physics_Cloth()
 	ReleasePtrArray(m_pParticles);
 }
 
-bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_LitTex* _pShader, float _width, float _height, int _numParticlesWidth, int _numParticlesHeight)
+bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_LitTex* _pShader, int _width, int _height, float _damping, float _timeStep)
 {
 	if (_pRenderer == 0 || _pShader == 0)
 	{
@@ -33,31 +33,32 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_LitTex* _p
 		return false;
 	}
 
-	// TO DO
-	m_damping = 0.01f;
-	m_timeStep = 0.01666666666f;
-	m_constraintIterations = 2;
-	m_initialisedParticles = false;
-
 	// Assign member variables
 	m_pRenderer = _pRenderer;
 	m_pShader = _pShader;
 	m_width = _width;
 	m_height = _height;
-	m_numParticlesWidth = _numParticlesWidth;
-	m_numParticlesHeight = _numParticlesHeight;
+	m_numParticlesWidth = m_width + 1;
+	m_numParticlesHeight = m_height + 1;
+	m_damping = _damping;
+	m_timeStep = _timeStep;
+
+	m_constraintIterations = 2;
+	m_initialisedParticles = false;
 
 	// Set a texture and a world matrix
 	VALIDATE(m_pRenderer->CreateTexture("Dragon.png", m_pTex));
 	D3DXMatrixIdentity(&m_matWorld);
 
-	// Create space for all the particles
+	// Create memory for all the particles
 	m_particleCount = m_numParticlesWidth * m_numParticlesHeight;
 	m_pParticles = new Physics_Particle[m_particleCount];
 
+	// Create and initialize a plane mesh that will be used for Renderering the particles
 	m_pMesh = new DX10_Mesh();
 	VALIDATE(m_pMesh->InitialisePlane(m_pRenderer, m_numParticlesWidth, { (m_width / (m_numParticlesWidth - 1.0f)), 1.0f, (m_height / (m_numParticlesHeight - 1.0f)) }));
 
+	// Set the cloth to initial positions and constraints
 	VALIDATE(ResetCloth());
 
 	return true;
@@ -78,55 +79,59 @@ void Physics_Cloth::Process()
 	}
 	
 	TVertexNormalUV* pVertexBuffer = m_pMesh->GetVertexBuffer();
-	int index = 0;
 	// Process each Particle
 	for (int i = 0; i < m_particleCount; i++)
 	{
 		m_pParticles[i].Process();
-		pVertexBuffer[index].pos.x = m_pParticles[i].GetPosition()->x;
-		pVertexBuffer[index].pos.y = m_pParticles[i].GetPosition()->y;
-		pVertexBuffer[index].pos.z = m_pParticles[i].GetPosition()->z;
-		index++;
+		pVertexBuffer[i].pos.x = m_pParticles[i].GetPosition()->x;
+		pVertexBuffer[i].pos.y = m_pParticles[i].GetPosition()->y;
+		pVertexBuffer[i].pos.z = m_pParticles[i].GetPosition()->z;
 	}
 
+	// Calculate the new normals for the cloth
 	m_pMesh->CalculateNormals();
 }
 
 void Physics_Cloth::Render()
 {
+	// Create the littex structure to determine how the shader draws the cloth
 	TLitTex litTex;
 	litTex.pMatWorld = &m_matWorld;
 	litTex.pMesh = m_pMesh;
 	litTex.pTexBase = m_pTex;
 
+	// Render the Cloth using no culling technique
 	m_pShader->Render(litTex, TECH_LITTEX_NOCULL);
 }
 
-void Physics_Cloth::AddForce(v3float _forceDir)
+void Physics_Cloth::AddForce(v3float _force)
 {
-	std::vector<Physics_Particle>::iterator particleIter;
-	// Add force to each particle
+	// Cycle through all the particles
 	for (int i = 0; i < m_particleCount; i++)
 	{
-		m_pParticles[i].AddForce(_forceDir);
+		// Add force to each particle
+		m_pParticles[i].AddForce(_force);
 	}
 }
 
-void Physics_Cloth::WindForce(v3float _forceDir)
+void Physics_Cloth::WindForce(v3float _force)
 {
+	// Cycle through the particles based on the rows and columns (Due to using a triangle strip topology)
 	for (int col = 0; col < m_numParticlesWidth - 1; col++)
 	{
 		for (int row = 0; row < m_numParticlesHeight- 1; row++)
 		{
 			if (row % 2 == 0)	// Even Row for triangle strip
 			{
-				AddWindForceForTri(GetParticle(col, row), GetParticle(col + 1, row + 1), GetParticle(col, row + 1), _forceDir);
-				AddWindForceForTri(GetParticle(col, row), GetParticle(col + 1, row), GetParticle(col + 1, row + 1), _forceDir);
+				// Add wind force to the triangles
+				AddWindForceForTri(GetParticle(col, row), GetParticle(col + 1, row + 1), GetParticle(col, row + 1), _force);
+				AddWindForceForTri(GetParticle(col, row), GetParticle(col + 1, row), GetParticle(col + 1, row + 1), _force);
 			}
 			else // Odd row for triangle strip
 			{
-				AddWindForceForTri(GetParticle(col, row), GetParticle(col + 1, row), GetParticle(col, row + 1), _forceDir);
-				AddWindForceForTri(GetParticle(col + 1, row), GetParticle(col + 1, row + 1), GetParticle(col, row + 1), _forceDir);
+				// Add wind force to the triangles
+				AddWindForceForTri(GetParticle(col, row), GetParticle(col + 1, row), GetParticle(col, row + 1), _force);
+				AddWindForceForTri(GetParticle(col + 1, row), GetParticle(col + 1, row + 1), GetParticle(col, row + 1), _force);
 			}			
 		}
 	}
@@ -134,13 +139,14 @@ void Physics_Cloth::WindForce(v3float _forceDir)
 
 void Physics_Cloth::ReleaseCloth()
 {
-	std::vector<Physics_Particle*>::iterator pinnedIter;
 	// Cycle through and release all pinned particles
+	std::vector<Physics_Particle*>::iterator pinnedIter;
 	for (pinnedIter = m_pinnedParticles.begin(); pinnedIter != m_pinnedParticles.end(); pinnedIter++)
 	{
-		(*pinnedIter)->StaticState(false);
+		(*pinnedIter)->SetStaticState(false);
 	}
 
+	// Clear the entire list of pinned particles
 	m_pinnedParticles.clear();
 }
 
@@ -172,7 +178,7 @@ void Physics_Cloth::MovePinned(bool _closer)
 				float ratio = abs((float)(i - centrePinIndex) / (float)centrePinIndex);
 
 				// Allow movement and move the pinned particle then return to static state
-				m_pinnedParticles[i]->StaticState(false);
+				m_pinnedParticles[i]->SetStaticState(false);
 				m_pinnedParticles[i]->Move(dir * ratio);
 
 				float length = (*m_pinnedParticles[centrePinIndex]->GetPosition() - *m_pinnedParticles[i]->GetPosition()).Magnitude();
@@ -182,7 +188,8 @@ void Physics_Cloth::MovePinned(bool _closer)
 					m_pinnedParticles[i]->Move(dir * -ratio);
 				}
 
-				m_pinnedParticles[i]->StaticState(true);
+				// Set the static state back to true once movement is complete
+				m_pinnedParticles[i]->SetStaticState(true);
 			}
 		}
 	}
@@ -190,7 +197,7 @@ void Physics_Cloth::MovePinned(bool _closer)
 
 void Physics_Cloth::PinParticle(Physics_Particle* _particle)
 {
-	_particle->StaticState(true);
+	_particle->SetStaticState(true);
 	m_pinnedParticles.push_back(_particle);
 }
 
@@ -296,9 +303,9 @@ bool Physics_Cloth::ResetCloth()
 	return true;
 }
 
-
 bool Physics_Cloth::MakeConstraint(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, float _restDist)
 {
+	// Create and initialise a new constraint
 	m_contraints.push_back(Physics_Constraint());
 	VALIDATE(m_contraints.back().Initialise(_pParticleA, _pParticleB, _restDist));
 
@@ -307,24 +314,30 @@ bool Physics_Cloth::MakeConstraint(Physics_Particle* _pParticleA, Physics_Partic
 
 v3float Physics_Cloth::CalcTriangleNormal(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC)
 {
+	// retrieve the positions of the 3 particles
 	v3float posA = *_pParticleA->GetPosition();
 	v3float posB = *_pParticleB->GetPosition();
 	v3float posC = *_pParticleC->GetPosition();
 
+	// Calculate two direction vector with focus on the first particle (A)
 	v3float vecA = posB - posA;
 	v3float vecB = posC - posA;
 
+	// Calculate the cross product to get the normal to the triangle
 	return vecA.Cross(vecB);
 }
 
-void Physics_Cloth::AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC, v3float _forceDir)
+void Physics_Cloth::AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC, v3float _force)
 {
+	// Calculate the normal to the triangle
 	v3float normal = CalcTriangleNormal(_pParticleA, _pParticleB, _pParticleC);
 	v3float normalised = normal;
 	normalised.Normalise();
 
-	v3float force = normal * (normalised.Dot(_forceDir));
+	// Calculate the force the wind can apply to the triangle
+	v3float force = normal * (normalised.Dot(_force));
 
+	// Add the calculated force to all particles on the triangle
 	_pParticleA->AddForce(force);
 	_pParticleB->AddForce(force);
 	_pParticleC->AddForce(force);
