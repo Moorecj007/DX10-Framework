@@ -514,3 +514,69 @@ technique10 StarTech
 		SetPixelShader(CompileShader(ps_4_0, PS_Star()));
 	}
 }
+
+//--------------------------------------------------------------
+// Cloth Shading
+//--------------------------------------------------------------
+
+float4 PS_NoCull(VS_OUT _inputPS) : SV_Target
+{
+	// Get materials from texture maps.
+	float4 diffuse = g_mapDiffuse.Sample(g_triLinearSam, _inputPS.texCoord);
+	float4 spec = g_mapSpec.Sample(g_triLinearSam, _inputPS.texCoord);
+
+	// Map [0,1] --> [0,256]
+	spec.a *= 256.0f;
+
+	// Interpolating normal can make it not be of unit length so normalize it.
+	float3 normal = normalize(_inputPS.normal);
+
+	// Render each side of a polygon with the same normal (no culling)
+	normal.x = abs(normal.x) * -1.0f;
+	normal.y = abs(normal.y) * -1.0f;
+	normal.z = abs(normal.z) * -1.0f;
+
+	// Compute the lit color for this pixel.
+	SurfaceInfo surface = { _inputPS.position, normal, diffuse, spec };
+
+	float3 litColor = float3(0.0f, 0.0f, 0.0f);
+		for (int i = 0; i < g_lightCount; i++)
+		{
+			if (g_light[i].active == true)
+			{
+				if (g_light[i].type == 0)
+				{
+					litColor += ParallelLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 1)
+				{
+					litColor += PointLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 2)
+				{
+					litColor += SpotLight(surface, g_light[i], g_eyePosW);
+				}
+				else if (g_light[i].type == 3)
+				{
+					float glowLerp = GlowLight(surface, g_light[i]);
+
+					if (glowLerp > 0.0f)
+					{
+						litColor = lerp(litColor, g_light[i].diffuse.xyz, glowLerp);
+					}
+				}
+			}
+		}
+
+	return float4(litColor, diffuse.a);
+}
+
+technique10 NoCullTech
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_4_0, VS_Standard()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_4_0, PS_NoCull()));
+	}
+}

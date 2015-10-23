@@ -179,6 +179,7 @@ private:
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "RefractTech", m_pFX, m_pTech_Refract));
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "ReflectTech", m_pFX, m_pTech_Reflect));
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "StarTech", m_pFX, m_pTech_Star));
+		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "NoCullTech", m_pFX, m_pTech_NoCull));
 
 		return true;
 	}
@@ -248,6 +249,7 @@ private:
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Refract, m_pVertexLayout_Refract);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Refract, m_pVertexLayout_Reflect);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Star, m_pVertexLayout_Star);
+		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_NoCull, m_pVertexLayout_NoCull);
 	
 		return true;
 	}
@@ -261,8 +263,7 @@ private:
 	void SetCurrentPtrs(eTech_LitTex _tech)
 	{
 		switch (_tech)
-		{
-			case TECH_LITTEX_NOCULL:	// Fall Through
+		{		
 			case TECH_LITTEX_STANDARD:
 			{
 				m_pCurrentVertexLayout = m_pVertexLayout_Standard;
@@ -295,6 +296,12 @@ private:
 			{
 				m_pCurrentVertexLayout = m_pVertexLayout_Star;
 				m_pCurrentTech = m_pTech_Star;
+			}
+			break;
+			case TECH_LITTEX_NOCULL:
+			{
+				m_pCurrentVertexLayout = m_pVertexLayout_NoCull;
+				m_pCurrentTech = m_pTech_NoCull;
 			}
 			break;
 			default:
