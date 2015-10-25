@@ -245,14 +245,17 @@ private:
 
 	// Shaders
 	DX10_Shader_LitTex* m_pShader_LitTex;
+	DX10_Shader_Cloth* m_pShader_Cloth;
 	DX10_Shader_Sprite* m_pShader_Sprite;
 
 	// Meshes
-
+	DX10_Mesh* m_pMesh_Floor;
 
 	// Objects
 	DXSprite* m_pSprite_InstructionsLeft;
 	DXSprite* m_pSprite_InstructionsRight;
+	DX10_Obj_LitTex* m_pObj_Floor;
+
 
 	// Texture Resources
 	TextureResource* m_pRefractionTexture;

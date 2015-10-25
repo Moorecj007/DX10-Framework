@@ -25,7 +25,7 @@ Physics_Cloth::~Physics_Cloth()
 	ReleasePtrArray(m_pParticles);
 }
 
-bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_LitTex* _pShader, int _width, int _height, float _damping, float _timeStep)
+bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_Cloth* _pShader, int _width, int _height, float _damping, float _timeStep)
 {
 	if (_pRenderer == 0 || _pShader == 0)
 	{
@@ -46,17 +46,8 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_LitTex* _p
 	m_constraintIterations = 2;
 	m_initialisedParticles = false;
 
-	// Set a texture and a world matrix
-	VALIDATE(m_pRenderer->CreateTexture("Dragon.png", m_pTex));
+	// Set the world matrix
 	D3DXMatrixIdentity(&m_matWorld);
-
-	// Create memory for all the particles
-	m_particleCount = m_numParticlesWidth * m_numParticlesHeight;
-	m_pParticles = new Physics_Particle[m_particleCount];
-
-	// Create and initialize a plane mesh that will be used for Renderering the particles
-	m_pMesh = new DX10_Mesh();
-	VALIDATE(m_pMesh->InitialisePlane(m_pRenderer, m_numParticlesWidth, { (m_width / (m_numParticlesWidth - 1.0f)), 1.0f, (m_height / (m_numParticlesHeight - 1.0f)) }));
 
 	// Set the cloth to initial positions and constraints
 	VALIDATE(ResetCloth());
@@ -69,16 +60,21 @@ void Physics_Cloth::Process()
 	// Adding Gravity
 	AddForce({ 0.0f, -9.81f, 0.0f });
 
+	DWORD* pIndices = m_pMesh->GetIndexBuffer();
+
 	// Calculate each constraint multiple times
 	for (int i = 0; i < m_constraintIterations; i++)
 	{
-		for (int i = 0; i < (int)m_contraints.size(); i++)
+		for (int j = 0; j < (int)m_contraints.size(); j++)
 		{
-			m_contraints[i].SatisfyConstraint();
+			if (m_contraints[j].SatisfyConstraint())
+			{
+				pIndices[(j * 2)+1] = m_pIndices[j*2] = 0;
+			}
 		}
 	}
 	
-	TVertexNormalUV* pVertexBuffer = m_pMesh->GetVertexBuffer();
+	TVertexColor* pVertexBuffer = m_pMesh->GetVertexBufferCloth();
 	// Process each Particle
 	for (int i = 0; i < m_particleCount; i++)
 	{
@@ -88,20 +84,17 @@ void Physics_Cloth::Process()
 		pVertexBuffer[i].pos.z = m_pParticles[i].GetPosition()->z;
 	}
 
-	// Calculate the new normals for the cloth
-	m_pMesh->CalculateNormals();
+	// Update the Buffer
+	m_pMesh->UpdateBufferCloth();
 }
 
 void Physics_Cloth::Render()
 {
-	// Create the littex structure to determine how the shader draws the cloth
-	TLitTex litTex;
-	litTex.pMatWorld = &m_matWorld;
-	litTex.pMesh = m_pMesh;
-	litTex.pTexBase = m_pTex;
+	TCloth cloth;
+	cloth.pMatWorld = &m_matWorld;
+	cloth.pMesh = m_pMesh;
 
-	// Render the Cloth using no culling technique
-	m_pShader->Render(litTex, TECH_LITTEX_NOCULL);
+	m_pShader->Render(cloth);
 }
 
 void Physics_Cloth::AddForce(v3float _force)
@@ -203,8 +196,28 @@ void Physics_Cloth::PinParticle(Physics_Particle* _particle)
 
 bool Physics_Cloth::ResetCloth()
 {
-	// Remove all the current pins
+	// Clear Memory
 	ReleaseCloth();
+	m_contraints.clear();
+
+	//if (m_initialisedParticles == true)
+	//{
+		ReleasePtr(m_pMesh);
+		ReleasePtrArray(m_pParticles);
+
+		// Create memory for all the particles
+		m_nextIndex = 0;
+		m_particleCount = m_numParticlesWidth * m_numParticlesHeight;
+		m_pParticles = new Physics_Particle[m_particleCount];
+		m_pVertices = new TVertexColor[m_particleCount];
+
+		// Calculate how many indices there with be based on how many particles there are using line list
+		int immediateConstraintCount = (m_numParticlesWidth - 1) * (m_numParticlesHeight - 1) * 4 + (m_numParticlesWidth - 1) + (m_numParticlesHeight - 1);
+		int secondaryConstraintCount = (m_numParticlesWidth - 2) * (m_numParticlesHeight - 2) * 4 + ((m_numParticlesWidth - 2) * 2) + ((m_numParticlesHeight - 2) * 2);
+		m_indexCount = (immediateConstraintCount + secondaryConstraintCount) * 2;
+
+		m_pIndices = new DWORD[m_indexCount];
+	//}
 
 	// Cycle through all the particles
 	for (int col = 0; col < m_numParticlesWidth; col++)
@@ -219,6 +232,7 @@ bool Physics_Cloth::ResetCloth()
 			{
 				// First time. Initialise
 				VALIDATE(m_pParticles[index].Initialise(pos, m_timeStep, m_damping));
+				m_pVertices[index] = { { pos.x, pos.y, pos.z }, d3dxColors::Black };
 			}
 			else
 			{
@@ -229,9 +243,6 @@ bool Physics_Cloth::ResetCloth()
 	}
 	m_initialisedParticles = true;
 
-	// Clear the constraints list to make way for new ones
-	m_contraints.clear();
-
 	// Connect Particles that are immediately to the right and below (include diagonals)
 	for (int col = 0; col < m_numParticlesWidth; col++)
 	{
@@ -240,20 +251,20 @@ bool Physics_Cloth::ResetCloth()
 			// Particle to the Right exists
 			if (col < m_numParticlesWidth - 1)
 			{
-				VALIDATE(MakeConstraint(GetParticle(col, row), GetParticle(col + 1, row)));
+				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 1, row)));
 			}
 
 			// Particle below exists
 			if (row < m_numParticlesHeight - 1)
 			{
-				VALIDATE(MakeConstraint(GetParticle(col, row), GetParticle(col, row + 1)));
+				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col, row + 1)));
 			}
 
 			// Particle to the right and below exists
 			if ((col < m_numParticlesWidth - 1) && (row < m_numParticlesHeight - 1))
 			{
-				VALIDATE(MakeConstraint(GetParticle(col, row), GetParticle(col + 1, row + 1)));
-				VALIDATE((GetParticle(col + 1, row), GetParticle(col, row + 1)));
+				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 1, row + 1)));
+				VALIDATE(MakeConstraint(GetParticleIndex(col + 1, row), GetParticleIndex(col, row + 1)));
 			}
 		}
 	}
@@ -266,23 +277,27 @@ bool Physics_Cloth::ResetCloth()
 			// Particle to the Right exists
 			if (col < m_numParticlesWidth - 2)
 			{
-				VALIDATE(MakeConstraint(GetParticle(col, row), GetParticle(col + 2, row)));
+				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row)));
 			}
 
 			// Particle below exists
 			if (row < m_numParticlesHeight - 2)
 			{
-				VALIDATE(MakeConstraint(GetParticle(col, row), GetParticle(col, row + 2)));
+				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col, row + 2)));
 			}
 
 			// Particle to the right and below exists
 			if ((col < m_numParticlesWidth - 2) && (row < m_numParticlesHeight - 2))
 			{
-				VALIDATE(MakeConstraint(GetParticle(col, row), GetParticle(col + 2, row + 2)));
-				VALIDATE(MakeConstraint(GetParticle(col + 2, row), GetParticle(col, row + 2)));
+				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row + 2)));
+				VALIDATE(MakeConstraint(GetParticleIndex(col + 2, row), GetParticleIndex(col, row + 2)));
 			}
 		}
 	}
+	
+	// Create a new Cloth Mesh
+	m_pMesh = new DX10_Mesh();
+	VALIDATE(m_pMesh->InitialiseCloth(m_pRenderer, m_pVertices, m_pIndices, m_particleCount, m_indexCount, sizeof(TVertexColor), D3D10_PRIMITIVE_TOPOLOGY_LINELIST, D3D10_USAGE_DYNAMIC, D3D10_USAGE_DYNAMIC));
 
 	// Pin Particles
 	GetParticle(0, 0)->Move({ 1.0f, 0.0f, 0.0f });
@@ -299,15 +314,95 @@ bool Physics_Cloth::ResetCloth()
 
 	WindForce({ 0.0f, 0.0f, 0.001f });
 	Process();
-
 	return true;
 }
 
-bool Physics_Cloth::MakeConstraint(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, float _restDist)
+void Physics_Cloth::ResizeWidth(bool _smaller)
 {
-	// Create and initialise a new constraint
+	if (_smaller == true)
+	{
+		if (m_width >= 8)
+		{
+			m_width -= 2;
+			m_numParticlesWidth = m_width + 1;
+		}
+	}
+	else
+	{
+		if (m_width <= 48)
+		{
+			m_width += 2;
+			m_numParticlesWidth = m_width + 1;
+		}
+	}
+	m_initialisedParticles = false;
+
+	ResetCloth();
+}
+
+void Physics_Cloth::ResizeHeight(bool _smaller)
+{
+	if (_smaller == true)
+	{
+		if (m_height >= 8)
+		{
+			m_height -= 2;
+			m_numParticlesHeight = m_height + 1;
+		}
+	}
+	else
+	{
+		if (m_height <= 48)
+		{
+			m_height += 2;
+			m_numParticlesHeight = m_height + 1;
+		}
+	}
+	m_initialisedParticles = false;
+
+	ResetCloth();
+}
+
+void Physics_Cloth::FloorCollision(float _floorPos)
+{
+	v3float up = { 0.0f, 1.0f, 0.0f };
+
+	for (int i = 0; i < m_particleCount; i++)
+	{
+			if (m_pParticles[i].GetPosition()->y <= _floorPos)
+		{
+			// Push the particles up if they are under the floor
+			float pierce = abs(m_pParticles[i].GetPosition()->y - (_floorPos));
+			m_pParticles[i].Move(up*pierce);
+		}
+	}
+}
+
+void Physics_Cloth::BallCollision(v3float _center, float _radius)
+{
+	//std::vector<Phy_Cloth_Particle>::iterator particleIter;
+	//for (particleIter = m_particleList.begin(); particleIter != m_particleList.end(); particleIter++)
+	//{
+	//	v3float Pierce = (*particleIter).GetPosition() - _Center;
+	//	float PierceLength = Pierce.Magnitude();
+	//	if (PierceLength < _Radius) // if the particle is inside the ball
+	//	{
+	//		(*particleIter).OffSetPosition(Pierce.Normalise() * (_Radius - PierceLength)); // project the particle to the surface of the ball
+	//	}
+	//}
+}
+
+bool Physics_Cloth::MakeConstraint(int _particleIndexA, int _particleIndexB, bool _draw, float _restDist)
+{
+	// Create and initialize a new constraint
 	m_contraints.push_back(Physics_Constraint());
-	VALIDATE(m_contraints.back().Initialise(_pParticleA, _pParticleB, _restDist));
+	VALIDATE(m_contraints.back().Initialise(&m_pParticles[_particleIndexA], &m_pParticles[_particleIndexB], _restDist));
+
+	if (_draw == true)
+	{
+		m_pIndices[m_nextIndex++] = _particleIndexA;
+		m_pIndices[m_nextIndex++] = _particleIndexB;
+	}
 
 	return true;
 }

@@ -47,22 +47,39 @@ bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB
 		m_restDist = _restDist;
 	}
 
+	m_active = true;
+
 	return true;
 }
 
-void Physics_Constraint::SatisfyConstraint()
+bool Physics_Constraint::SatisfyConstraint()
 {
-	// Calculate the vector from particle A to B and its length
-	v3float differenceVec = (*m_pParticleB->GetPosition() - *m_pParticleA->GetPosition());
-	float currDist = differenceVec.Magnitude();
+	if (m_active == true)
+	{
+		// Calculate the vector from particle A to B and its length
+		v3float differenceVec = (*m_pParticleB->GetPosition() - *m_pParticleA->GetPosition());
+		float currDist = differenceVec.Magnitude();
 
-	// Calculate the correction vector needed to return to rest
-	v3float correctionVec = differenceVec * (1 - m_restDist / currDist);
+		if (currDist > m_restDist * 3.0f)
+		{
+			m_active = false;
+			return true;
+		}
+		else
+		{	
+			if (currDist > m_restDist || currDist < m_restDist / 2)
+			{
+				// Calculate the correction vector needed to return to rest
+				v3float correctionVec = differenceVec * (1 - m_restDist / currDist);
 
-	// Halve the correction vector so each particle and can get half
-	v3float correctionVecHalved = correctionVec / 2.0f;
+				// Halve the correction vector so each particle and can get half
+				v3float correctionVecHalved = correctionVec / 2.0f;
 
-	// Move the particles based on the correction vector
-	m_pParticleA->Move(correctionVecHalved);
-	m_pParticleB->Move(-correctionVecHalved);
+				// Move the particles based on the correction vector
+				m_pParticleA->Move(correctionVecHalved);
+				m_pParticleB->Move(-correctionVecHalved);
+			}
+		}
+	}
+	return false;
 }

@@ -48,16 +48,19 @@ public:
 	/***********************
 	* SatisfyConstraint: Manipulate the particles and correct them to satisfy the constraints
 	* @author: Callan Moore
-	* @return: void
+	* @return: bool: Constraint was broken
 	********************/
-	void SatisfyConstraint();
+	bool SatisfyConstraint();
 
 private:
 	Physics_Particle* m_pParticleA;
 	Physics_Particle* m_pParticleB;
 	float m_restDist;
 
+	int m_indexNumA;
+	int m_indexNumB;
 
+	bool m_active;
 };
 #endif	// __PHYSICS_CONTRAINT_H__
 

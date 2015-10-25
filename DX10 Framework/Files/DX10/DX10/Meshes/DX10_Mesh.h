@@ -50,6 +50,7 @@ public:
 	virtual ~DX10_Mesh() 
 	{
 		ReleasePtr(m_pVertexBuffer);
+		ReleasePtr(m_pVertexBufferCloth);
 		ReleasePtr(m_pIndexBuffer);
 		ReleasePtr(m_pReadCornerIndices);
 		ReleasePtr(m_pWriteCornerIndices);
@@ -60,29 +61,65 @@ public:
 	* Initialise: Initialise a new mesh
 	* @author: Callan Moore
 	* @parameter: _pRenderer: The renderer for the mesh
-	* @parameter: _meshType: The type fo mesh to create
+	* @parameter: _meshType: The type for mesh to create
 	* @parameter: _scale: 3D scalar for the mesh
 	* @return: bool: Successful or not
 	********************/
-	bool DX10_Mesh::Initialise(DX10_Renderer* _pRenderer, eMeshType _meshType, v3float _scale)
+	bool Initialise(DX10_Renderer* _pRenderer, eMeshType _meshType, v3float _scale)
 	{
 		if (_pRenderer == 0)
 		{
 			return false;
 		}
-
+	
 		// Save the renderer on the Rectangular Prism
 		m_pRenderer = _pRenderer;
 		m_scale = _scale;
 		m_primTopology = D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		int stride = sizeof(TVertexNormalUV);
-
+	
 		// Load the Mesh File
 		std::string fileName = GetFilePath(_meshType);
 		VALIDATE(m_pRenderer->LoadMeshObj(fileName, m_pVertexBuffer, m_pIndexBuffer, &m_vertexCount, &m_indexCount, m_scale));
-
+	
 		// Create the buffer
 		VALIDATE(m_pRenderer->CreateBuffer(m_pVertexBuffer, m_pIndexBuffer, m_vertexCount, m_indexCount, stride, m_pBuffer, D3D10_USAGE_DYNAMIC, D3D10_USAGE_DEFAULT));
+	
+		return true;
+	}
+	
+	/***********************
+	* InitialiseCloth: Initialise a Mesh to be used as a cloth
+	* @author: Callan Moore
+	* @parameter: _pRenderer: The renderer for the mesh
+	* @parameter: _pVertices: The Vertices list
+	* @parameter: _pIndices: The Indices list
+	* @parameter: _vertexCount: The number of vertices
+	* @parameter: _indexCount: The number of indices
+	* @parameter: _stride: The stride of the vertices
+	* @parameter: _topology: The topology to be used
+	* @parameter: _vertexUsage: The usage flag for creating the vertex buffer
+	* @parameter: _indexUsage: The usage flag for creating the index buffer
+	* @return: bool: Successful or not
+	********************/
+	template<typename TIndices, typename TVertices>
+	bool InitialiseCloth(DX10_Renderer* _pRenderer, TVertices* _pVertices, TIndices* _pIndices, UINT _vertexCount, UINT _indexCount, UINT _stride, D3D10_PRIMITIVE_TOPOLOGY _topology, D3D10_USAGE _vertexUsage = D3D10_USAGE_IMMUTABLE, D3D10_USAGE _indexUsage = D3D10_USAGE_IMMUTABLE)
+	{
+		if (_pRenderer == 0 || _pVertices == 0 || _pIndices == 0)
+		{
+			return false;
+		}
+
+		m_pRenderer = _pRenderer;
+		m_primTopology = _topology;
+		int stride = _stride;
+		m_indexCount = _indexCount;
+		m_vertexCount = _vertexCount;
+		m_pVertexBufferCloth = _pVertices;
+		m_pIndexBuffer = _pIndices;
+
+		// Create the buffer
+		VALIDATE(m_pRenderer->CreateBuffer(m_pVertexBufferCloth, m_pIndexBuffer, m_vertexCount, m_indexCount, stride, m_pBuffer, _vertexUsage, _indexUsage));
 
 		return true;
 	}
@@ -95,7 +132,7 @@ public:
 	* @parameter: _scale: 3D scalar for the mesh
 	* @return: bool: Successful or not
 	********************/
-	bool DX10_Mesh::InitialisePlane(DX10_Renderer* _pRenderer, int _size, v3float _scale)
+	bool InitialisePlane(DX10_Renderer* _pRenderer, int _size, v3float _scale)
 	{
 		if (_pRenderer == 0)
 		{
@@ -239,9 +276,27 @@ public:
 	* @return: float: The Scale of the Mesh
 	********************/
 	v3float GetScale(){ return m_scale; };
-
-	// TO DO CAL
+	
+	/***********************
+	* GetVertexBuffer: Retrieve the Vertex Buffer of the Mesh
+	* @author: Callan Moore
+	* @return: TVertexNormalUV*: The array of vertices that make up the vertex buffer
+	********************/
 	TVertexNormalUV* GetVertexBuffer() { return m_pVertexBuffer; };
+
+	/***********************
+	* GetVertexBufferCloth: Retrieve the Vertex Buffer for Cloth of the Mesh
+	* @author: Callan Moore
+	* @return: TVertexNormalUV*: The array of vertices that make up the vertex buffer for Cloth
+	********************/
+	TVertexColor* GetVertexBufferCloth() { return m_pVertexBufferCloth; };
+
+	/***********************
+	* GetIndexBuffer: Retrieve the index Buffer of the Mesh
+	* @author: Callan Moore
+	* @return: TVertexNormalUV*: The array of indices that make up the Index buffer
+	********************/
+	DWORD* GetIndexBuffer() { return m_pIndexBuffer; };
 
 	/***********************
 	* DiamondSquareInit: Initialise the Mesh to be able to handle Diamond Square algorithm
@@ -426,6 +481,40 @@ public:
 
 		// Unlock the memory
 		pVertexBuff->Unmap();
+	}
+
+	/***********************
+	* UpdateBufferCloth: Update the Meshes Vertex buffer for Cloth for the GPU
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void UpdateBufferCloth()
+	{
+		// Retrieve the current Vertex Buffer used by the GPU
+		ID3D10Buffer* pVertexBuff = m_pBuffer->GetVertexBuffer();
+		void* verticesPtr;
+
+		// Lock the memory
+		pVertexBuff->Map(D3D10_MAP_WRITE_DISCARD, 0, (void**)&verticesPtr);
+
+		//Copy the new Vertex Buffer into the pointer to the GPU Vertex Buffer
+		memcpy(verticesPtr, (void*)m_pVertexBufferCloth, sizeof(TVertexColor) * m_vertexCount);
+
+		// Unlock the memory
+		pVertexBuff->Unmap();
+
+		// Retrieve the current Index Buffer used by the GPU
+		ID3D10Buffer* pIndexBuff = m_pBuffer->GetIndexBuffer();
+		void* indicesPtr;
+
+		// Lock the memory
+		pIndexBuff->Map(D3D10_MAP_WRITE_DISCARD, 0, (void**)&indicesPtr);
+
+		//Copy the new Vertex Buffer into the pointer to the GPU Vertex Buffer
+		memcpy(indicesPtr, (void*)m_pIndexBuffer, sizeof(DWORD) * m_indexCount);
+
+		// Unlock the memory
+		pIndexBuff->Unmap();
 	}
 
 	/***********************
@@ -615,6 +704,7 @@ private:
 	int m_indexCount;
 
 	TVertexNormalUV* m_pVertexBuffer;
+	TVertexColor* m_pVertexBufferCloth;
 	DWORD* m_pIndexBuffer;
 	int m_size;
 	std::vector<UINT>* m_pWriteCornerIndices;

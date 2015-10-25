@@ -86,7 +86,7 @@ public:
 
 		return true;
 	}
-	
+
 	/***********************
 	* SetUpPerFrame: Setup the shader file with the variables used for the whole frame
 	* @author: Callan Moore
@@ -98,7 +98,7 @@ public:
 		m_pMatView->SetMatrix((float*)m_pDX10_Renderer->GetViewMatrix());
 		m_pMatProj->SetMatrix((float*)m_pDX10_Renderer->GetProjMatrix());
 	}
-	
+
 	/***********************
 	* Render: Ready the shader technique with object specific details and setting the objects mesh to render
 	* @author: Callan Moore
@@ -165,7 +165,7 @@ public:
 	}
 
 private:
-	
+
 	/***********************
 	* BuildFX: Build the FX file for the Shader
 	* @author: Callan Moore
@@ -192,7 +192,7 @@ private:
 	bool CreateFXVarPointers()
 	{
 		// Per Frame	
-		
+
 		m_pEyePos = m_pFX->GetVariableByName("g_eyePosW");
 		m_pMatView = m_pFX->GetVariableByName("g_matView")->AsMatrix();
 		m_pMatProj = m_pFX->GetVariableByName("g_matProj")->AsMatrix();
@@ -250,7 +250,7 @@ private:
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Refract, m_pVertexLayout_Reflect);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Star, m_pVertexLayout_Star);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_NoCull, m_pVertexLayout_NoCull);
-	
+
 		return true;
 	}
 
@@ -263,52 +263,52 @@ private:
 	void SetCurrentPtrs(eTech_LitTex _tech)
 	{
 		switch (_tech)
-		{		
-			case TECH_LITTEX_STANDARD:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_Standard;
-				m_pCurrentTech = m_pTech_Standard;
-			}
-			break;
-			case TECH_LITTEX_FADE:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_Fade;
-				m_pCurrentTech = m_pTech_Fade;
-			}
-			break;
-			case TECH_LITTEX_BLENDTEX2:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_BlendTex2;
-				m_pCurrentTech = m_pTech_BlendTex2;
-			}
-			case TECH_LITTEX_REFLECT:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_Reflect;
-				m_pCurrentTech = m_pTech_Reflect;
-			}
-			case TECH_LITTEX_REFRACT:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_Refract;
-				m_pCurrentTech = m_pTech_Refract;
-			}
-			break;
-			case TECH_LITTEX_STAR:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_Star;
-				m_pCurrentTech = m_pTech_Star;
-			}
-			break;
-			case TECH_LITTEX_NOCULL:
-			{
-				m_pCurrentVertexLayout = m_pVertexLayout_NoCull;
-				m_pCurrentTech = m_pTech_NoCull;
-			}
-			break;
-			default:
-			{
-				m_pCurrentVertexLayout = 0;
-				m_pCurrentTech = 0;
-			}
+		{
+		case TECH_LITTEX_STANDARD:
+		{
+			m_pCurrentVertexLayout = m_pVertexLayout_Standard;
+			m_pCurrentTech = m_pTech_Standard;
+		}
+		break;
+		case TECH_LITTEX_FADE:
+		{
+			m_pCurrentVertexLayout = m_pVertexLayout_Fade;
+			m_pCurrentTech = m_pTech_Fade;
+		}
+		break;
+		case TECH_LITTEX_BLENDTEX2:
+		{
+			m_pCurrentVertexLayout = m_pVertexLayout_BlendTex2;
+			m_pCurrentTech = m_pTech_BlendTex2;
+		}
+		case TECH_LITTEX_REFLECT:
+		{
+			m_pCurrentVertexLayout = m_pVertexLayout_Reflect;
+			m_pCurrentTech = m_pTech_Reflect;
+		}
+		case TECH_LITTEX_REFRACT:
+		{
+			m_pCurrentVertexLayout = m_pVertexLayout_Refract;
+			m_pCurrentTech = m_pTech_Refract;
+		}
+		break;
+		case TECH_LITTEX_STAR:
+		{
+			m_pCurrentVertexLayout = m_pVertexLayout_Star;
+			m_pCurrentTech = m_pTech_Star;
+		}
+		break;
+		case TECH_LITTEX_NOCULL:
+		{
+			m_pCurrentVertexLayout = m_pVertexLayout_NoCull;
+			m_pCurrentTech = m_pTech_NoCull;
+		}
+		break;
+		default:
+		{
+			m_pCurrentVertexLayout = 0;
+			m_pCurrentTech = 0;
+		}
 		}	// End Switch
 	}
 
@@ -347,7 +347,7 @@ private:
 	ID3D10EffectMatrixVariable*			m_pMatTex;
 	ID3D10EffectVariable*				m_pReduceAlpha;
 	ID3D10EffectVectorVariable*			m_pPlane;
-	
+
 
 	ID3D10EffectShaderResourceVariable* m_pMapDiffuse;
 	ID3D10EffectShaderResourceVariable* m_pMapDiffuse2;

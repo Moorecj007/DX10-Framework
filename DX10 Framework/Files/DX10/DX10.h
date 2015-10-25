@@ -51,6 +51,7 @@
 #include "DX10\Shaders\DX10_Shader_LitTex.h"
 #include "DX10\Shaders\DX10_Shader_Sprite.h"
 #include "DX10\Shaders\DX10_Shader_Water.h"
+#include "DX10\Shaders\DX10_Shader_Cloth.h"
 
 // Systems
 #include "DX10\Systems\TextureResource.h"

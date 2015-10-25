@@ -216,10 +216,15 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pShader_LitTex = new DX10_Shader_LitTex();
 	VALIDATE(m_pShader_LitTex->Initialise(m_pDX10_Renderer));
 
+	m_pShader_Cloth = new DX10_Shader_Cloth();
+	VALIDATE(m_pShader_Cloth->Initialise(m_pDX10_Renderer));
+
 	m_pShader_Sprite = new DX10_Shader_Sprite();
 	VALIDATE(m_pShader_Sprite->Initialise(m_pDX10_Renderer, &m_hWnd));
 
 	// Create the Meshes
+	m_pMesh_Floor = new DX10_Mesh();
+	VALIDATE(m_pMesh_Floor->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 100.0f, 100.0f, 100.0f }));
 
 
 	// Create the Objects
@@ -231,9 +236,13 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pSprite_InstructionsRight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsRightRed.png", 384, 140));
 	m_pSprite_InstructionsRight->SetPosition(600, 5);
 
+	m_pObj_Floor = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Floor->Initialise(m_pDX10_Renderer, m_pMesh_Floor, m_pShader_LitTex, "WaterMap.png"));
+	m_pObj_Floor->SetPosition({ 0.0f, -60.0f, 0.0f });
+
 	// Create the Cloth
 	m_pCloth = new Physics_Cloth();
-	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_LitTex, 30, 30, 0.01f, 0.033f));
+	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_Cloth, 30, 30, 0.01f, 0.033f));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
@@ -265,11 +274,14 @@ void Application::ShutDown()
 		ReleasePtr(m_pCamera);
 		// Release the Shaders
 		ReleasePtr(m_pShader_LitTex);
+		ReleasePtr(m_pShader_Cloth);
 		ReleasePtr(m_pShader_Sprite);
 		// Release the Meshes
+		ReleasePtr(m_pMesh_Floor);
 		// Release the Objects
 		ReleasePtr(m_pSprite_InstructionsLeft);
 		ReleasePtr(m_pSprite_InstructionsRight);
+		ReleasePtr(m_pObj_Floor);
 		// Release the Texture Resources
 		ReleasePtr(m_pRefractionTexture);
 		ReleasePtr(m_pReflectionTexture);
@@ -325,6 +337,9 @@ bool Application::Process(float _dt)
 		ProcessShaders();
 
 		m_pCloth->Process();
+		m_pObj_Floor->Process(_dt);
+
+		m_pCloth->FloorCollision(m_pObj_Floor->GetPosition().y);
 	}
 
 	return true;
@@ -333,6 +348,7 @@ bool Application::Process(float _dt)
 void Application::ProcessShaders()
 {
 	m_pShader_LitTex->SetUpPerFrame();
+	m_pShader_Cloth->SetUpPerFrame();
 	m_pShader_Sprite->Update(m_deltaTick);
 }
 
@@ -350,7 +366,8 @@ void Application::Render()
 
 		// Render the Objects of the Scene
 		m_pCloth->Render();
-		
+		m_pObj_Floor->Render();
+
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		//m_pSprite_InstructionsLeft->Render();
 		//m_pSprite_InstructionsRight->Render();
@@ -461,57 +478,111 @@ bool Application::HandleInput()
 		m_pCamera->Fly(-1);
 	}
 
-	if ((m_pKeyDown[VK_UP]) && !(m_pKeyDown[VK_DOWN]))
+	if ((m_pKeyDown[VK_UP]) && !(m_pKeyDown[VK_DOWN]) && !(m_pKeyDown[VK_CONTROL]))
 	{
 		// Down arrow pressed
 		m_pCamera->RotatePitch(-1);
 	}
 
-	if ((m_pKeyDown[VK_DOWN]) && !(m_pKeyDown[VK_UP]))
+	if ((m_pKeyDown[VK_DOWN]) && !(m_pKeyDown[VK_UP]) && !(m_pKeyDown[VK_CONTROL]))
 	{
 		// Up arrow pressed
 		m_pCamera->RotatePitch(1);
 	}
 
-	if ((m_pKeyDown[VK_LEFT]) && !(m_pKeyDown[VK_RIGHT]))
+	if ((m_pKeyDown[VK_LEFT]) && !(m_pKeyDown[VK_RIGHT]) && !(m_pKeyDown[VK_CONTROL]))
 	{
 		// Left arrow pressed
 		m_pCamera->RotateYaw(-1);
 	}
 
-	if ((m_pKeyDown[VK_RIGHT]) && !(m_pKeyDown[VK_LEFT]))
+	if ((m_pKeyDown[VK_RIGHT]) && !(m_pKeyDown[VK_LEFT]) && !(m_pKeyDown[VK_CONTROL]))
 	{
 		// Right arrow pressed
 		m_pCamera->RotateYaw(1);
 	}
 
 	// Application Specific Keys
-
 	if (m_pKeyDown[input::VK_1])
-	{
-		m_pCloth->WindForce({ 0.0f, 0.0f, 10.0f });
-	}
-
-	if (m_pKeyDown[input::VK_2])
 	{
 		m_pCloth->ReleaseCloth();
 		SetKeyDown(input::VK_2, false);
 	}
 
-	if (m_pKeyDown[input::VK_3])
+	if (m_pKeyDown[input::VK_2])
 	{
 		m_pCloth->MovePinned(true);
 	}
 
-	if (m_pKeyDown[input::VK_4])
+	if (m_pKeyDown[input::VK_3])
 	{
 		m_pCloth->MovePinned(false);
 	}
 
-	if (m_pKeyDown[input::VK_5])
+	if (m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_LEFT])
+	{
+		m_pCloth->ResizeWidth(true);
+	}
+
+	if(m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_RIGHT])
+	{
+		m_pCloth->ResizeWidth(false);
+	}
+
+	if (m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_UP])
+	{
+		m_pCloth->ResizeHeight(true);
+	}
+
+	if (m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_DOWN])
+	{
+		m_pCloth->ResizeHeight(false);
+	}
+
+	if (m_pKeyDown[input::VK_R])
 	{
 		m_pCloth->ResetCloth();
 		SetKeyDown(input::VK_5, false);
+	}
+
+	if (m_pKeyDown[VK_NUMPAD1])
+	{
+		m_pCloth->WindForce({ 10.0f, 0.0f, 10.0f });
+	}
+
+	if (m_pKeyDown[VK_NUMPAD2])
+	{
+		m_pCloth->WindForce({ 0.0f, 0.0f, 10.0f });
+	}
+
+	if (m_pKeyDown[VK_NUMPAD3])
+	{
+		m_pCloth->WindForce({ -10.0f, 0.0f, 10.0f });
+	}
+
+	if (m_pKeyDown[VK_NUMPAD4])
+	{
+		m_pCloth->WindForce({ 10.0f, 0.0f, 0.0f });
+	}
+
+	if (m_pKeyDown[VK_NUMPAD6])
+	{
+		m_pCloth->WindForce({ -10.0f, 0.0f, 0.0f });
+	}
+
+	if (m_pKeyDown[VK_NUMPAD7])
+	{
+		m_pCloth->WindForce({ 10.0f, 0.0f, -10.0f });
+	}
+
+	if (m_pKeyDown[VK_NUMPAD8])
+	{
+		m_pCloth->WindForce({ 0.0f, 0.0f, -10.0f });
+	}
+
+	if (m_pKeyDown[VK_NUMPAD9])
+	{
+		m_pCloth->WindForce({ -10.0f, 0.0f, -10.0f });
 	}
 
 	
