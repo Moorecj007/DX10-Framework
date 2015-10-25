@@ -146,11 +146,12 @@ private:
 	* @author: Callan Moore
 	* @parameter: _particleIndexA: Index of the First particle to constrain
 	* @parameter: _particleIndexB: Index of the Second particle to constrain
+	* @parameter: _immediate: Whether the constraint is an immediate neighbor
 	* @parameter: _draw: Whether to draw the constraint
 	* @parameter: _restDist: The resting distance to constrain the particles to (Default to the initial distance between the input particles)
 	* @return: bool: Successful or not
 	********************/
-	bool MakeConstraint(int _particleIndexA, int _particleIndexB, bool _draw = true, float _restDist = -1.0f);
+	bool MakeConstraint(int _particleIndexA, int _particleIndexB, bool _immediate, bool _draw = true, float _restDist = -1.0f);
 	
 	/***********************
 	* CalcTriangleNormal: Calculate the normal of the triangle defined by the three input particles
@@ -182,6 +183,10 @@ private:
 
 	int m_width;
 	int m_height;
+	int m_maxWidth;
+	int m_minWidth;
+	int m_maxHeight;
+	int m_minHeight;
 	int m_numParticlesWidth;
 	int m_numParticlesHeight;
 	int m_particleCount;

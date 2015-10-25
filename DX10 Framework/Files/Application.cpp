@@ -242,7 +242,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Cloth
 	m_pCloth = new Physics_Cloth();
-	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_Cloth, 30, 30, 0.01f, 0.033f));
+	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_Cloth, 20, 20, 0.01f, 0.033f));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);

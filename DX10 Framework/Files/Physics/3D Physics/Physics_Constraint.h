@@ -43,7 +43,7 @@ public:
 	* @parameter: _restDist: The resting distance of the particles (Default: calculates the initial distance as resting distance)
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(Physics_Particle* _pA, Physics_Particle* _pB, float _restDist = -1.0f);
+	bool Initialise(Physics_Particle* _pA, Physics_Particle* _pB, bool _immediate, float _restDist = -1.0f);
 	
 	/***********************
 	* SatisfyConstraint: Manipulate the particles and correct them to satisfy the constraints
@@ -61,6 +61,7 @@ private:
 	int m_indexNumB;
 
 	bool m_active;
+	bool m_immediate;
 };
 #endif	// __PHYSICS_CONTRAINT_H__
 

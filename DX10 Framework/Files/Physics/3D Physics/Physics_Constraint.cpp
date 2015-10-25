@@ -23,7 +23,7 @@ Physics_Constraint::~Physics_Constraint()
 {
 }
 
-bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB, float _restDist)
+bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB, bool _immediate, float _restDist)
 {
 	if (_pA == 0 || _pB == 0)
 	{
@@ -48,6 +48,7 @@ bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB
 	}
 
 	m_active = true;
+	m_immediate = _immediate;
 
 	return true;
 }
@@ -67,7 +68,17 @@ bool Physics_Constraint::SatisfyConstraint()
 		}
 		else
 		{	
-			if (currDist > m_restDist || currDist < m_restDist / 2)
+			bool correct = false;
+			if (m_immediate == true)
+			{
+				correct = true;
+			}
+			else if (currDist > m_restDist)
+			{
+				correct = true;
+			}
+
+			if (correct == true)
 			{
 				// Calculate the correction vector needed to return to rest
 				v3float correctionVec = differenceVec * (1 - m_restDist / currDist);
