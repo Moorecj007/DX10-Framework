@@ -88,6 +88,12 @@ LRESULT CALLBACK Application::WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam
 		case WM_LBUTTONDOWN:
 		{
 			pApp->SetMouseDown(true);
+
+			POINT mousePos;
+			mousePos.x = GET_X_LPARAM(_lParam);
+			mousePos.y = GET_Y_LPARAM(_lParam);
+
+			pApp->SetMousePos(mousePos);
 		}
 		break;
 		case WM_LBUTTONUP:
@@ -506,17 +512,29 @@ bool Application::HandleInput()
 	if (m_pKeyDown[input::VK_1])
 	{
 		m_pCloth->ReleaseCloth();
-		SetKeyDown(input::VK_2, false);
+		SetKeyDown(input::VK_1, false);
 	}
 
 	if (m_pKeyDown[input::VK_2])
 	{
-		m_pCloth->MovePinned(true);
+		m_pCloth->MoveHooks(true);
 	}
 
 	if (m_pKeyDown[input::VK_3])
 	{
-		m_pCloth->MovePinned(false);
+		m_pCloth->MoveHooks(false);
+	}
+
+	if (m_pKeyDown[input::VK_9])
+	{
+		m_pCloth->ResizeHooks(true);
+		SetKeyDown(input::VK_9, false);
+	}
+
+	if (m_pKeyDown[input::VK_0])
+	{
+		m_pCloth->ResizeHooks(false);
+		SetKeyDown(input::VK_0, false);
 	}
 
 	if (m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_LEFT])
@@ -542,50 +560,81 @@ bool Application::HandleInput()
 	if (m_pKeyDown[input::VK_R])
 	{
 		m_pCloth->ResetCloth();
-		SetKeyDown(input::VK_5, false);
+		SetKeyDown(input::VK_R, false);
+	}
+
+	if (m_pKeyDown[VK_NUMPAD0])
+	{
+		m_pCloth->AddWindForce({ 0.0f, -1.0f, 0.0f });
 	}
 
 	if (m_pKeyDown[VK_NUMPAD1])
 	{
-		m_pCloth->WindForce({ 10.0f, 0.0f, 10.0f });
+		m_pCloth->AddWindForce({ -1.0f, 0.0f, -1.0f });
 	}
 
 	if (m_pKeyDown[VK_NUMPAD2])
 	{
-		m_pCloth->WindForce({ 0.0f, 0.0f, 10.0f });
+		m_pCloth->AddWindForce({ 0.0f, 0.0f, -1.0f });
 	}
 
 	if (m_pKeyDown[VK_NUMPAD3])
 	{
-		m_pCloth->WindForce({ -10.0f, 0.0f, 10.0f });
+		m_pCloth->AddWindForce({ 1.0f, 0.0f, -1.0f });
 	}
 
 	if (m_pKeyDown[VK_NUMPAD4])
 	{
-		m_pCloth->WindForce({ 10.0f, 0.0f, 0.0f });
+		m_pCloth->AddWindForce({ -1.0f, 0.0f, 0.0f });
+	}
+
+	if (m_pKeyDown[VK_NUMPAD5])
+	{
+		m_pCloth->AddWindForce({ 0.0f, 1.0f, 0.0f });
 	}
 
 	if (m_pKeyDown[VK_NUMPAD6])
 	{
-		m_pCloth->WindForce({ -10.0f, 0.0f, 0.0f });
+		m_pCloth->AddWindForce({ 1.0f, 0.0f, 0.0f });
 	}
 
 	if (m_pKeyDown[VK_NUMPAD7])
 	{
-		m_pCloth->WindForce({ 10.0f, 0.0f, -10.0f });
+		m_pCloth->AddWindForce({ -1.0f, 0.0f, 1.0f });
 	}
 
 	if (m_pKeyDown[VK_NUMPAD8])
 	{
-		m_pCloth->WindForce({ 0.0f, 0.0f, -10.0f });
+		m_pCloth->AddWindForce({ 0.0f, 0.0f, 1.0f });
 	}
 
 	if (m_pKeyDown[VK_NUMPAD9])
 	{
-		m_pCloth->WindForce({ -10.0f, 0.0f, -10.0f });
+		m_pCloth->AddWindForce({ 1.0f, 0.0f, 1.0f });
 	}
 
-	
+	if (m_pKeyDown[VK_ADD])
+	{
+		m_pCloth->UpdateWindSpeed(1.0f);
+		SetKeyDown(VK_ADD, false);
+	}
+
+	if (m_pKeyDown[VK_SUBTRACT])
+	{
+		m_pCloth->UpdateWindSpeed(-1.0f);
+		SetKeyDown(VK_SUBTRACT, false);
+	}
+
+	// Cast a Ray
+	if (m_mouseDown)
+	{
+		v3float originPos;
+		v3float direction;
+
+		m_pCamera->GetRay(m_mousePos, &originPos, &direction);
+		m_pCloth->RayParticleIntersect(originPos, direction);
+
+	}
 
 	return true;
 }

@@ -195,6 +195,9 @@ public:
 	********************/
 	void SetMouseDown(bool _mouseDown) { m_mouseDown = _mouseDown; };
 
+	// TO DO CAL
+	void SetMousePos(POINT _mousePos) { m_mousePos = _mousePos; };
+
 private:
 	// Preventing copies and extra constructions
 	Application() {}
@@ -235,6 +238,7 @@ private:
 	// Input Variables
 	bool* m_pKeyDown;
 	bool m_mouseDown;
+	POINT m_mousePos;
 
 	// Renderer Variables
 	DX10_Renderer* m_pDX10_Renderer;

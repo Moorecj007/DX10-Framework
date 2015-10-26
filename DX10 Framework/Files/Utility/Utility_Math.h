@@ -593,4 +593,34 @@ inline float RadiansToDegrees(float _radians)
 	return (180.0f * _radians / float(M_PI));
 }
 
+/***********************
+* RaySphereIntersect: Checks whether a Ray (In Local Space to the Sphere) intersect the Sphere
+* @author: Jc Fowles
+* @parameter: _rayOrigin: The Origin point of the Ray in Local Space to the Sphere
+* @parameter: _rayDirection: The Direction of the Ray in Local Space to the Sphere
+* @parameter: _sphereRad: Radius of the Sphere
+* @return: bool: True if the Ray Intersect the Sphere
+********************/
+inline bool RaySphereIntersect(v3float _rayOrigin, v3float _rayDirection, float _sphereRad)
+{
+	// Calculate the a, b, and c Coefficients of the Discriminant
+	float a = _rayDirection.Dot(_rayDirection);
+	float b = _rayDirection.Dot(_rayOrigin) * 2.0f;
+	float c = _rayOrigin.Dot(_rayOrigin) - pow(_sphereRad, 2);
+
+	// Calculate the Discriminant (b^2 - 4ac)
+	float discriminant = pow(b, 2) - (4 * a * c);
+
+	if (discriminant < 0.0f)
+	{
+		// The Discriminant is Negative the Ray missed the Sphere
+		return false;
+	}
+	else
+	{
+		// The Discriminant is Positive the Ray intersected the Sphere
+		return true;
+	}
+}
+
 #endif	// __UTILITY_MATH_H__

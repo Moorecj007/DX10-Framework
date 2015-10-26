@@ -30,7 +30,7 @@ bool DX10_Camera_FirstPerson::Initialise(DX10_Renderer* _pRenderer, HINSTANCE _h
 	m_pDirectInput = new DirectInput();
 	VALIDATE(m_pDirectInput->Initialise(_hInstance, _hWnd));
 
-	m_position = D3DXVECTOR3(15.0f, 15.0f, -80.0f);
+	m_position = D3DXVECTOR3(0.0f, 30.0f, -80.0f);
 	m_target = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	m_forward = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
@@ -104,9 +104,9 @@ void DX10_Camera_FirstPerson::Process(float _dt)
 	m_target = m_position + m_target;
 
 	// Create the View matrix
-	D3DXMatrixLookAtLH(&m_view, &m_position, &m_target, &m_up);
+	D3DXMatrixLookAtLH(&m_matView, &m_position, &m_target, &m_up);
 
-	m_pRenderer->SetViewMatrix(m_view);
+	m_pRenderer->SetViewMatrix(m_matView);
 	m_pRenderer->SetEyePosition(m_position);
 }
 
@@ -178,4 +178,29 @@ void DX10_Camera_FirstPerson::RotatePitch(float _dir)
 		// Rotate Down on Pitch axis
 		m_pitchChange -= m_rotSpeed;
 	}
+}
+
+void DX10_Camera_FirstPerson::GetRay(POINT _mousePos, v3float* _pOriginPos, v3float* _pDirection)
+{
+	// Move the Mouse Coordinates into the -1 to +1 range.
+	float pointX = ((2.0f * (float)_mousePos.x) / (float)m_pRenderer->GetWidth()) - 1.0f;
+	float pointY = (((2.0f * (float)_mousePos.y) / (float)m_pRenderer->GetHeight()) - 1.0f) * -1.0f;
+
+	// Adjust the points using the Projection Matrix to Account for the Aspect Ratio of the Viewport
+	D3DXMATRIX projectionMatrix;
+	projectionMatrix = *(m_pRenderer->GetProjMatrix());
+	pointX = pointX / projectionMatrix._11;
+	pointY = pointY / projectionMatrix._22;
+
+	// Get the inverse of the view matrix.
+	D3DXMATRIX invViewMatrix;
+	D3DXMatrixInverse(&invViewMatrix, NULL, &m_matView);
+
+	// Calculate the Direction of the Ray in View Space.
+	_pDirection->x = (pointX * invViewMatrix._11) + (pointY * invViewMatrix._21) + invViewMatrix._31;
+	_pDirection->y = (pointX * invViewMatrix._12) + (pointY * invViewMatrix._22) + invViewMatrix._32;
+	_pDirection->z = (pointX * invViewMatrix._13) + (pointY * invViewMatrix._23) + invViewMatrix._33;
+
+	// Set the Origin Position of the Ray which is the Position of the Camera.
+	*_pOriginPos = { m_position.x, m_position.y, m_position.z };
 }

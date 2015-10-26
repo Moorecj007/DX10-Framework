@@ -96,6 +96,16 @@ public:
 	********************/
 	void RotatePitch(float _dir);
 
+	/***********************
+	* GetRay: Calculates a ray from the mouse position
+	* @author: Jc Fowles
+	* @parameter: _mousePos: The Mouse positions in screen space
+	* @parameter: _pOriginPos: (OUT) The to be calculated Origin Position of the Ray
+	* @parameter: _pDirection: (OUT) The to be calculated Direction of the Ray
+	* @return: void
+	********************/
+	void GetRay(POINT _mousePos, v3float* _pOriginPos, v3float* _pDirection);
+
 private:
 	DX10_Renderer* m_pRenderer;
 	DirectInput* m_pDirectInput;
@@ -112,7 +122,7 @@ private:
 	D3DXVECTOR3 m_forward;
 	D3DXVECTOR3 m_right;
 	D3DXMATRIX m_rotationMatrix;
-	D3DXMATRIX m_view;
+	D3DXMATRIX m_matView;
 
 	float m_yaw;
 	float m_pitch;

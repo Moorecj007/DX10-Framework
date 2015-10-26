@@ -19,11 +19,10 @@
 
 // Local Includes
 #include "Physics_Constraint.h"
-#include "../../DX10/DX10/DX10_Renderer.h"
-#include "../../DX10/DX10/Meshes/DX10_Mesh.h"
-#include "../../DX10/DX10/Shaders/DX10_Shader_Cloth.h"
+#include "../../DX10/DX10.h"
 
 class Physics_Cloth
+	: public DX10_Obj_Generic
 {
 public:
 	/***********************
@@ -79,7 +78,7 @@ public:
 	* @parameter: _force: Force vector of the force to apply (Direction and magnitude)
 	* @return: void
 	********************/
-	void WindForce(v3float _force);
+	void AddWindForce(v3float _force);
 	
 	/***********************
 	* ReleaseCloth: Release all the pins that holds the cloth in place
@@ -89,20 +88,20 @@ public:
 	void ReleaseCloth();
 	
 	/***********************
-	* MovePinned: Move the pinned particles closer or further away from the centre
+	* MoveHooks: Move the hooked particles closer or further away from the centre
 	* @author: Callan Moore
 	* @parameter: _closer: true to move closer. False to move particles away
 	* @return: void
 	********************/
-	void MovePinned(bool _closer);
+	void MoveHooks(bool _closer);
 	
 	/***********************
-	* PinParticle: Pin the input particle
+	* HookParticle: Hook the input particle
 	* @author: Callan Moore
-	* @parameter: _particle: Pointer to the particle to pin
+	* @parameter: _particle: Pointer to the particle to hook
 	* @return: void
 	********************/
-	void PinParticle(Physics_Particle* _particle);
+	void HookParticle(Physics_Particle* _particle);
 	
 	/***********************
 	* ResetCloth: Reset the cloth to the default positions and states
@@ -110,16 +109,49 @@ public:
 	* @return: bool: Successful or not
 	********************/
 	bool ResetCloth();
+	
+	/***********************
+	* ResizeWidth: Resize the width of the cloth
+	* @author: Callan Moore
+	* @parameter: _smaller: True to make the cloth smaller. False to enlarge
+	* @return: void
+	********************/
+	void ResizeWidth(bool _smaller);
 
-	// TO DO CAL
-	void Physics_Cloth::ResizeWidth(bool _smaller);
-	void Physics_Cloth::ResizeHeight(bool _smaller);
+	/***********************
+	* ResizeHeight: Resize the height of the cloth
+	* @author: Callan Moore
+	* @parameter: _smaller: True to make the cloth smaller. False to enlarge
+	* @return: void
+	********************/
+	void ResizeHeight(bool _smaller);
+	
+	/***********************
+	* ResizeHooks: Resize the amount of hooks used by the cloth
+	* @author: Callan Moore
+	* @parameter: _less: true to have less hooks. false to make more hooks
+	* @return: void
+	********************/
+	void ResizeHooks(bool _less);
+	
+	/***********************
+	* CreateHooks: Create and attach the number of hooks
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void CreateHooks();
 
 	// TO DO CAL
 	void FloorCollision(float _floorPos);
 
 	// TO DO CAL
 	void BallCollision(v3float _center, float _radius);
+
+	// TO DO CAL
+	void RayParticleIntersect(v3float _origin, v3float _direction);
+
+	// TO DO CAL
+	void UpdateWindSpeed(float _speed);
 
 private:
 	
@@ -130,7 +162,7 @@ private:
 	* @parameter: _y: Row index
 	* @return: Physics_Particle*: Pointer to the returned particle
 	********************/
-	Physics_Particle* GetParticle(int _x, int _y) { return &m_pParticles[_y * m_numParticlesWidth + _x]; };
+	Physics_Particle* GetParticle(int _x, int _y) { return &m_pParticles[_y * m_particlesWidthCount + _x]; };
 	
 	/***********************
 	* GetParticleIndex: Calculate the index of a particle based on the row and column
@@ -139,7 +171,7 @@ private:
 	* @parameter: _y: Y Position (Row)
 	* @return: int: Particle Index
 	********************/
-	int GetParticleIndex(int _x, int _y) { return (_y * m_numParticlesWidth + _x); };
+	int GetParticleIndex(int _x, int _y) { return (_y * m_particlesWidthCount + _x); };
 	
 	/***********************
 	* MakeConstraint: Create a constraint between two particles
@@ -148,10 +180,9 @@ private:
 	* @parameter: _particleIndexB: Index of the Second particle to constrain
 	* @parameter: _immediate: Whether the constraint is an immediate neighbor
 	* @parameter: _draw: Whether to draw the constraint
-	* @parameter: _restDist: The resting distance to constrain the particles to (Default to the initial distance between the input particles)
 	* @return: bool: Successful or not
 	********************/
-	bool MakeConstraint(int _particleIndexA, int _particleIndexB, bool _immediate, bool _draw = true, float _restDist = -1.0f);
+	bool MakeConstraint(int _particleIndexA, int _particleIndexB, bool _immediate, bool _draw = true);
 	
 	/***********************
 	* CalcTriangleNormal: Calculate the normal of the triangle defined by the three input particles
@@ -175,8 +206,6 @@ private:
 	void AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC, v3float _force);
 
 private:
-	DX10_Renderer* m_pRenderer;
-	DX10_Mesh* m_pMesh;
 	DX10_Shader_Cloth* m_pShader;
 
 	bool m_initialisedParticles;
@@ -187,19 +216,23 @@ private:
 	int m_minWidth;
 	int m_maxHeight;
 	int m_minHeight;
-	int m_numParticlesWidth;
-	int m_numParticlesHeight;
+	int m_particlesWidthCount;
+	int m_particlesHeightCount;
+	int m_hooks;
+	int m_minHooks;
+	int m_maxHooks;	
+
 	int m_particleCount;
 	int m_constraintIterations;
 
 	float m_damping;
 	float m_timeStep;
-
-	D3DXMATRIX m_matWorld;
+	float m_breakModifier;
+	float m_windSpeed;
 
 	Physics_Particle* m_pParticles;
 	std::vector<Physics_Constraint> m_contraints;
-	std::vector<Physics_Particle*> m_pinnedParticles;
+	std::vector<Physics_Particle*> m_hookedParticles;
 
 	TVertexColor* m_pVertices;
 	DWORD* m_pIndices;

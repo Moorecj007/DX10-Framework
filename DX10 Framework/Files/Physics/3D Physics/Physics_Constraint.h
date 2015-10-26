@@ -40,15 +40,16 @@ public:
 	* @author: Callan Moore
 	* @parameter: _pA: The first particle to constrain
 	* @parameter: _pB: The second particle to constrain
-	* @parameter: _restDist: The resting distance of the particles (Default: calculates the initial distance as resting distance)
+	* @parameter: _immediate: Whether the constraint is an immediate constraint
+	* @parameter: _breakModifier: Ratio to how far a constraint can stretch before breaking;
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(Physics_Particle* _pA, Physics_Particle* _pB, bool _immediate, float _restDist = -1.0f);
+	bool Initialise(Physics_Particle* _pA, Physics_Particle* _pB, bool _immediate, float _breakModifier);
 	
 	/***********************
 	* SatisfyConstraint: Manipulate the particles and correct them to satisfy the constraints
 	* @author: Callan Moore
-	* @return: bool: Constraint was broken
+	* @return: bool: Constraint was satisfied, false means constraint was broken
 	********************/
 	bool SatisfyConstraint();
 
@@ -56,9 +57,8 @@ private:
 	Physics_Particle* m_pParticleA;
 	Physics_Particle* m_pParticleB;
 	float m_restDist;
-
-	int m_indexNumA;
-	int m_indexNumB;
+	float m_breakDist;
+	float m_elasticity;
 
 	bool m_active;
 	bool m_immediate;
