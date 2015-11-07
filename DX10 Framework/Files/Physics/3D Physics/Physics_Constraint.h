@@ -53,6 +53,12 @@ public:
 	********************/
 	bool SatisfyConstraint();
 
+	// FOR JC
+	// TO DO CAL
+	bool BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite);
+	void Ignite(float _burnTimer) { m_ignited = true; m_burnTimer = _burnTimer; };
+	bool GetIgnitedStatus() { return m_ignited; };
+
 private:
 	Physics_Particle* m_pParticleA;
 	Physics_Particle* m_pParticleB;
@@ -62,6 +68,10 @@ private:
 
 	bool m_active;
 	bool m_immediate;
+
+	// FOR JC
+	bool m_ignited;
+	float m_burnTimer;
 };
 #endif	// __PHYSICS_CONTRAINT_H__
 

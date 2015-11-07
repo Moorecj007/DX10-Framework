@@ -36,6 +36,8 @@ bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB
 	m_pParticleB = _pB;
 	m_active = true;
 	m_immediate = _immediate;
+	m_ignited = false;
+	m_burnTimer = 8.0f;
 
 	// Calculate based on particle positions
 	m_restDist = (*m_pParticleA->GetPosition() - *m_pParticleB->GetPosition()).Magnitude();
@@ -95,4 +97,28 @@ bool Physics_Constraint::SatisfyConstraint()
 		}
 	}
 	return true;
+}
+
+bool Physics_Constraint::BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite)
+{
+	if (m_ignited == true && m_burnTimer > 0.0f)
+	{
+		m_burnTimer -= _dt;
+		if ( m_burnTimer <= 0.0f)
+		{
+			if (m_pParticleA->GetIgnitedStatus() == false)
+			{
+				m_pParticleA->Ignite();
+				_prParticleToIgnite = m_pParticleA;
+			}
+			else if (m_pParticleB->GetIgnitedStatus() == false)
+			{
+				m_pParticleB->Ignite();
+				_prParticleToIgnite = m_pParticleB;
+			}
+					
+			return true;
+		}
+	}
+	return false;
 }

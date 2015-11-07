@@ -196,11 +196,11 @@ public:
 	void SetMouseDown(bool _mouseDown) { m_mouseDown = _mouseDown; };
 
 	// TO DO CAL
-	void SetMousePos(POINT _mousePos) { m_mousePos = _mousePos; };
+	void UpdateMousePos(POINT _mousePos);
 
 private:
 	// Preventing copies and extra constructions
-	Application() {}
+	Application() {};
 	Application(const Application& _kr);
 	Application& operator= (const Application& _kr);
 
@@ -238,7 +238,8 @@ private:
 	// Input Variables
 	bool* m_pKeyDown;
 	bool m_mouseDown;
-	POINT m_mousePos;
+	v2float m_mousePos;
+	bool m_rayCasted;
 
 	// Renderer Variables
 	DX10_Renderer* m_pDX10_Renderer;
@@ -259,7 +260,6 @@ private:
 	DXSprite* m_pSprite_InstructionsLeft;
 	DXSprite* m_pSprite_InstructionsRight;
 	DX10_Obj_LitTex* m_pObj_Floor;
-
 
 	// Texture Resources
 	TextureResource* m_pRefractionTexture;

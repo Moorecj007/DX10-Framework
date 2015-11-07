@@ -18,8 +18,25 @@
 #define __PHYSICS_CLOTH_H__
 
 // Local Includes
-#include "Physics_Constraint.h"
 #include "../../DX10/DX10.h"
+#include "Physics_Constraint.h"
+
+
+// Enumerator
+// TO DO CAL
+enum eClothClickAction
+{
+	CCA_CUT,
+	CCA_IGNITE,
+	CCA_MANIPULATE
+};
+
+// TO DO CAL - Re name
+enum eForceType
+{
+	FT_UNIVERSAL,
+	FT_WIND
+};
 
 class Physics_Cloth
 	: public DX10_Obj_Generic
@@ -68,9 +85,10 @@ public:
 	* AddForce: Add a force to the entire cloth
 	* @author: Callan Moore
 	* @parameter: _force: Force vector of the force to apply (Direction and magnitude)
+	// TO DO CAL
 	* @return: void
 	********************/
-	void AddForce(v3float _force);
+	void AddForce(v3float _force, eForceType _forceType, bool _selected);
 	
 	/***********************
 	* WindForce: Add a Wind force to the entire cloth
@@ -148,11 +166,18 @@ public:
 	void BallCollision(v3float _center, float _radius);
 
 	// TO DO CAL
-	void RayParticleIntersect(v3float _origin, v3float _direction);
-
-	// TO DO CAL
 	void UpdateWindSpeed(float _speed);
 
+	// FOR JC
+	// TO DO CAL
+	void ClickAction(DX10_Camera_FirstPerson* _cam, v2float _mousePos, eClothClickAction _clickAction);
+	void Ignite(TCameraRay _camRay);
+	void Cut(TCameraRay _camRay);
+	void Manipulate(TCameraRay _camRay);
+	void SelectParticles(TCameraRay _camRay, float _selectRadius);
+	void ReleaseSelected();
+
+	
 private:
 	
 	/***********************
@@ -205,6 +230,10 @@ private:
 	********************/
 	void AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC, v3float _force);
 
+	// FOR JC
+	// TO DO CAL
+	void BurnConnectedConstraints(Physics_Particle* _pParticle);
+
 private:
 	DX10_Shader_Cloth* m_pShader;
 
@@ -238,5 +267,10 @@ private:
 	DWORD* m_pIndices;
 	int m_indexCount;
 	int m_nextIndex;
+
+	std::vector<Physics_Particle*> m_selectedParticles;
+
+	// FOR JC
+	std::vector<Physics_Particle*>* m_ignitedParticles;
 };
 #endif	// __PHYSICS_CLOTH_H__

@@ -88,18 +88,20 @@ LRESULT CALLBACK Application::WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam
 		case WM_LBUTTONDOWN:
 		{
 			pApp->SetMouseDown(true);
-
+		}
+		break;
+		case WM_MOUSEMOVE:
+		{
 			POINT mousePos;
 			mousePos.x = GET_X_LPARAM(_lParam);
 			mousePos.y = GET_Y_LPARAM(_lParam);
 
-			pApp->SetMousePos(mousePos);
+			pApp->UpdateMousePos(mousePos);
 		}
 		break;
 		case WM_LBUTTONUP:
 		{
-			pApp->SetMouseDown(false);
-			
+			pApp->SetMouseDown(false);			
 		}
 		break;
 		default: break;
@@ -628,12 +630,44 @@ bool Application::HandleInput()
 	// Cast a Ray
 	if (m_mouseDown)
 	{
-		v3float originPos;
-		v3float direction;
+		// TO DO CAL - re comment
+		// Cast a Ray
+		TCameraRay Ray = m_pCamera->GetRay(m_mousePos);
 
-		m_pCamera->GetRay(m_mousePos, &originPos, &direction);
-		m_pCloth->RayParticleIntersect(originPos, direction);
+		if (m_pKeyDown[VK_SHIFT] && !m_pKeyDown[VK_CONTROL])
+		{
+			// Select the particles
+			m_pCloth->SelectParticles(Ray, 0.707f);
+			// Add a huge amount of force to break the constraints attached to this particle
+			v3float force = { 0.0f, 0.0f, 10000.0f };
+			m_pCloth->Cut(Ray);
+		}
+		// Check if the initial Ray has been Cast
+		else if (!m_rayCasted)
+		{
+			// Select The Particles
+			m_pCloth->SelectParticles(Ray, 1.0f);
 
+			// Set Ray Casted to true
+			m_rayCasted = true;
+		}
+		else
+		{
+			if (m_pKeyDown[VK_CONTROL] && !m_pKeyDown[VK_MENU])
+			{
+				m_pCloth->Ignite(Ray);
+			}
+			else
+			{
+				// Move the Selected The Particles
+				m_pCloth->Manipulate(Ray);
+			}
+		}
+	}
+	else
+	{
+		m_rayCasted = false;
+		m_pCloth->ReleaseSelected();
 	}
 
 	return true;
@@ -670,4 +704,12 @@ void Application::UpdateClientSize()
 		m_pSprite_InstructionsLeft->SetPosition(0.0f, (diff / 2.0f));
 		m_pSprite_InstructionsRight->SetPosition(0.0f, height - 400.0f);
 	}
+}
+
+void Application::UpdateMousePos(POINT _mousePos)
+{
+	// TO DO CAL
+	// Move the Mouse Coordinates into the -1 to +1 range.
+	m_mousePos.x = ((2.0f * (float)_mousePos.x) / (float)m_pDX10_Renderer->GetWidth()) - 1.0f;
+	m_mousePos.y = (((2.0f * (float)_mousePos.y) / (float)m_pDX10_Renderer->GetHeight()) - 1.0f) * -1.0f;
 }

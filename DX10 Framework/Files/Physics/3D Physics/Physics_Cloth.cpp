@@ -66,9 +66,10 @@ void Physics_Cloth::Process()
 {
 	CalcWorldMatrix();
 	// Adding Gravity
-	AddForce({ 0.0f, -9.81f, 0.0f });
+	AddForce({ 0.0f, -9.81f, 0.0f }, FT_UNIVERSAL, false);
 
 	DWORD* pIndices = m_pMesh->GetIndexBuffer();
+	float burnTimer = (m_timeStep / m_constraintIterations);
 
 	// Calculate each constraint multiple times
 	for (int i = 0; i < m_constraintIterations; i++)
@@ -79,6 +80,14 @@ void Physics_Cloth::Process()
 			{
 				// Constraint is broken. Stop drawing the line
 				pIndices[(j * 2) + 1] = pIndices[j * 2] = 0;
+			}
+			Physics_Particle* pIgnitedParticle;
+			if (m_contraints[j].BurnDown(burnTimer, pIgnitedParticle) == true)
+			{
+				if (pIgnitedParticle != 0)
+				{
+					pIgnitedParticle->GetContraintIndices();
+				}
 			}
 		}
 	}
@@ -106,13 +115,36 @@ void Physics_Cloth::Render()
 	m_pShader->Render(cloth);
 }
 
-void Physics_Cloth::AddForce(v3float _force)
+void Physics_Cloth::AddForce(v3float _force, eForceType _forceType, bool _selected)
 {
-	// Cycle through all the particles
-	for (int i = 0; i < m_particleCount; i++)
+	switch (_forceType)
 	{
-		// Add force to each particle
-		m_pParticles[i].AddForce(_force);
+	case FT_UNIVERSAL: // Adding a Universal Force - The force on each particle is universal (apply the same force to each particle)
+	{
+		for (int i = 0; i < m_particleCount; i++)
+		{
+			if (m_pParticles[i].GetSelectedState() == _selected)
+			{
+				m_pParticles[i].AddForce(_force);
+			}
+		}
+	}
+	break;
+	case FT_WIND: // Adding a Wind Force - The force on each particle is Dependant on in normal
+	{
+		// Normalise and Multiply the wind force
+		_force = _force.Normalise() * m_windSpeed;
+		for (int x = 0; x < m_particlesWidthCount - 1; x++)
+		{
+			for (int y = 0; y < m_particlesHeightCount - 1; y++)
+			{
+				AddWindForceForTri(GetParticle(x + 1, y + 1), GetParticle(x, y + 1), GetParticle(x, y), _force);
+				AddWindForceForTri(GetParticle(x, y), GetParticle(x + 1, y), GetParticle(x + 1, y + 1), _force);
+			}
+		}
+	}
+	break;
+	default:break;
 	}
 }
 
@@ -219,9 +251,9 @@ bool Physics_Cloth::ResetCloth()
 
 			if (m_initialisedParticles == false)
 			{
-				// First time. Initialise
-				VALIDATE(m_pParticles[index].Initialise(pos, m_timeStep, m_damping));
+				// First time. Initialise			
 				m_pVertices[index] = { { pos.x, pos.y, pos.z }, d3dxColors::Black };
+				(m_pParticles[index].Initialise(index, &m_pVertices[index], pos, m_timeStep, m_damping));
 			}
 			else
 			{
@@ -240,19 +272,27 @@ bool Physics_Cloth::ResetCloth()
 			if (col < m_particlesWidthCount - 1)
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 1, row), true));
+				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+				GetParticle(col + 1, row)->AddContraintIndex(m_contraints.size() - 1);
 			}
 	
 			// Particle below exists
 			if (row < m_particlesHeightCount - 1)
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col, row + 1), true));
+				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+				GetParticle(col, row + 1)->AddContraintIndex(m_contraints.size() - 1);
 			}
 	
 			// Particle to the right and below exists
 			if ((col < m_particlesWidthCount - 1) && (row < m_particlesHeightCount - 1))
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 1, row + 1), true));
+				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+				GetParticle(col + 1, row + 1)->AddContraintIndex(m_contraints.size() - 1);
 				VALIDATE(MakeConstraint(GetParticleIndex(col + 1, row), GetParticleIndex(col, row + 1), true));
+				GetParticle(col + 1, row)->AddContraintIndex(m_contraints.size() - 1);
+				GetParticle(col, row + 1)->AddContraintIndex(m_contraints.size() - 1);
 			}
 		}
 	}
@@ -266,19 +306,27 @@ bool Physics_Cloth::ResetCloth()
 			if (col < m_particlesWidthCount - 2)
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row), false));
+				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+				GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
 			}
 
 			// Particle below exists
 			if (row < m_particlesHeightCount - 2)
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col, row + 2), false));
+				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+				GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
 			}
 
 			// Particle to the right and below exists
 			if ((col < m_particlesWidthCount - 2) && (row < m_particlesHeightCount - 2))
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row + 2), false));
+				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+				GetParticle(col + 2, row + 2)->AddContraintIndex(m_contraints.size() - 1);
 				VALIDATE(MakeConstraint(GetParticleIndex(col + 2, row), GetParticleIndex(col, row + 2), false));
+				GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
+				GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
 			}
 		}
 	}
@@ -387,30 +435,55 @@ void Physics_Cloth::ResizeHooks(bool _less)
 
 void Physics_Cloth::CreateHooks()
 {
+	// Position the particles Closer Together, to create the Curtain effect
 	for (int i = 0; i < (m_particlesWidthCount - 1) / 2; i++)
 	{
 		float movement = 1.0f - ((float)i / ((float)(m_particlesWidthCount - 1) / 2.0f));
-
 		GetParticle(i, 0)->Move({ movement, 0.0f, 0.0f });
 		GetParticle((m_particlesWidthCount - i - 1), 0)->Move({ -movement, 0.0f, 0.0f });
 	}
 
-	// Determine the number of hooks to place limited by the width of the current cloth
-	int hooks = m_hooks;
-	if (m_width < m_hooks)
+	// Select the Particles and Pin them
+	float pinDist = (float)m_width / (float)(m_hooks - 1);
+	int roundedDist = (int)round(pinDist);
+
+	int increment = 0;
+	for (int i = 0; i < m_hooks; i++)
 	{
-		hooks = m_width;
-	}
+		if (i % 2 == 0) // Even i - Go Right from Left
+		{
+			HookParticle(GetParticle((int)(increment * roundedDist), 0));
+		}
+		else // Odd i - Go Left from Right
+		{
+			HookParticle(GetParticle((m_width - (int)(increment * roundedDist)), 0));
+			increment++;
+		}
+	 }
 
-	float increment = (float)m_width / ((float)hooks - 1.0f);
 
-	for (int i = 0; i < hooks; i++)
-	{
-		HookParticle(GetParticle((int)(i * increment), 0));
-		HookParticle(GetParticle((m_particlesWidthCount - (int)(i * increment) - 1), 0));
-	}
-
-	
+	//for (int i = 0; i < (m_particlesWidthCount - 1) / 2; i++)
+	//{
+	//	float movement = 1.0f - ((float)i / ((float)(m_particlesWidthCount - 1) / 2.0f));
+	//
+	//	GetParticle(i, 0)->Move({ movement, 0.0f, 0.0f });
+	//	GetParticle((m_particlesWidthCount - i - 1), 0)->Move({ -movement, 0.0f, 0.0f });
+	//}
+	//
+	//// Determine the number of hooks to place limited by the width of the current cloth
+	//int hooks = m_hooks;
+	//if (m_width < m_hooks)
+	//{
+	//	hooks = m_width;
+	//}
+	//
+	//float increment = (float)m_width / ((float)hooks - 1.0f);
+	//
+	//for (int i = 0; i < hooks; i++)
+	//{
+	//	HookParticle(GetParticle((int)(i * increment), 0));
+	//	HookParticle(GetParticle((m_particlesWidthCount - (int)(i * increment) - 1), 0));
+	//}	
 }
 
 void Physics_Cloth::FloorCollision(float _floorPos)
@@ -442,8 +515,54 @@ void Physics_Cloth::BallCollision(v3float _center, float _radius)
 	//}
 }
 
-void Physics_Cloth::RayParticleIntersect(v3float _origin, v3float _direction)
+void Physics_Cloth::UpdateWindSpeed(float _speed)
 {
+	// Update the Wind Speed
+	m_windSpeed += _speed;
+
+	// Ensure the Windspeed exists
+	if (m_windSpeed < 1.0f)
+	{
+		m_windSpeed = 1.0f;
+	}
+}
+
+void Physics_Cloth::Ignite(TCameraRay _camRay)
+{
+	for (UINT i = 0; i < m_selectedParticles.size(); i++)
+	{
+		BurnConnectedConstraints(m_selectedParticles[i]);
+	}
+}
+
+void Physics_Cloth::Cut(TCameraRay _camRay)
+{
+	for (UINT i = 0; i < m_selectedParticles.size(); i++)
+	{
+		// FOR JC
+		m_selectedParticles[i]->SetSelectedPosition({ 1000000.0f, 1000000.0f, 10000000.0f });
+	}
+}
+
+void Physics_Cloth::Manipulate(TCameraRay _camRay)
+{
+	for (UINT i = 0; i < m_selectedParticles.size(); i++)
+	{
+		// TO DO CAL - re comment
+		v3float tmpA = (*(m_selectedParticles[i]->GetPosition()) - _camRay.Origin);
+		_camRay.Direction.Normalise();
+		float tmpC = (_camRay.Direction.Dot(tmpA));
+		v3float Result = _camRay.Origin + _camRay.Direction * tmpC;
+		Result.z = m_selectedParticles[i]->GetPosition()->z;
+		m_selectedParticles[i]->SetSelectedPosition(Result);
+	}
+}
+
+void Physics_Cloth::SelectParticles(TCameraRay _camRay, float _selectRadius)
+{
+	// TO DO CAL
+
+	ReleaseSelected();
 	// Check The Ray with each particle
 	for (int i = 0; i < m_particleCount; i++)
 	{
@@ -458,44 +577,63 @@ void Physics_Cloth::RayParticleIntersect(v3float _origin, v3float _direction)
 		D3DXMatrixInverse(&invWorldMatrix, NULL, &transWorldMatrix);
 
 		// Transform the Ray Origin and the Ray Direction from View Space to World Space
-		D3DXVECTOR3 origin = { _origin.x, _origin.y, _origin.z };
-		D3DXVECTOR3 dir = { _direction.x, _direction.y, _direction.z };
-		D3DXVECTOR3  tempRayDir, tmpRayOrigin;
-		D3DXVec3TransformCoord(&tmpRayOrigin, &origin, &invWorldMatrix);
-		D3DXVec3TransformNormal(&tempRayDir, &dir, &invWorldMatrix);
-		v3float rayOrigin = { tmpRayOrigin.x, tmpRayOrigin.y, tmpRayOrigin.z };
-		v3float rayDirection = { tempRayDir.x, tempRayDir.y, tempRayDir.z };
-		rayDirection.Normalise();
+		D3DXVECTOR3 Origin = { _camRay.Origin.x, _camRay.Origin.y, _camRay.Origin.z };
+		D3DXVECTOR3 Direction = { _camRay.Direction.x, _camRay.Direction.y, _camRay.Direction.z };
+		D3DXVECTOR3  tmpRayDirection, tmpRayOrigin;
+		D3DXVec3TransformCoord(&tmpRayOrigin, &Origin, &invWorldMatrix);
+		D3DXVec3TransformNormal(&tmpRayDirection, &Direction, &invWorldMatrix);
+		TCameraRay TransformedRay({ tmpRayOrigin.x, tmpRayOrigin.y, tmpRayOrigin.z }, { tmpRayDirection.x, tmpRayDirection.y, tmpRayDirection.z });
+		TransformedRay.Direction.Normalise();
 
 		// Perform the Ray-Sphere Intersection Test
-		// Where the Sphere is Around each Cloth Particle
-		bool intersect = RaySphereIntersect(rayOrigin, rayDirection, 1.0f);
-
+		// Where the Sphere is Around each individual Cloth Particle
+		bool intersect = TransformedRay.RaySphereIntersect(_selectRadius);
 		// Handle the Intersection
 		if (intersect == true)
 		{
-			m_pVertices[i].color = d3dxColors::Red;
-			m_pParticles[i].AddForce({ rayDirection.x * 100000.0f, rayDirection.y * 100000.0f, rayDirection.z * 100000.0f });
+			m_pParticles[i].SetSelectedState(true);
+			// Color Selected Particles Red
+			//m_pVertices[i].color = d3dxColors::Red;
+
+			m_selectedParticles.push_back(&m_pParticles[i]);
+			//pSelectedParticle = &m_pParticleArray[i];
 		}
 		else
 		{
-			m_pVertices[i].color = d3dxColors::Black;
+			m_pParticles[i].SetSelectedState(false);
 		}
-
 	}
 }
 
-void Physics_Cloth::UpdateWindSpeed(float _speed)
+void Physics_Cloth::ReleaseSelected()
 {
-	// Update the Wind Speed
-	m_windSpeed += _speed;
+	// TO DO CAL - re comment
 
-	// Ensure the Windspeed exists
-	if (m_windSpeed < 1.0f)
+	for (UINT i = 0; i < m_selectedParticles.size(); i++)
 	{
-		m_windSpeed = 1.0f;
+		int ID = m_selectedParticles[i]->GetParticleID();
+		if (m_selectedParticles[i]->GetStaticState())
+		{
+			m_pVertices[ID].color = d3dxColors::Blue;
+		}
+		else if (m_selectedParticles[i]->GetIgnitedStatus())
+		{
+			m_pVertices[ID].color = d3dxColors::Red;
+		}
+		else
+		{
+			m_pVertices[ID].color = d3dxColors::Black;
+		}
+		m_selectedParticles[i]->SetSelectedState(false);
 	}
+	m_selectedParticles.clear();
 }
+
+
+
+
+
+// Private Functions
 
 bool Physics_Cloth::MakeConstraint(int _particleIndexA, int _particleIndexB, bool _immediate, bool _draw)
 {
@@ -556,3 +694,24 @@ void Physics_Cloth::AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Pa
 	_pParticleB->AddForce(force);
 	_pParticleC->AddForce(force);
 }
+
+void Physics_Cloth::BurnConnectedConstraints(Physics_Particle* _pParticle)
+{
+	if (_pParticle->GetIgnitedStatus() == false)
+	{
+		// Ignite the Particles
+		_pParticle->Ignite();
+
+		std::vector<UINT> connectedConstraints = _pParticle->GetContraintIndices();
+		for (UINT i = 0; i < connectedConstraints.size(); i++)
+		{
+			if (m_contraints[connectedConstraints[i]].GetIgnitedStatus() == false)
+			{
+				// TO DO CAL - create variable for burn time and random function to 
+				m_contraints[connectedConstraints[i]].Ignite(3.0f);
+			}
+		}
+	}
+}
+
+

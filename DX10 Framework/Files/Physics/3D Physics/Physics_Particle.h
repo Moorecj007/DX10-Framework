@@ -18,7 +18,9 @@
 #define __PHYSICS_PARTICLE_H__
 
 // Local Includes
-#include "../../Utility/Utilities.h"
+#include "../../DX10/DX10/DX10_Utilities.h"
+#include "../../DX10/DX10/DX10_Vertex.h"
+
 
 class Physics_Particle
 {
@@ -45,13 +47,15 @@ public:
 	/***********************
 	* Initialise: Initialise the Physics Particle for use
 	* @author: Callan Moore
+	* @parameter: _particleID: TO DO CAL
+	* @parameter: _pVertex: Pointer to the Vertex that is used for drawing this particle
 	* @parameter: _pos: The first position for the particle
 	* @parameter: _timeStep: The time step used for physics calculations
 	* @parameter: _damping: The damping of the particle
 	* @parameter: _static: Whether the particle is affected by forces
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(v3float _pos, float _timeStep, float _damping, bool _static = false);
+	bool Initialise(int _particleID, TVertexColor* _pVertex, v3float _pos, float _timeStep, float _damping, bool _static = false);
 	
 	/***********************
 	* Process: Process the Particle
@@ -106,8 +110,26 @@ public:
 	********************/
 	void SetPosition(v3float _pos) { m_pos = m_prevPos = _pos; };
 
+	// TO DO CAL
+	void SetSelectedPosition(v3float _pos);
+	void SetSelectedState(bool _selected) { m_selected = _selected; };
+	bool GetSelectedState() { return m_selected; };
+	bool GetStaticState() { return m_static; };
+	int GetParticleID() { return m_particleID; };
+
+
+	// FOR JC
+	// TO DO CAL
+	std::vector<UINT> GetContraintIndices() { return m_contraintIndices; };
+	void AddContraintIndex(UINT _index) { m_contraintIndices.push_back(_index); };
+	//void RemoveConstraintIndex(UINT _index) { m_contraintIndices.erase()};
+	bool GetIgnitedStatus() { return m_ignited; };
+	void Ignite() { m_ignited = true; m_pVertex->color = d3dxColors::Blue; };
+
 private:
+	int m_particleID;
 	bool m_static;
+	bool m_selected;
 	
 	v3float m_pos;
 	v3float m_prevPos;
@@ -117,6 +139,12 @@ private:
 	float m_timeStepSquared;
 	float m_damping;
 	float m_dampingInverse;
+
+	// FOR JC
+	TVertexColor* m_pVertex;
+	std::vector<UINT> m_contraintIndices;
+	bool m_ignited;
+
 };
 #endif	// __PHYSICS_PARTICLE_H__
 

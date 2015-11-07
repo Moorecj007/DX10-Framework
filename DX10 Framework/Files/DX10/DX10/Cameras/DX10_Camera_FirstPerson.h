@@ -22,6 +22,66 @@
 #include "../../../Utility/Utilities.h"
 #include "../../../Utility/DirectInput.h"
 
+struct TCameraRay
+{
+	// TO DO CAL - Rename and comment
+	v3float Origin;
+	v3float Direction;
+
+	/***********************
+	* CameraRay: Constructor for the CameraRay struct
+	* @author: Jc Fowles
+	* @parameter: _origin: The Origin of the Ray
+	* @parameter: _direction: The Direction of the Ray
+	********************/
+	TCameraRay()
+	{
+		Origin = { 0.0f, 0.0f, 0.0f };
+		Direction = { 0.0f, 0.0f, 0.0f };
+	}
+
+	/***********************
+	* CameraRay: Constructor for the CameraRay struct
+	* @author: Jc Fowles
+	* @parameter: _origin: The Origin of the Ray
+	* @parameter: _direction: The Direction of the Ray
+	********************/
+	TCameraRay(v3float _origin, v3float _direction)
+	{
+		Origin = _origin;
+		Direction = _direction;
+	}
+
+	/***********************
+	* RaySphereIntersect: Checks whether the Ray (In Local Space to a Sphere) intersect the Sphere
+	* @author: Jc Fowles
+	* @parameter: _sphereRadius: Radius of the Sphere
+	* @return: bool: True if the Ray Intersect the Sphere
+	********************/
+	bool RaySphereIntersect(float _sphereRadius)
+	{
+		// Calculate the a, b, and c Coefficients of the Discriminant
+		float a = Direction.Dot(Direction);
+		float b = Direction.Dot(Origin) * 2.0f;
+		float c = Origin.Dot(Origin) - pow(_sphereRadius, 2);
+
+		// Calculate the Discriminant (b^2 - 4ac)
+		float discriminant = pow(b, 2) - (4 * a * c);
+		if (discriminant < 0.0f)
+		{
+			// The Discriminant is Negative the Ray missed the Sphere
+			return false;
+		}
+		else
+		{
+			// The Discriminant is Positive the Ray intersected the Sphere
+			return true;
+		}
+	}
+};
+
+
+
 class DX10_Camera_FirstPerson
 {
 public:
@@ -98,13 +158,11 @@ public:
 
 	/***********************
 	* GetRay: Calculates a ray from the mouse position
-	* @author: Jc Fowles
+	* @author: Callan Moore
 	* @parameter: _mousePos: The Mouse positions in screen space
-	* @parameter: _pOriginPos: (OUT) The to be calculated Origin Position of the Ray
-	* @parameter: _pDirection: (OUT) The to be calculated Direction of the Ray
 	* @return: void
 	********************/
-	void GetRay(POINT _mousePos, v3float* _pOriginPos, v3float* _pDirection);
+	TCameraRay GetRay(v2float _mousePos);
 
 private:
 	DX10_Renderer* m_pRenderer;
