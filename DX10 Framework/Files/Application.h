@@ -255,11 +255,17 @@ private:
 
 	// Meshes
 	DX10_Mesh* m_pMesh_Floor;
+	DX10_Mesh* m_pMesh_Sphere;
+	DX10_Mesh* m_pMesh_Capsule;
+	DX10_Mesh* m_pMesh_Pyramid;
 
 	// Objects
 	DXSprite* m_pSprite_InstructionsLeft;
 	DXSprite* m_pSprite_InstructionsRight;
 	DX10_Obj_LitTex* m_pObj_Floor;
+	DX10_Obj_LitTex* m_pObj_Sphere;
+	DX10_Obj_LitTex* m_pObj_Capsule;
+	DX10_Obj_LitTex* m_pObj_Pyramid;
 
 	// Texture Resources
 	TextureResource* m_pRefractionTexture;
@@ -267,6 +273,9 @@ private:
 
 	// Cloth Simulation
 	Physics_Cloth* m_pCloth;
+
+	// FOR JC
+	eCollisionType m_eCollisionType;
 };
 
 #endif // __APPLICATION_H__

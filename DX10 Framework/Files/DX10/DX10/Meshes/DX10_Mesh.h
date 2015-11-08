@@ -28,7 +28,9 @@ enum eMeshType
 	MT_EPICTERRAIN,
 	MT_WHARF,
 	MT_STARMAP,
-	MT_5X5
+	MT_5X5,
+	MT_CAPSULE,
+	MT_PYRAMID
 };
 
 class DX10_Mesh
@@ -257,6 +259,16 @@ public:
 			case MT_5X5:
 			{
 				return "Resources/Meshes/Mesh_5x5.txt";
+			}
+			break;
+			case MT_CAPSULE:
+			{
+				return "Resources/Meshes/Mesh_Capsule.txt";
+			}
+			break;
+			case MT_PYRAMID:
+			{
+				return "Resources/Meshes/Mesh_Pyramid.txt";
 			}
 			break;
 			default: return "";

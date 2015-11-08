@@ -81,6 +81,4 @@ struct TVertexNormalUV
 	v2float		uv;
 };
 
-
-
 #endif // __DX10_VERTEX_H__

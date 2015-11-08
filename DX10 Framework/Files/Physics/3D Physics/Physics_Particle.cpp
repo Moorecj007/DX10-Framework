@@ -17,6 +17,9 @@
 
 Physics_Particle::Physics_Particle()
 {
+	// FOR JC
+	// Initialise all Pointers to NULL
+	m_pVertex = 0;
 }
 
 Physics_Particle::~Physics_Particle()
@@ -25,8 +28,10 @@ Physics_Particle::~Physics_Particle()
 
 bool Physics_Particle::Initialise(int _particleID, TVertexColor* _pVertex, v3float _pos, float _timeStep, float _damping, bool _static)
 {
+	// FOR JC
 	if (_pVertex == 0)
 	{
+		// If the vertex is null then the initialisation is invalid
 		return false;
 	}
 
@@ -41,14 +46,18 @@ bool Physics_Particle::Initialise(int _particleID, TVertexColor* _pVertex, v3flo
 	m_acceleration = { 0.0f, 0.0f, 0.0f };
 
 	m_mass = 1.0f;
-	m_timeStep = _timeStep;
+	m_timeStep = _timeStep;	// FOR JC
 	m_timeStepSquared = pow(_timeStep, 2.0f);
 	m_damping = _damping;	
 	m_dampingInverse = (1.0f - m_damping);
 
+	// FOR JC
 	m_ignited = false;
-	m_timeUntilFullyLit = 3.0f;
-
+	m_lightTime = 0.0f;
+	m_destroyTime = 0.0f;
+	m_timeUntilFullyLit = 0.0f;
+	m_timeUntilDestroyed = 0.0f;
+	
 	return true;
 }
 

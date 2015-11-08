@@ -51,7 +51,7 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_Cloth* _pS
 	m_minHooks = 2;
 	m_maxHooks = m_maxWidth;
 
-	m_constraintIterations = 5;
+	m_constraintIterations = 3;
 	m_breakModifier = 2.0f;
 	m_windSpeed = 1.0f;
 	m_initialisedParticles = false;
@@ -64,13 +64,22 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_Cloth* _pS
 	return true;
 }
 
-void Physics_Cloth::Process()
-{
+void Physics_Cloth::Process(eCollisionType _collisionType)
+{	
+
 	CalcWorldMatrix();
 	// Adding Gravity
 	AddForce({ 0.0f, -9.81f, 0.0f }, FT_UNIVERSAL, false);
 
+	TVertexColor* pVertexBuffer = m_pMesh->GetVertexBufferCloth();
 	DWORD* pIndices = m_pMesh->GetIndexBuffer();
+
+	// Process each Particle
+	// FOR JC
+	for (int i = 0; i < m_particleCount; i++)
+	{
+		m_pParticles[i].Process();
+	}
 
 	// Calculate each constraint multiple times
 	for (int i = 0; i < m_constraintIterations; i++)
@@ -83,7 +92,54 @@ void Physics_Cloth::Process()
 				pIndices[(j * 2) + 1] = pIndices[j * 2] = 0;
 			}
 		}
+	
+		// FOR JC
+		switch (_collisionType)
+		{
+			case CT_SPHERE:
+			{
+				SphereCollision({ 0.0f, 0.0f, 7.0f }, 5.0f);
+			}
+			break;
+			case CT_CAPSULE:
+			{
+				CapsuleCollision({ 0.0f, -2.0f, 4.0f }, { 0.0f, 2.0f, 4.0f }, 2.0f);
+			}
+			break;
+			case CT_PYRAMID:
+			{
+				PyramidCollision();
+			}
+			default: break;
+		}
+
+		FloorCollision(-15.0f);
+		SelfCollisions();
 	}
+
+	// FOR JC
+	//SelfCollisions();
+
+	//if (m_collide_Sphere)
+	//{
+	//	m_pObj_Sphere->Process(_dt);
+	//	m_pCloth->SphereCollision(m_pObj_Sphere->GetPosition(), 5.0f + 0.2f);
+	//}
+	//if (m_collide_Capsule)
+	//{
+	//	m_pObj_Capsule->Process(_dt);
+	//	m_pCloth->CapsuleCollision();
+	//}
+	//
+	//if (m_collide_Pyramid)
+	//{
+	//	m_pObj_Pyramid->Process(_dt);
+	//	m_pCloth->PyramidCollision();
+	//}
+	//
+	//m_pCloth->FloorCollision(m_pObj_Floor->GetPosition().y);
+
+
 
 	// FOR JC
 	for (int j = 0; j < (int)m_contraints.size(); j++)
@@ -105,16 +161,23 @@ void Physics_Cloth::Process()
 		default: break;
 		}	// End Switch
 	}
-	
-	TVertexColor* pVertexBuffer = m_pMesh->GetVertexBufferCloth();
+
+	//SelfCollisions();
+
 	// Process each Particle
 	for (int i = 0; i < m_particleCount; i++)
 	{
-		m_pParticles[i].Process();
+
+		//m_pParticles[i].Process();
+		
 		pVertexBuffer[i].pos.x = m_pParticles[i].GetPosition()->x;
 		pVertexBuffer[i].pos.y = m_pParticles[i].GetPosition()->y;
 		pVertexBuffer[i].pos.z = m_pParticles[i].GetPosition()->z;
 	}
+
+
+
+	//
 
 	// Update the Buffer
 	m_pMesh->UpdateBufferCloth();
@@ -367,7 +430,7 @@ bool Physics_Cloth::ResetCloth()
 
 	// Add a little wind force to settle the cloth
 	AddWindForce({ 0.0f, 0.0f, 0.001f });
-	Process();
+	Process(CT_NONE);
 
 	m_initialisedParticles = true;
 	return true;
@@ -516,27 +579,122 @@ void Physics_Cloth::FloorCollision(float _floorPos)
 
 	for (int i = 0; i < m_particleCount; i++)
 	{
-			if (m_pParticles[i].GetPosition()->y <= _floorPos + 0.05f)
+		if (m_pParticles[i].GetPosition()->y <= _floorPos + 0.1f)
 		{
 			// Push the particles up if they are under the floor
 			float pierce = abs(m_pParticles[i].GetPosition()->y - (_floorPos));
-			m_pParticles[i].Move(up*pierce);
+			//m_pParticles[i].Move(up*pierce);
+			m_pParticles[i].SetPosition(*m_pParticles[i].GetPosition() + (up*pierce));
+
 		}
 	}
 }
 
-void Physics_Cloth::BallCollision(v3float _center, float _radius)
+void Physics_Cloth::SphereCollision(v3float _center, float _radius)
 {
-	//std::vector<Phy_Cloth_Particle>::iterator particleIter;
-	//for (particleIter = m_particleList.begin(); particleIter != m_particleList.end(); particleIter++)
+	// TO DO CAL - re comment
+	for (int i = 0; i < m_particleCount; i++)
+	{
+		// Calculate the Direction of and length of a potential Pierce
+		v3float pierce = *m_pParticles[i].GetPosition() - _center;
+		float pierceLength = pierce.Magnitude();
+
+		// Check if the Particle is Inside the Sphere
+		if (pierceLength < _radius)
+		{
+			// Push the Particle out of the Sphere
+			m_pParticles[i].Move(pierce.Normalise() * (_radius - pierceLength));
+		}
+	}
+}
+
+void  Physics_Cloth::CapsuleCollision(v3float _endPoint1, v3float _endPoint2, float _capsuleRadius)
+{
+	for (int i = 0; i < m_particleCount; i++)
+	{
+		
+		v3float particlePos =(*m_pParticles[i].GetPosition()) ;// v3float(0.0f, 0.0f, 0.0f);
+
+		v3float LineDiffVect = _endPoint2 - _endPoint1;
+		float lineSegSqrLength = LineDiffVect.Magnitude();
+		lineSegSqrLength *= lineSegSqrLength;
+
+		v3float LineToPointVect = particlePos - _endPoint1;
+		float dotProduct = LineToPointVect.Dot(LineDiffVect);
+
+		float percAlongLine = dotProduct / lineSegSqrLength ;
+
+		if (percAlongLine  < 0.0f)
+		{
+			percAlongLine = 0.0f;
+		}
+		else if(percAlongLine  > 1.0f)
+		{
+			percAlongLine = 1.0f;
+		}
+		else
+		{
+			int c = 9;
+		}
+
+		v3float pointOnLine = (_endPoint1 + (LineDiffVect *percAlongLine));
+
+		if ((!(pointOnLine == _endPoint2)) || (!(pointOnLine == _endPoint2)))
+		{
+		
+			int c = 0;
+
+		}
+		// Calculate the Direction of and length of a potential Pierce
+		v3float pierce = particlePos - pointOnLine;
+		float pierceLength = pierce.Magnitude();
+
+		// Check if the Particle is Inside the Sphere
+		if (pierceLength < _capsuleRadius)
+		{
+			// Push the Particle out of the Sphere
+			m_pParticles[i].Move(pierce.Normalise() * (_capsuleRadius - pierceLength));
+		}
+
+
+
+		//v3float capsuleCentreVector = _endPoint2 - _endPoint1;
+		//float distanceFactorFromEP1 = (*m_pParticles[i].GetPosition()).Dot(_endPoint1) / capsuleCentreVector.Dot(capsuleCentreVector);
+		//if (distanceFactorFromEP1 < 0){ distanceFactorFromEP1 = 0; }
+		//if (distanceFactorFromEP1 > 1){ distanceFactorFromEP1 = 1; }
+		//v3float closetPoint = _endPoint1 + (capsuleCentreVector * distanceFactorFromEP1);
+		//v3float collisionVector = (*m_pParticles[i].GetPosition()) - closetPoint;
+		//float distance = collisionVector.Magnitude();
+		//v3float collisionNormal = collisionVector.Normalise();
+		//if (distance < _capsuleRadius)
+		//{
+		//	m_pParticles[i].Move(collisionVector.Normalise() * (_capsuleRadius - distance));
+		//}
+
+
+
+	}
+	//vector cylCenterVector = endPoint2 - endpoint1;
+	//float distanceFactorFromEP1 = Dot(sphereCenter - endPoint1) / Dot(cylCenterVector, cylCenterVector);
+	//if (distanceFactorFromEP1 < 0) distanceFactorFromEP1 = 0;// clamp to endpoints if neccesary
+	//if (distanceFactorFromEP1 > 1) distanceFactorFromEP1 = 1;
+	//vector closestPoint = endPoint1 + (cylCenterVector * distanceFactorFromEP1);
+	//vector collisionVector = sphereCenter - closestPoint;
+	//float distance = collisionVector.Length();
+	//vector collisionNormal = collisionVector / distance;
+	//if (distance < sphereRadius + cylRadius)
 	//{
-	//	v3float Pierce = (*particleIter).GetPosition() - _Center;
-	//	float PierceLength = Pierce.Magnitude();
-	//	if (PierceLength < _Radius) // if the particle is inside the ball
-	//	{
-	//		(*particleIter).OffSetPosition(Pierce.Normalise() * (_Radius - PierceLength)); // project the particle to the surface of the ball
-	//	}
+	//	//collision occurred. use collisionNormal to reflect sphere off cyl
+	//	float factor = Dot(velocity, collisionNormal);
+	//	velocity = velocity - (2 * factor * collisionNormal);
 	//}
+
+
+}
+
+void  Physics_Cloth::PyramidCollision()
+{
+
 }
 
 void Physics_Cloth::UpdateWindSpeed(float _speed)
@@ -743,5 +901,35 @@ void Physics_Cloth::BurnConnectedConstraints(Physics_Particle* _pParticle)
 		}
 	}
 }
+
+void Physics_Cloth::SelfCollisions()
+{
+	for (int i = 0; i < m_particleCount; i++)
+	{
+		v3float particlePos = *m_pParticles[i].GetPosition();
+
+		// TO DO CAL - re comment
+		for (int j = i + 1; j < m_particleCount; j++)
+		{
+			// Calculate the Direction of and length of a potential Pierce
+			v3float pierce = *m_pParticles[j].GetPosition() - particlePos;
+			float pierceLength = pierce.Magnitude();
+
+			// Check if the Particle is Inside the Sphere
+			if (pierceLength < 0.9f)
+			{
+				// Push the Particle out of the Sphere
+				//m_pParticles[j].SetPosition(*m_pParticles[j].GetPosition() + ((pierce.Normalise() * (0.5f - pierceLength))/2.0f));
+				//m_pParticles[i].SetPosition(*m_pParticles[i].GetPosition() + ((pierce.Normalise() * (0.5f - pierceLength))/-2.0f));
+				m_pParticles[j].Move((pierce.Normalise() * (0.9f - pierceLength))/2.0f);
+				m_pParticles[i].Move((pierce.Normalise() * (0.9f - pierceLength)) / -2.0f);
+			}
+		}
+	}
+
+	
+}
+
+
 
 

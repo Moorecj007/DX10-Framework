@@ -21,7 +21,6 @@
 #include "../../DX10/DX10/DX10_Utilities.h"
 #include "../../DX10/DX10/DX10_Vertex.h"
 
-
 class Physics_Particle
 {
 public:
@@ -117,7 +116,6 @@ public:
 	bool GetStaticState() { return m_static; };
 	int GetParticleID() { return m_particleID; };
 
-
 	// FOR JC
 	// TO DO CAL
 	std::vector<UINT> GetContraintIndices() { return m_contraintIndices; };
@@ -136,7 +134,7 @@ private:
 	v3float m_acceleration;
 
 	float m_mass;
-	float m_timeStep;
+	float m_timeStep;	// FOR JC
 	float m_timeStepSquared;
 	float m_damping;
 	float m_dampingInverse;
@@ -145,11 +143,10 @@ private:
 	TVertexColor* m_pVertex;
 	std::vector<UINT> m_contraintIndices;
 	bool m_ignited;
-	float m_timeUntilFullyLit;
-	float m_timeUntilDestroyed;
 	float m_lightTime;
 	float m_destroyTime;
-
+	float m_timeUntilFullyLit;
+	float m_timeUntilDestroyed;
 };
 #endif	// __PHYSICS_PARTICLE_H__
 

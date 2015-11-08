@@ -473,7 +473,7 @@ struct v3float
 	********************/
 	float Dot(const v3float& _v3)
 	{
-		return (x * _v3.x + y * _v3.y + z * _v3.z);
+		return ((x * _v3.x) + (y * _v3.y) + (z * _v3.z));
 	}
 };
 

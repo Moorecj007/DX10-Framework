@@ -38,6 +38,14 @@ enum eForceType
 	FT_WIND
 };
 
+enum eCollisionType
+{
+	CT_NONE,
+	CT_SPHERE,
+	CT_CAPSULE,
+	CT_PYRAMID
+};
+
 class Physics_Cloth
 	: public DX10_Obj_Generic
 {
@@ -70,9 +78,10 @@ public:
 	/***********************
 	* Process: Process the Cloth for the time step
 	* @author: Callan Moore
+	// TO DO CAL
 	* @return: void
 	********************/
-	void Process();
+	void Process(eCollisionType _collisionType);
 	
 	/***********************
 	* Render: Render the Cloth the to the screen
@@ -163,7 +172,9 @@ public:
 	void FloorCollision(float _floorPos);
 
 	// TO DO CAL
-	void BallCollision(v3float _center, float _radius);
+	void SphereCollision(v3float _center, float _radius);
+	void CapsuleCollision(v3float _endPoint2, v3float _endPoint1, float _capsuleRadius);
+	void PyramidCollision();
 
 	// TO DO CAL
 	void UpdateWindSpeed(float _speed);
@@ -178,7 +189,7 @@ public:
 	void Cut(TCameraRay _camRay);
 	void Manipulate(TCameraRay _camRay);
 	void ToggleWeave() { m_complexWeave = !m_complexWeave; m_initialisedParticles = false; ResetCloth(); };
-
+	void SelfCollisions();
 	
 private:
 	

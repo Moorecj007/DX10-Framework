@@ -209,6 +209,8 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	m_fps = 0;
 	m_deltaTick = 0;
 	m_fpsTimer = 0;
+
+	m_eCollisionType = CT_CAPSULE;
 	
 	return true;
 }
@@ -237,6 +239,14 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pMesh_Floor = new DX10_Mesh();
 	VALIDATE(m_pMesh_Floor->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 100.0f, 100.0f, 100.0f }));
 
+	m_pMesh_Sphere = new DX10_Mesh();
+	VALIDATE(m_pMesh_Sphere->Initialise(m_pDX10_Renderer, MT_SPHERE, { 5.0f, 5.0f, 5.0f }));
+
+	m_pMesh_Capsule = new DX10_Mesh();
+	VALIDATE(m_pMesh_Capsule->Initialise(m_pDX10_Renderer, MT_CAPSULE, { 2.0f, 2.0f, 2.0f }));
+
+	m_pMesh_Pyramid = new DX10_Mesh();
+	VALIDATE(m_pMesh_Pyramid->Initialise(m_pDX10_Renderer, MT_PYRAMID, { 5.0f, 5.0f, 5.0f }));
 
 	// Create the Objects
 	m_pSprite_InstructionsLeft = new DXSprite();
@@ -249,11 +259,23 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	m_pObj_Floor = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Floor->Initialise(m_pDX10_Renderer, m_pMesh_Floor, m_pShader_LitTex, "WaterMap.png"));
-	m_pObj_Floor->SetPosition({ 0.0f, -60.0f, 0.0f });
+	m_pObj_Floor->SetPosition({ 0.0f, -15.0f, 0.0f });
+
+	m_pObj_Sphere = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Sphere->Initialise(m_pDX10_Renderer, m_pMesh_Sphere, m_pShader_LitTex, "WaterMap.png"));
+	m_pObj_Sphere->SetPosition({ 0.0f, 0.0f, 7.0f });
+
+	m_pObj_Capsule = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Capsule->Initialise(m_pDX10_Renderer, m_pMesh_Capsule, m_pShader_LitTex, "WaterMap.png"));
+	m_pObj_Capsule->SetPosition({ 0.0f, 0.0f, 4.0f });
+
+	m_pObj_Pyramid = new DX10_Obj_LitTex();
+	VALIDATE(m_pObj_Pyramid->Initialise(m_pDX10_Renderer, m_pMesh_Pyramid, m_pShader_LitTex, "WaterMap.png"));
+	m_pObj_Pyramid->SetPosition({ 0.0f, 0.0f, 7.0f });
 
 	// Create the Cloth
 	m_pCloth = new Physics_Cloth();
-	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_Cloth, 20, 20, 0.01f, 0.033f));
+	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_Cloth, 15, 15, 0.01f, 0.033f));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
@@ -289,10 +311,16 @@ void Application::ShutDown()
 		ReleasePtr(m_pShader_Sprite);
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Floor);
+		ReleasePtr(m_pMesh_Sphere);
+		ReleasePtr(m_pMesh_Capsule);
+		ReleasePtr(m_pMesh_Pyramid);
 		// Release the Objects
 		ReleasePtr(m_pSprite_InstructionsLeft);
 		ReleasePtr(m_pSprite_InstructionsRight);
 		ReleasePtr(m_pObj_Floor);
+		ReleasePtr(m_pObj_Sphere);
+		ReleasePtr(m_pObj_Capsule);
+		ReleasePtr(m_pObj_Pyramid);
 		// Release the Texture Resources
 		ReleasePtr(m_pRefractionTexture);
 		ReleasePtr(m_pReflectionTexture);
@@ -347,10 +375,29 @@ bool Application::Process(float _dt)
 
 		ProcessShaders();
 
-		m_pCloth->Process();
+		m_pCloth->Process(m_eCollisionType);
 		m_pObj_Floor->Process(_dt);
 
-		m_pCloth->FloorCollision(m_pObj_Floor->GetPosition().y);
+		switch (m_eCollisionType)
+		{
+			case CT_SPHERE:
+			{
+				m_pObj_Sphere->Process(_dt);
+			}
+			break;
+			case CT_CAPSULE:
+			{
+				m_pObj_Capsule->Process(_dt);
+			}
+			break;
+			case CT_PYRAMID:
+			{
+				m_pObj_Pyramid->Process(_dt);
+			}
+			break;
+			default: break;
+		} // End Switch
+
 	}
 
 	return true;
@@ -377,6 +424,28 @@ void Application::Render()
 
 		// Render the Objects of the Scene	
 		m_pObj_Floor->Render();
+
+		switch (m_eCollisionType)
+		{
+			case CT_SPHERE:
+			{
+				m_pObj_Sphere->Render();
+			}
+			break;
+			case CT_CAPSULE:
+			{
+				m_pObj_Capsule->Render();
+			}
+			break;
+			case CT_PYRAMID:
+			{
+				m_pObj_Pyramid->Render();
+			}
+			break;
+			default: break;
+		} // End Switch
+
+
 		m_pCloth->Render();
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
