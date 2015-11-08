@@ -197,7 +197,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	memset(m_pKeyDown, false, 255);
 
 	m_mouseDown = false;
-	m_rayCasted = false; // FOR JC
+	m_initialRayCast = false; // FOR JC
 
 	VALIDATE(Initialise_DX10(_hInstance));
 
@@ -705,43 +705,41 @@ bool Application::HandleInput()
 		SetKeyDown(VK_CAPITAL, false);
 	}
 
-	// Cast a Ray
 	if (m_mouseDown)
 	{
-		// TO DO CAL - re comment
 		// Cast a Ray
-		TCameraRay Ray = m_pCamera->GetRay(m_mousePos);
+		TCameraRay camRay = m_pCamera->GetRay(m_mousePos);
 
 		if (m_pKeyDown[VK_SHIFT] && !m_pKeyDown[VK_CONTROL])
 		{
 			// Select the particles
-			m_pCloth->SelectParticles(Ray, 0.707f);
-			m_pCloth->Cut(Ray);
+			m_pCloth->Cut(camRay, 0.707f);
 		}
-		// Check if the initial Ray has been Cast
-		else if (!m_rayCasted)
+		else if (m_pKeyDown[VK_CONTROL] && !m_pKeyDown[VK_SHIFT])
 		{
-			// Select The Particles
-			m_pCloth->SelectParticles(Ray, 1.0f);
-			m_rayCasted = true;
+			// Ignite the Selected Particles
+			m_pCloth->Ignite(camRay, 0.707f);
 		}
 		else
 		{
-			if (m_pKeyDown[VK_CONTROL] && !m_pKeyDown[VK_SHIFT])
+			// Check if the initial Ray has been Cast
+			if (!m_initialRayCast)
 			{
-				// Ignite the Selected Particles
-				m_pCloth->Ignite(Ray);
+				// Move the Selected The Particles
+				m_pCloth->Manipulate(camRay, 0.707f, true);
+				m_initialRayCast = true;
 			}
 			else
 			{
 				// Move the Selected The Particles
-				m_pCloth->Manipulate(Ray);
+				m_pCloth->Manipulate(camRay, 0.707f, false);
 			}
 		}
 	}
 	else
 	{
-		m_rayCasted = false;
+		// Reset the Initial Ray cast and release all selected particles of cloth
+		m_initialRayCast = false;
 		m_pCloth->ReleaseSelected();
 	}
 
@@ -766,7 +764,6 @@ void Application::UpdateClientSize()
 	float width = static_cast<float>(m_pDX10_Renderer->GetWidth());
 	float height = static_cast<float>(m_pDX10_Renderer->GetHeight());
 
-
 	float diff = max(width, height) - min(width, height);
 
 	if (max(width, height) == width)
@@ -783,8 +780,10 @@ void Application::UpdateClientSize()
 
 void Application::UpdateMousePos(POINT _mousePos)
 {
-	// TO DO CAL
-	// Move the Mouse Coordinates into the -1 to +1 range.
-	m_mousePos.x = ((2.0f * (float)_mousePos.x) / (float)m_pDX10_Renderer->GetWidth()) - 1.0f;
-	m_mousePos.y = (((2.0f * (float)_mousePos.y) / (float)m_pDX10_Renderer->GetHeight()) - 1.0f) * -1.0f;
+	// Change the mouse coordinates into -1 to +1 range
+	m_mousePos.x = ((float)(2.0f * _mousePos.x) / (float)m_pDX10_Renderer->GetWidth()) - 1.0f;
+	m_mousePos.y = ((float)(2.0f * _mousePos.y) / (float)m_pDX10_Renderer->GetHeight()) - 1.0f; 
+
+	// Flip the Y axis around to that positive Y goes up ( Screen coordinates use top left as (0,0))
+	m_mousePos.y *= -1.0f;
 }

@@ -7,7 +7,7 @@
 * (c) 2005 - 2015 Media Design School
 *
 * File Name : Physics_Particle.h
-* Description : TO DO CAL
+* Description : Physics particle that is part of a cloth weave.
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */
@@ -46,15 +46,15 @@ public:
 	/***********************
 	* Initialise: Initialise the Physics Particle for use
 	* @author: Callan Moore
-	* @parameter: _particleID: TO DO CAL
-	* @parameter: _pVertex: Pointer to the Vertex that is used for drawing this particle
+	* @parameter: _particleID: The index of the particle in the particle array in Cloth
+	* @parameter: _pVertex: Pointer to the Vertex that is used for drawing this particle // FOR JC
 	* @parameter: _pos: The first position for the particle
 	* @parameter: _timeStep: The time step used for physics calculations
 	* @parameter: _damping: The damping of the particle
 	* @parameter: _static: Whether the particle is affected by forces
 	* @return: bool: Successful or not
 	********************/
-	bool Initialise(int _particleID, TVertexColor* _pVertex, v3float _pos, float _timeStep, float _damping, bool _static = false);
+	bool Initialise(UINT _particleID, TVertexColor* _pVertex, v3float _pos, float _timeStep, float _damping, bool _static = false);
 	
 	/***********************
 	* Process: Process the Particle
@@ -108,24 +108,85 @@ public:
 	* @return: void
 	********************/
 	void SetPosition(v3float _pos) { m_pos = m_prevPos = _pos; };
-
-	// TO DO CAL
-	void SetSelectedPosition(v3float _pos);
+	
+	/***********************
+	* SetPositionIfSelected: Sets the position of the particle if its currently selected
+	* @author: Callan Moore
+	* @parameter: _pos: The new position for the particle
+	* @return: void
+	********************/
+	void SetPositionIfSelected(v3float _pos);
+	
+	/***********************
+	* SetSelectedState: Set the selected state of the particle
+	* @author: Callan Moore
+	* @parameter: _selected: The selected state
+	* @return: void
+	********************/
 	void SetSelectedState(bool _selected) { m_selected = _selected; };
+	
+	/***********************
+	* GetSelectedState: Retrieve the current selected state of the particle
+	* @author: Callan Moore
+	* @return: bool: The particles current selected state
+	********************/
 	bool GetSelectedState() { return m_selected; };
+	
+	/***********************
+	* GetStaticState: Retrieve the current static state of the particle
+	* @author: Callan Moore
+	* @return: bool: The particles current selected state
+	********************/
 	bool GetStaticState() { return m_static; };
-	int GetParticleID() { return m_particleID; };
+	
+	/***********************
+	* GetParticleID: Retrieve the particles ID
+	* @author: Callan Moore
+	* @return: UINT: The ID of the particle
+	********************/
+	UINT GetParticleID() { return m_particleID; };
 
 	// FOR JC
-	// TO DO CAL
+
+	/***********************
+	* GetContraintIndices: Retrieve the vector of constraints attached to this particle as indices
+	* @author: Callan Moore
+	* @return: std::vector<UINT>: Vector of constraint indices
+	********************/
 	std::vector<UINT> GetContraintIndices() { return m_contraintIndices; };
+	
+	/***********************
+	* AddContraintIndex: Add a constraint index to the particle
+	* @author: Callan Moore
+	* @parameter: _index: The index to add
+	* @return: void
+	********************/
 	void AddContraintIndex(UINT _index) { m_contraintIndices.push_back(_index); };
-	bool GetIgnitedStatus() { return m_ignited; };
+	
+	/***********************
+	* GetIgnitedState: Retrieve the ignited state of the particle
+	* @author: Callan Moore
+	* @return: bool: The particles current ignited state
+	********************/
+	bool GetIgnitedState() { return m_ignited; };
+	
+	/***********************
+	* Ignite: Ignite the particle and set the burn timer
+	* @author: Callan Moore
+	* @parameter: _burnTime: The time for the particle to burn for
+	* @return: void
+	********************/
 	void Ignite(float _burnTime);
+	
+	/***********************
+	* Reset: Reset the particle states to default
+	* @author: Callan Moore
+	* @return: void
+	********************/
 	void Reset();
 
 private:
-	int m_particleID;
+	UINT m_particleID;
 	bool m_static;
 	bool m_selected;
 	
@@ -139,9 +200,12 @@ private:
 	float m_damping;
 	float m_dampingInverse;
 
-	// FOR JC
+	// FOR JC	
 	TVertexColor* m_pVertex;
 	std::vector<UINT> m_contraintIndices;
+
+	// FOR JC
+	// Ignition variables
 	bool m_ignited;
 	float m_lightTime;
 	float m_destroyTime;

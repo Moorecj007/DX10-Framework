@@ -36,6 +36,7 @@ bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB
 	m_pParticleB = _pB;
 	m_active = true;
 	m_immediate = _immediate;
+	m_elasticity = 0.07f;
 	m_ignited = false;
 	m_timeUntilIgniteOthers = 0.0f;
 	m_timeUntilDestroyed = 0.0f;
@@ -45,18 +46,21 @@ bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB
 
 	if (m_immediate == false)
 	{
+		// Edit the modifier value for a secondary constraint
 		_breakModifier--;
 		_breakModifier /= 2;
 		_breakModifier++;
 	}
+	
+	// Calculate the break distance using the modifier
 	m_breakDist = m_restDist * _breakModifier;
-	m_elasticity = 0.07f;
 
 	return true;
 }
 
 bool Physics_Constraint::SatisfyConstraint()
 {
+	// Check if the calculations need to be run
 	if (m_active == true)
 	{
 		// Calculate the vector from particle A to B and its length
@@ -65,6 +69,7 @@ bool Physics_Constraint::SatisfyConstraint()
 
 		if (currDist > m_breakDist)
 		{
+			// Distance has exceeded breaking threshold, set the constraint to inactive (broken)
 			m_active = false;
 			return false;
 		}
@@ -102,14 +107,17 @@ bool Physics_Constraint::SatisfyConstraint()
 
 void Physics_Constraint::Ignite(float _burnTimer)
 {
+	// Set the ignited state of the constraint to true
 	m_ignited = true;
 	
-	if (m_immediate == false)
+	if (m_immediate == true)
 	{
+		// Set the burn time as it was passed in
 		m_timeUntilIgniteOthers = _burnTimer;
 	}
 	else
 	{
+		// Constraint is secondary (Twice as long) therefore double the burn timer
 		m_timeUntilIgniteOthers = _burnTimer * 2.0f;	
 	}
 	m_timeUntilDestroyed = m_timeUntilIgniteOthers + (_burnTimer * 3);	
@@ -117,30 +125,44 @@ void Physics_Constraint::Ignite(float _burnTimer)
 
 eConstraintBurning Physics_Constraint::BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite)
 {
+	// Calculate only if the constraint is ignited and still active
 	if (m_ignited == true && m_active == true)
 	{
+		// Reduce the burning timers
 		m_timeUntilIgniteOthers -= _dt;
 		m_timeUntilDestroyed -= _dt;
 
 		if ( m_timeUntilIgniteOthers <= 0.0f)
 		{
-			if (m_pParticleA->GetIgnitedStatus() == false)
+			// Ignite others timer has completed
+
+			if (m_pParticleA->GetIgnitedState() == false)
 			{
+				// Particle A is the new particle to ignite
 				_prParticleToIgnite = m_pParticleA;
 			}
-			else if (m_pParticleB->GetIgnitedStatus() == false)
+			else if (m_pParticleB->GetIgnitedState() == false)
 			{
+				// Particle B is the new particle to ignite
 				_prParticleToIgnite = m_pParticleB;
 			}
 			
+			// Set the time to a large number so that this code is only executed once
 			m_timeUntilIgniteOthers = 1000.0f;
+
+			// Tell the Cloth that a new particle is to be ignited
 			return CB_IGNITEOTHERS;
 		}
 		else if (m_timeUntilDestroyed <= 0.0f)
 		{
+			// The destroy timer has completed so destroy the constraint
 			m_active = false;
+
+			// Tell the Cloth that this constraint has been destroyed
 			return CB_DESTROYED;
 		}
 	}
+
+	// No additional action needs to happen at this time
 	return CB_NOACTION;
 }

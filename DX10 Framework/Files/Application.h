@@ -32,24 +32,13 @@
 #endif // _DEBUG
 
 // Local Includes
-#include "Utility\Utilities.h"
+//#include "Utility\Utilities.h"
 #include "Utility\Timer.h"
 #include "DX10\DX10.h"
-#include "DX10\DX10\2D Objects\GUI_Button.h"
-#include "Input\InputGamePad.h"
-#include "Menus\Menu.h"
+//#include "DX10\DX10\2D Objects\GUI_Button.h"
+//#include "Input\InputGamePad.h"
+//#include "Menus\Menu.h"
 #include "Physics\Physics_3D.h"
-
-enum APP_STATE
-{
-	APP_STATE_TITLE,
-	APP_STATE_MAIN_MENU,
-	APP_STATE_MATCH_MENU,
-	APP_STATE_OPTION_MENU,
-	APP_STATE_INSTRUCTIONS_MENU,
-	APP_STATE_PAUSE_MENU,
-	APP_STATE_GAME
-};
 
 class Application
 {
@@ -195,7 +184,12 @@ public:
 	********************/
 	void SetMouseDown(bool _mouseDown) { m_mouseDown = _mouseDown; };
 
-	// TO DO CAL
+	/***********************
+	* UpdateMousePos: Update the stored mouse position
+	* @author: Callan Moore
+	* @parameter: _mousePos: The new mouse position
+	* @return: void
+	********************/
 	void UpdateMousePos(POINT _mousePos);
 
 private:
@@ -239,7 +233,7 @@ private:
 	bool* m_pKeyDown;
 	bool m_mouseDown;
 	v2float m_mousePos;
-	bool m_rayCasted;
+	bool m_initialRayCast;
 
 	// Renderer Variables
 	DX10_Renderer* m_pDX10_Renderer;

@@ -26,12 +26,12 @@ Physics_Particle::~Physics_Particle()
 {
 }
 
-bool Physics_Particle::Initialise(int _particleID, TVertexColor* _pVertex, v3float _pos, float _timeStep, float _damping, bool _static)
+bool Physics_Particle::Initialise(UINT _particleID, TVertexColor* _pVertex, v3float _pos, float _timeStep, float _damping, bool _static)
 {
 	// FOR JC
 	if (_pVertex == 0)
 	{
-		// If the vertex is null then the initialisation is invalid
+		// If the vertex is null then the initialization is invalid
 		return false;
 	}
 
@@ -73,20 +73,28 @@ void Physics_Particle::Process()
 		m_acceleration = { 0.0f, 0.0f, 0.0f};
 	}
 
+	// FOR JC
 	if (m_ignited == true)
 	{
+		// Reduce the burning timers
 		m_timeUntilFullyLit -= m_timeStep;
 		m_timeUntilDestroyed -= m_timeStep;
 
 		if (m_timeUntilFullyLit > 0.0f)
 		{
+			// Calculate the inverse ratio of time left until completely lit
 			float ratio = 1 - (m_timeUntilFullyLit / m_lightTime);
+
+			// Edit the vertex color to be red based on the ratio (Redder the longer its been lit)
 			m_pVertex->color = d3dxColors::Red * ratio;
-			m_pVertex->color.a = 1.0f;
+			m_pVertex->color.a = 1.0f;	// Set the alpha back to full after ratio calculation
 		}
 		else
 		{
+			// Calculate the ratio of time left until destroyed
 			float ratio =  (m_timeUntilDestroyed / m_destroyTime);
+
+			// Alpha the color based on the ratio so that the more transparent it vertex is the closer to being destroyed
 			m_pVertex->color.a = ratio;
 		}
 	}
@@ -101,8 +109,9 @@ void Physics_Particle::Move(v3float _movement)
 	}
 }
 
-void Physics_Particle::SetSelectedPosition(v3float _pos)
+void Physics_Particle::SetPositionIfSelected(v3float _pos)
 {
+	// Ensure the particle is selected before moving
 	if (m_selected)
 	{
 		m_pos = _pos;
@@ -111,14 +120,22 @@ void Physics_Particle::SetSelectedPosition(v3float _pos)
 
 void Physics_Particle::Ignite(float _burnTime)
 {
+	// Set the particle as ignited
 	m_ignited = true;
-	m_timeUntilFullyLit = _burnTime;
-	m_lightTime = m_timeUntilFullyLit;
-	m_timeUntilDestroyed = _burnTime * 4.0f;
-	m_destroyTime = m_timeUntilDestroyed;
+
+	// Store the time that it takes become fully lit ( change to full red color)
+	m_lightTime = _burnTime;
+	m_timeUntilFullyLit = m_lightTime;
+	
+	// Store the time that it takes to be destroyed completely after being ignited
+	m_destroyTime = _burnTime * 4.0f;
+	m_timeUntilDestroyed = m_destroyTime;
 }
 
 void Physics_Particle::Reset()
 {
+	// Default states
+	m_static = false;
+	m_selected = false;
 	m_ignited = false;
 }

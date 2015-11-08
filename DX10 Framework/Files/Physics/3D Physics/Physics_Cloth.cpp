@@ -709,25 +709,36 @@ void Physics_Cloth::UpdateWindSpeed(float _speed)
 	}
 }
 
-void Physics_Cloth::Ignite(TCameraRay _camRay)
+void Physics_Cloth::Ignite(TCameraRay _camRay, float _selectRadius)
 {
+	SelectParticles(_camRay, _selectRadius);
+	// FOR JC
+	// Cycle through all the currently selected particles
 	for (UINT i = 0; i < m_selectedParticles.size(); i++)
 	{
 		BurnConnectedConstraints(m_selectedParticles[i]);
 	}
 }
 
-void Physics_Cloth::Cut(TCameraRay _camRay)
+void Physics_Cloth::Cut(TCameraRay _camRay, float _selectRadius)
 {
+	SelectParticles(_camRay, _selectRadius);
+	// FOR JC
+	// Cycle through all the currently selected particles
 	for (UINT i = 0; i < m_selectedParticles.size(); i++)
 	{
-		// FOR JC
-		m_selectedParticles[i]->SetSelectedPosition({ 1000000.0f, 1000000.0f, 10000000.0f });
+		m_selectedParticles[i]->SetPositionIfSelected({ 1000000.0f, 1000000.0f, 10000000.0f });
 	}
 }
 
-void Physics_Cloth::Manipulate(TCameraRay _camRay)
+void Physics_Cloth::Manipulate(TCameraRay _camRay, float _selectRadius, bool _firstCast)
 {
+	if (_firstCast == true)
+	{
+		SelectParticles(_camRay, _selectRadius);
+	}
+
+	// Cycle through all the currently selected particles
 	for (UINT i = 0; i < m_selectedParticles.size(); i++)
 	{
 		// TO DO CAL - re comment
@@ -736,7 +747,7 @@ void Physics_Cloth::Manipulate(TCameraRay _camRay)
 		float tmpC = (_camRay.Direction.Dot(tmpA));
 		v3float Result = _camRay.Origin + _camRay.Direction * tmpC;
 		Result.z = m_selectedParticles[i]->GetPosition()->z;
-		m_selectedParticles[i]->SetSelectedPosition(Result);
+		m_selectedParticles[i]->SetPositionIfSelected(Result);
 	}
 }
 
@@ -798,7 +809,7 @@ void Physics_Cloth::ReleaseSelected()
 		{
 			m_pVertices[ID].color = d3dxColors::Blue;
 		}
-		else if (m_selectedParticles[i]->GetIgnitedStatus())
+		else if (m_selectedParticles[i]->GetIgnitedState())
 		{
 			m_pVertices[ID].color = d3dxColors::Red;
 		}
@@ -881,7 +892,7 @@ void Physics_Cloth::BurnConnectedConstraints(Physics_Particle* _pParticle)
 {
 	if (_pParticle != 0)
 	{
-		if (_pParticle->GetIgnitedStatus() == false)
+		if (_pParticle->GetIgnitedState() == false)
 		{
 			float modifier = 1 + (float)((rand() % 60) - 30) / 100.0f;
 			float modifiedBurnTime = m_burnTime * modifier;

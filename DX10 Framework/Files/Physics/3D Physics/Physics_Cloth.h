@@ -170,24 +170,17 @@ public:
 
 	// TO DO CAL
 	void FloorCollision(float _floorPos);
-
-	// TO DO CAL
 	void SphereCollision(v3float _center, float _radius);
 	void CapsuleCollision(v3float _endPoint2, v3float _endPoint1, float _capsuleRadius);
 	void PyramidCollision();
-
-	// TO DO CAL
 	void UpdateWindSpeed(float _speed);
-
-	// TO DO CAL
-	void SelectParticles(TCameraRay _camRay, float _selectRadius);
 	void ReleaseSelected();
 
 	// FOR JC
 	// TO DO CAL
-	void Ignite(TCameraRay _camRay);
-	void Cut(TCameraRay _camRay);
-	void Manipulate(TCameraRay _camRay);
+	void Ignite(TCameraRay _camRay, float _selectRadius);
+	void Cut(TCameraRay _camRay, float _selectRadius);
+	void Manipulate(TCameraRay _camRay, float _selectRadius, bool _firstCast);
 	void ToggleWeave() { m_complexWeave = !m_complexWeave; m_initialisedParticles = false; ResetCloth(); };
 	void SelfCollisions();
 	
@@ -242,6 +235,9 @@ private:
 	* @return: void
 	********************/
 	void AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC, v3float _force);
+
+	// TO DO CAL
+	void SelectParticles(TCameraRay _camRay, float _selectRadius);
 
 	// FOR JC
 	// TO DO CAL

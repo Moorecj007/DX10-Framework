@@ -63,9 +63,30 @@ public:
 	bool SatisfyConstraint();
 
 	// FOR JC
-	// TO DO CAL
+
+	
+	/***********************
+	* BurnDown: Process the burning of the constraint
+	* @author: Callan Moore
+	* @parameter: _dt: The current delta tick (time step) that passed since the last process
+	* @parameter: _prParticleToIgnite: Storage variable for a particle if this constraint has fully lit
+	* @return: eConstraintBurning: The result of the burn down
+	********************/
 	eConstraintBurning BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite);
+	
+	/***********************
+	* Ignite: Ignite the constraint and set the burn timer
+	* @author: Callan Moore
+	* @parameter: _burnTimer: The time for the particle to burn for
+	* @return: void
+	********************/
 	void Ignite(float _burnTimer);
+	
+	/***********************
+	* CanBeIgnited: Check if the constraint can be ignited
+	* @author: Callan Moore
+	* @return: bool: true if the constraint can be ignited
+	********************/
 	bool CanBeIgnited() { return (m_active == true && m_ignited == false); };
 
 private:
@@ -79,6 +100,7 @@ private:
 	bool m_immediate;
 
 	// FOR JC
+	// Ignition Variables
 	bool m_ignited;
 	float m_burnTime;
 	float m_timeUntilIgniteOthers;
