@@ -56,6 +56,7 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_Cloth* _pS
 	m_windSpeed = 1.0f;
 	m_initialisedParticles = false;
 	m_burnTime = 3.0f;
+	m_complexWeave = false;
 
 	// Set the cloth to initial positions and constraints
 	VALIDATE(ResetCloth());
@@ -245,7 +246,12 @@ bool Physics_Cloth::ResetCloth()
 
 		// Calculate how many indices there are with be based on how many particles there are using line list
 		int immediateConstraintCount = (m_particlesWidthCount - 1) * (m_particlesHeightCount - 1) * 4 + (m_particlesWidthCount - 1) + (m_particlesHeightCount - 1);
-		int secondaryConstraintCount = (m_particlesWidthCount - 2) * (m_particlesHeightCount - 2) * 4 + ((m_particlesWidthCount - 2) * 2) + ((m_particlesHeightCount - 2) * 2);
+		int secondaryConstraintCount = 0;
+		if (m_complexWeave == true)
+		{
+			secondaryConstraintCount = (m_particlesWidthCount - 2) * (m_particlesHeightCount - 2) * 4 + ((m_particlesWidthCount - 2) * 2) + ((m_particlesHeightCount - 2) * 2);
+		}
+		
 		m_indexCount = (immediateConstraintCount + secondaryConstraintCount) * 2;
 		m_pIndices = new DWORD[m_indexCount];
 	}
@@ -312,36 +318,39 @@ bool Physics_Cloth::ResetCloth()
 		}
 	}
 
-	// Connect Particles the are one step further away than previous loop
-	for (int col = 0; col < m_particlesWidthCount; col++)
+	if (m_complexWeave == true)
 	{
-		for (int row = 0; row < m_particlesHeightCount; row++)
+		// Connect Particles the are one step further away than previous loop
+		for (int col = 0; col < m_particlesWidthCount; col++)
 		{
-			// Particle to the Right exists
-			if (col < m_particlesWidthCount - 2)
+			for (int row = 0; row < m_particlesHeightCount; row++)
 			{
-				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row), false));
-				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
-				GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
-			}
-	
-			// Particle below exists
-			if (row < m_particlesHeightCount - 2)
-			{
-				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col, row + 2), false));
-				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
-				GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
-			}
-	
-			// Particle to the right and below exists
-			if ((col < m_particlesWidthCount - 2) && (row < m_particlesHeightCount - 2))
-			{
-				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row + 2), false));
-				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
-				GetParticle(col + 2, row + 2)->AddContraintIndex(m_contraints.size() - 1);
-				VALIDATE(MakeConstraint(GetParticleIndex(col + 2, row), GetParticleIndex(col, row + 2), false));
-				GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
-				GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
+				// Particle to the Right exists
+				if (col < m_particlesWidthCount - 2)
+				{
+					VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row), false));
+					GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+					GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
+				}
+
+				// Particle below exists
+				if (row < m_particlesHeightCount - 2)
+				{
+					VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col, row + 2), false));
+					GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+					GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
+				}
+
+				// Particle to the right and below exists
+				if ((col < m_particlesWidthCount - 2) && (row < m_particlesHeightCount - 2))
+				{
+					VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row + 2), false));
+					GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
+					GetParticle(col + 2, row + 2)->AddContraintIndex(m_contraints.size() - 1);
+					VALIDATE(MakeConstraint(GetParticleIndex(col + 2, row), GetParticleIndex(col, row + 2), false));
+					GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
+					GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
+				}
 			}
 		}
 	}

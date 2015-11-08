@@ -630,6 +630,12 @@ bool Application::HandleInput()
 		SetKeyDown(VK_SUBTRACT, false);
 	}
 
+	if (m_pKeyDown[VK_CAPITAL])
+	{
+		m_pCloth->ToggleWeave();
+		SetKeyDown(VK_CAPITAL, false);
+	}
+
 	// Cast a Ray
 	if (m_mouseDown)
 	{

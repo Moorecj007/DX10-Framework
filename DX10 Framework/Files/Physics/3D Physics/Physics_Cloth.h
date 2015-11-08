@@ -168,14 +168,16 @@ public:
 	// TO DO CAL
 	void UpdateWindSpeed(float _speed);
 
+	// TO DO CAL
+	void SelectParticles(TCameraRay _camRay, float _selectRadius);
+	void ReleaseSelected();
+
 	// FOR JC
 	// TO DO CAL
-	void ClickAction(DX10_Camera_FirstPerson* _cam, v2float _mousePos, eClothClickAction _clickAction);
 	void Ignite(TCameraRay _camRay);
 	void Cut(TCameraRay _camRay);
 	void Manipulate(TCameraRay _camRay);
-	void SelectParticles(TCameraRay _camRay, float _selectRadius);
-	void ReleaseSelected();
+	void ToggleWeave() { m_complexWeave = !m_complexWeave; m_initialisedParticles = false; ResetCloth(); };
 
 	
 private:
@@ -273,5 +275,6 @@ private:
 	// FOR JC
 	std::vector<Physics_Particle*>* m_ignitedParticles;
 	float m_burnTime;
+	bool m_complexWeave;
 };
 #endif	// __PHYSICS_CLOTH_H__
