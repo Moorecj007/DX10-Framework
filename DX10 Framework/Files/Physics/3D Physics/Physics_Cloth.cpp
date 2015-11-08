@@ -55,6 +55,7 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_Cloth* _pS
 	m_breakModifier = 2.0f;
 	m_windSpeed = 1.0f;
 	m_initialisedParticles = false;
+	m_burnTime = 3.0f;
 
 	// Set the cloth to initial positions and constraints
 	VALIDATE(ResetCloth());
@@ -69,7 +70,6 @@ void Physics_Cloth::Process()
 	AddForce({ 0.0f, -9.81f, 0.0f }, FT_UNIVERSAL, false);
 
 	DWORD* pIndices = m_pMesh->GetIndexBuffer();
-	float burnTimer = (m_timeStep / m_constraintIterations);
 
 	// Calculate each constraint multiple times
 	for (int i = 0; i < m_constraintIterations; i++)
@@ -81,15 +81,28 @@ void Physics_Cloth::Process()
 				// Constraint is broken. Stop drawing the line
 				pIndices[(j * 2) + 1] = pIndices[j * 2] = 0;
 			}
-			Physics_Particle* pIgnitedParticle;
-			if (m_contraints[j].BurnDown(burnTimer, pIgnitedParticle) == true)
-			{
-				if (pIgnitedParticle != 0)
-				{
-					pIgnitedParticle->GetContraintIndices();
-				}
-			}
 		}
+	}
+
+	// FOR JC
+	for (int j = 0; j < (int)m_contraints.size(); j++)
+	{
+		Physics_Particle* pIgnitedParticle = 0;
+		switch (m_contraints[j].BurnDown(m_timeStep, pIgnitedParticle))
+		{
+		case CB_IGNITEOTHERS:
+		{
+			BurnConnectedConstraints(pIgnitedParticle);
+		}
+		break;
+		case CB_DESTROYED:
+		{
+			pIndices[(j * 2) + 1] = pIndices[j * 2] = 0;
+		}
+		break;
+		case CB_NOACTION: // Fall Through
+		default: break;
+		}	// End Switch
 	}
 	
 	TVertexColor* pVertexBuffer = m_pMesh->GetVertexBufferCloth();
@@ -258,7 +271,9 @@ bool Physics_Cloth::ResetCloth()
 			else
 			{
 				// Particle has already been initialized so just reset the position
+				m_pParticles[index].Reset();
 				m_pParticles[index].SetPosition(pos);
+				m_pVertices[index] = { { pos.x, pos.y, pos.z }, d3dxColors::Black };
 			}
 		}
 	}
@@ -309,7 +324,7 @@ bool Physics_Cloth::ResetCloth()
 				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
 				GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
 			}
-
+	
 			// Particle below exists
 			if (row < m_particlesHeightCount - 2)
 			{
@@ -317,7 +332,7 @@ bool Physics_Cloth::ResetCloth()
 				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
 				GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
 			}
-
+	
 			// Particle to the right and below exists
 			if ((col < m_particlesWidthCount - 2) && (row < m_particlesHeightCount - 2))
 			{
@@ -697,18 +712,24 @@ void Physics_Cloth::AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Pa
 
 void Physics_Cloth::BurnConnectedConstraints(Physics_Particle* _pParticle)
 {
-	if (_pParticle->GetIgnitedStatus() == false)
+	if (_pParticle != 0)
 	{
-		// Ignite the Particles
-		_pParticle->Ignite();
-
-		std::vector<UINT> connectedConstraints = _pParticle->GetContraintIndices();
-		for (UINT i = 0; i < connectedConstraints.size(); i++)
+		if (_pParticle->GetIgnitedStatus() == false)
 		{
-			if (m_contraints[connectedConstraints[i]].GetIgnitedStatus() == false)
+			float modifier = 1 + (float)((rand() % 60) - 30) / 100.0f;
+			float modifiedBurnTime = m_burnTime * modifier;
+
+			// Ignite the Particles
+			_pParticle->Ignite(modifiedBurnTime);
+
+			std::vector<UINT> connectedConstraints = _pParticle->GetContraintIndices();
+			for (UINT i = 0; i < connectedConstraints.size(); i++)
 			{
-				// TO DO CAL - create variable for burn time and random function to 
-				m_contraints[connectedConstraints[i]].Ignite(3.0f);
+				if (m_contraints[connectedConstraints[i]].CanBeIgnited() == true)
+				{
+					// TO DO CAL - create variable for burn time and random function to 
+					m_contraints[connectedConstraints[i]].Ignite(modifiedBurnTime);
+				}
 			}
 		}
 	}

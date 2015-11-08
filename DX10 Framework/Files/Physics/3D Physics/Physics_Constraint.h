@@ -20,6 +20,15 @@
 // Local Includes
 #include "Physics_Particle.h"
 
+// FOR JC
+// Enumerators
+enum eConstraintBurning
+{
+	CB_NOACTION,
+	CB_IGNITEOTHERS,
+	CB_DESTROYED
+};
+
 class Physics_Constraint
 {
 public:
@@ -55,9 +64,9 @@ public:
 
 	// FOR JC
 	// TO DO CAL
-	bool BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite);
-	void Ignite(float _burnTimer) { m_ignited = true; m_burnTimer = _burnTimer; };
-	bool GetIgnitedStatus() { return m_ignited; };
+	eConstraintBurning BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite);
+	void Ignite(float _burnTimer);
+	bool CanBeIgnited() { return (m_active == true && m_ignited == false); };
 
 private:
 	Physics_Particle* m_pParticleA;
@@ -71,7 +80,9 @@ private:
 
 	// FOR JC
 	bool m_ignited;
-	float m_burnTimer;
+	float m_burnTime;
+	float m_timeUntilIgniteOthers;
+	float m_timeUntilDestroyed;
 };
 #endif	// __PHYSICS_CONTRAINT_H__
 

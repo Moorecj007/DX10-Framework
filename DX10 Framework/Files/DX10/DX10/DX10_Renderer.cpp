@@ -34,7 +34,7 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 
 	VALIDATE(InitialiseDeviceAndSwapChain());
 
-	m_clearColor = YELLOW;
+	m_clearColor = d3dxColors::DarkGray;
 
 	//Initialise the ID Keys for the Maps
 	m_nextInputLayoutID = 0;

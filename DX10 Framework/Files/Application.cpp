@@ -196,6 +196,9 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	m_pKeyDown = new bool[255];
 	memset(m_pKeyDown, false, 255);
 
+	m_mouseDown = false;
+	m_rayCasted = false; // FOR JC
+
 	VALIDATE(Initialise_DX10(_hInstance));
 
 	m_online = true;
@@ -372,9 +375,9 @@ void Application::Render()
 		// Tell the Renderer that the data input for the back buffer is about to commence
 		m_pDX10_Renderer->StartRender();
 
-		// Render the Objects of the Scene
-		m_pCloth->Render();
+		// Render the Objects of the Scene	
 		m_pObj_Floor->Render();
+		m_pCloth->Render();
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		//m_pSprite_InstructionsLeft->Render();
@@ -638,8 +641,6 @@ bool Application::HandleInput()
 		{
 			// Select the particles
 			m_pCloth->SelectParticles(Ray, 0.707f);
-			// Add a huge amount of force to break the constraints attached to this particle
-			v3float force = { 0.0f, 0.0f, 10000.0f };
 			m_pCloth->Cut(Ray);
 		}
 		// Check if the initial Ray has been Cast
@@ -647,14 +648,13 @@ bool Application::HandleInput()
 		{
 			// Select The Particles
 			m_pCloth->SelectParticles(Ray, 1.0f);
-
-			// Set Ray Casted to true
 			m_rayCasted = true;
 		}
 		else
 		{
-			if (m_pKeyDown[VK_CONTROL] && !m_pKeyDown[VK_MENU])
+			if (m_pKeyDown[VK_CONTROL] && !m_pKeyDown[VK_SHIFT])
 			{
+				// Ignite the Selected Particles
 				m_pCloth->Ignite(Ray);
 			}
 			else

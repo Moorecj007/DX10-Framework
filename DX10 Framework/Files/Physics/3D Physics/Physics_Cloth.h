@@ -272,5 +272,6 @@ private:
 
 	// FOR JC
 	std::vector<Physics_Particle*>* m_ignitedParticles;
+	float m_burnTime;
 };
 #endif	// __PHYSICS_CLOTH_H__

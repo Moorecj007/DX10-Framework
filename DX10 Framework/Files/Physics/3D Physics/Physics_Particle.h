@@ -122,9 +122,9 @@ public:
 	// TO DO CAL
 	std::vector<UINT> GetContraintIndices() { return m_contraintIndices; };
 	void AddContraintIndex(UINT _index) { m_contraintIndices.push_back(_index); };
-	//void RemoveConstraintIndex(UINT _index) { m_contraintIndices.erase()};
 	bool GetIgnitedStatus() { return m_ignited; };
-	void Ignite() { m_ignited = true; m_pVertex->color = d3dxColors::Blue; };
+	void Ignite(float _burnTime);
+	void Reset();
 
 private:
 	int m_particleID;
@@ -136,6 +136,7 @@ private:
 	v3float m_acceleration;
 
 	float m_mass;
+	float m_timeStep;
 	float m_timeStepSquared;
 	float m_damping;
 	float m_dampingInverse;
@@ -144,6 +145,10 @@ private:
 	TVertexColor* m_pVertex;
 	std::vector<UINT> m_contraintIndices;
 	bool m_ignited;
+	float m_timeUntilFullyLit;
+	float m_timeUntilDestroyed;
+	float m_lightTime;
+	float m_destroyTime;
 
 };
 #endif	// __PHYSICS_PARTICLE_H__

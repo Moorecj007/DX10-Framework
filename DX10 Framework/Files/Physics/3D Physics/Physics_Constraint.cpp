@@ -37,11 +37,12 @@ bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB
 	m_active = true;
 	m_immediate = _immediate;
 	m_ignited = false;
-	m_burnTimer = 8.0f;
+	m_timeUntilIgniteOthers = 0.0f;
+	m_timeUntilDestroyed = 0.0f;
 
 	// Calculate based on particle positions
 	m_restDist = (*m_pParticleA->GetPosition() - *m_pParticleB->GetPosition()).Magnitude();
-	
+
 	if (m_immediate == false)
 	{
 		_breakModifier--;
@@ -74,17 +75,17 @@ bool Physics_Constraint::SatisfyConstraint()
 			float maxDist = (m_restDist + (m_restDist * m_elasticity));
 
 			if (m_immediate == true || currDist > maxDist)
-			{			
+			{
 				v3float correctionVec;
 				if (currDist > maxDist)
 				{
 					// Calculate the correction vector needed to return to rest
 					correctionVec = differenceVec * (1 - maxDist / currDist);
-				}				
+				}
 				else if (currDist < minDist)
 				{
 					// Calculate the correction vector needed to return to rest
-					correctionVec = differenceVec * (1 - minDist / currDist);	
+					correctionVec = differenceVec * (1 - minDist / currDist);
 				}
 
 				// Halve the correction vector so each particle and can get half
@@ -99,26 +100,47 @@ bool Physics_Constraint::SatisfyConstraint()
 	return true;
 }
 
-bool Physics_Constraint::BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite)
+void Physics_Constraint::Ignite(float _burnTimer)
 {
-	if (m_ignited == true && m_burnTimer > 0.0f)
+	m_ignited = true;
+	
+	if (m_immediate == false)
 	{
-		m_burnTimer -= _dt;
-		if ( m_burnTimer <= 0.0f)
+		m_timeUntilIgniteOthers = _burnTimer;
+	}
+	else
+	{
+		m_timeUntilIgniteOthers = _burnTimer * 2.0f;	
+	}
+	m_timeUntilDestroyed = m_timeUntilIgniteOthers + (_burnTimer * 3);	
+}
+
+eConstraintBurning Physics_Constraint::BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite)
+{
+	if (m_ignited == true && m_active == true)
+	{
+		m_timeUntilIgniteOthers -= _dt;
+		m_timeUntilDestroyed -= _dt;
+
+		if ( m_timeUntilIgniteOthers <= 0.0f)
 		{
 			if (m_pParticleA->GetIgnitedStatus() == false)
 			{
-				m_pParticleA->Ignite();
 				_prParticleToIgnite = m_pParticleA;
 			}
 			else if (m_pParticleB->GetIgnitedStatus() == false)
 			{
-				m_pParticleB->Ignite();
 				_prParticleToIgnite = m_pParticleB;
 			}
-					
-			return true;
+			
+			m_timeUntilIgniteOthers = 1000.0f;
+			return CB_IGNITEOTHERS;
+		}
+		else if (m_timeUntilDestroyed <= 0.0f)
+		{
+			m_active = false;
+			return CB_DESTROYED;
 		}
 	}
-	return false;
+	return CB_NOACTION;
 }

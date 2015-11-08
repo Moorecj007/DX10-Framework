@@ -17,6 +17,19 @@ cbuffer cbPerObject
 	float4x4 g_matWorld;
 };
 
+// For transparency values
+BlendState SrcAlphaBlendingAdd
+{
+	BlendEnable[0] = TRUE;
+	SrcBlend = SRC_ALPHA;
+	DestBlend = INV_SRC_ALPHA;
+	BlendOp = ADD;
+	SrcBlendAlpha = ZERO;
+	DestBlendAlpha = ZERO;
+	BlendOpAlpha = ADD;
+	RenderTargetWriteMask[0] = 0x0F;
+};
+
 struct VS_IN
 {
 	float3 position		: POSITION;
@@ -57,6 +70,8 @@ technique10 StandardTech
 {
     pass P0
     {
+		SetBlendState(SrcAlphaBlendingAdd, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+
 		SetVertexShader(CompileShader(vs_4_0, VS_Standard()));
        	SetGeometryShader( NULL );
 		SetPixelShader(CompileShader(ps_4_0, PS_Standard()));
