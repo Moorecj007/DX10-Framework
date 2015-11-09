@@ -119,8 +119,6 @@ namespace input
 	const DWORD VK_X = 0x58;
 	const DWORD VK_Y = 0x59;
 	const DWORD VK_Z = 0x5A;
-
-
 }
 
 namespace shape

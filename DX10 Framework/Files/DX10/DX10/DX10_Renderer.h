@@ -271,7 +271,7 @@ public:
 	* @parameter: _light: The light structure
 	* @return: bool: Successful or not
 	********************/
-	bool AddLight(std::string _lightName, Light* _light);
+	bool AddLight(std::string _lightName, TLight* _light);
 	
 	/***********************
 	* RemoveLight: Remove a light from the Renderer
@@ -286,7 +286,7 @@ public:
 	* @author: Callan Moore
 	* @return: Light*: The current active lights
 	********************/
-	Light* GetActiveLights();
+	TLight* GetActiveLights();
 
 	/***********************
 	* SetPrimitiveTopology: Sets the primitive topology for a Mesh before drawing
@@ -436,9 +436,9 @@ private:
 	std::map<std::string, ID3D10ShaderResourceView*> m_textures;
 
 	// Lighting
-	Light m_activeLight;
-	std::map<std::string, Light*> m_mapLights;
-	Light* m_pArrLights;
+	TLight m_activeLight;
+	std::map<std::string, TLight*> m_mapLights;
+	TLight* m_pArrLights;
 	int m_lightCount;
 };
 

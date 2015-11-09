@@ -19,20 +19,17 @@
 
 // Local Includes
 #include "../DX10_Renderer.h"
-#include "../../../Utility/Utilities.h"
+//#include "../../../Utility/Utilities.h"
 #include "../../../Utility/DirectInput.h"
 
 struct TCameraRay
 {
-	// TO DO CAL - Rename and comment
 	v3float Origin;
 	v3float Direction;
 
 	/***********************
-	* CameraRay: Constructor for the CameraRay struct
-	* @author: Jc Fowles
-	* @parameter: _origin: The Origin of the Ray
-	* @parameter: _direction: The Direction of the Ray
+	* TCameraRay: Default constructor for the TCameraRay struct
+	* @author: Callan Moore
 	********************/
 	TCameraRay()
 	{
@@ -41,40 +38,41 @@ struct TCameraRay
 	}
 
 	/***********************
-	* CameraRay: Constructor for the CameraRay struct
-	* @author: Jc Fowles
-	* @parameter: _origin: The Origin of the Ray
-	* @parameter: _direction: The Direction of the Ray
+	* TCameraRay: Constructor for the TCameraRay struct that initializes the origin and direction
+	* @author: Callan Moore
+	* @parameter: _origin: The origin of the Ray ( Camera Position in world space)
+	* @parameter: _direction: The direction of the Ray
 	********************/
 	TCameraRay(v3float _origin, v3float _direction)
 	{
+		// Assign member variables
 		Origin = _origin;
 		Direction = _direction;
 	}
 
 	/***********************
-	* RaySphereIntersect: Checks whether the Ray (In Local Space to a Sphere) intersect the Sphere
-	* @author: Jc Fowles
-	* @parameter: _sphereRadius: Radius of the Sphere
-	* @return: bool: True if the Ray Intersect the Sphere
+	* RaySphereIntersect: Checks if the ray intersects a sphere with the input radius in local space to the sphere
+	* @author: Callan Moore
+	* @parameter: _sphereRad: Radius of the sphere
+	* @return: bool: Whether the ray intersected the sphere
 	********************/
-	bool RaySphereIntersect(float _sphereRadius)
+	bool RaySphereIntersect(float _sphereRad)
 	{
-		// Calculate the a, b, and c Coefficients of the Discriminant
+		// Calculate the a, b, and c coefficients of the discriminant
 		float a = Direction.Dot(Direction);
 		float b = Direction.Dot(Origin) * 2.0f;
-		float c = Origin.Dot(Origin) - pow(_sphereRadius, 2);
+		float c = Origin.Dot(Origin) - pow(_sphereRad, 2);
 
-		// Calculate the Discriminant (b^2 - 4ac)
+		// Calculate the discriminant and check the result
 		float discriminant = pow(b, 2) - (4 * a * c);
 		if (discriminant < 0.0f)
 		{
-			// The Discriminant is Negative the Ray missed the Sphere
+			// Discriminant is negative therefore the ray does not intersect the sphere
 			return false;
 		}
 		else
 		{
-			// The Discriminant is Positive the Ray intersected the Sphere
+			// Discriminant is positive therefore the ray did intersect the sphere
 			return true;
 		}
 	}
@@ -159,7 +157,7 @@ public:
 	/***********************
 	* GetRay: Calculates a ray from the mouse position
 	* @author: Callan Moore
-	* @parameter: _mousePos: The Mouse positions in screen space
+	* @parameter: _mousePos: The mouse position on screen at a -1 to 1 range
 	* @return: void
 	********************/
 	TCameraRay GetRay(v2float _mousePos);

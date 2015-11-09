@@ -267,8 +267,6 @@ private:
 
 	// Cloth Simulation
 	Physics_Cloth* m_pCloth;
-
-	// FOR JC
 	eCollisionType m_eCollisionType;
 };
 

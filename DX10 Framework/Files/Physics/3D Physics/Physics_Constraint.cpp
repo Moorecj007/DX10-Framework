@@ -17,6 +17,9 @@
 
 Physics_Constraint::Physics_Constraint()
 {
+	// Initialise pointers to NULL
+	m_pParticleA = 0;
+	m_pParticleB = 0;
 }
 
 Physics_Constraint::~Physics_Constraint()
@@ -37,6 +40,7 @@ bool Physics_Constraint::Initialise(Physics_Particle* _pA, Physics_Particle* _pB
 	m_active = true;
 	m_immediate = _immediate;
 	m_elasticity = 0.07f;
+
 	m_ignited = false;
 	m_timeUntilIgniteOthers = 0.0f;
 	m_timeUntilDestroyed = 0.0f;
@@ -123,7 +127,7 @@ void Physics_Constraint::Ignite(float _burnTimer)
 	m_timeUntilDestroyed = m_timeUntilIgniteOthers + (_burnTimer * 3);	
 }
 
-eConstraintBurning Physics_Constraint::BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite)
+eIgnitedAction Physics_Constraint::BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite)
 {
 	// Calculate only if the constraint is ignited and still active
 	if (m_ignited == true && m_active == true)
@@ -151,7 +155,7 @@ eConstraintBurning Physics_Constraint::BurnDown(float _dt, Physics_Particle*& _p
 			m_timeUntilIgniteOthers = 1000.0f;
 
 			// Tell the Cloth that a new particle is to be ignited
-			return CB_IGNITEOTHERS;
+			return IA_IGNITEPARTICLE;
 		}
 		else if (m_timeUntilDestroyed <= 0.0f)
 		{
@@ -159,10 +163,10 @@ eConstraintBurning Physics_Constraint::BurnDown(float _dt, Physics_Particle*& _p
 			m_active = false;
 
 			// Tell the Cloth that this constraint has been destroyed
-			return CB_DESTROYED;
+			return IA_DESTROYCONSTRAINT;
 		}
 	}
 
 	// No additional action needs to happen at this time
-	return CB_NOACTION;
+	return IA_NOACTION;
 }

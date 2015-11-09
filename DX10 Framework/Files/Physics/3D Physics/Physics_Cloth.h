@@ -21,23 +21,21 @@
 #include "../../DX10/DX10.h"
 #include "Physics_Constraint.h"
 
-
-// Enumerator
-// TO DO CAL
-enum eClothClickAction
-{
-	CCA_CUT,
-	CCA_IGNITE,
-	CCA_MANIPULATE
-};
-
-// TO DO CAL - Re name
+// Enumerators
+/***********************
+* eForceType: Enum for the different types of Force that can be enacted upon the Cloth
+* @author: Callan Moore
+********************/
 enum eForceType
 {
-	FT_UNIVERSAL,
+	FT_GENERIC,
 	FT_WIND
 };
 
+/***********************
+* eCollisionType: Enum for the different types of collisions the Cloth can be subject to
+* @author: Callan Moore
+********************/
 enum eCollisionType
 {
 	CT_NONE,
@@ -78,7 +76,7 @@ public:
 	/***********************
 	* Process: Process the Cloth for the time step
 	* @author: Callan Moore
-	// TO DO CAL
+	* @parameter: _collisionType: The type of collision to use during this process
 	* @return: void
 	********************/
 	void Process(eCollisionType _collisionType);
@@ -93,19 +91,12 @@ public:
 	/***********************
 	* AddForce: Add a force to the entire cloth
 	* @author: Callan Moore
-	* @parameter: _force: Force vector of the force to apply (Direction and magnitude)
-	// TO DO CAL
+	* @parameter: _force: Force vector of the force to add (Direction and magnitude)
+	* @parameter: _forceType: The type of force to add
+	* @parameter: _selected: Whether to only affect currently selected particles
 	* @return: void
 	********************/
 	void AddForce(v3float _force, eForceType _forceType, bool _selected);
-	
-	/***********************
-	* WindForce: Add a Wind force to the entire cloth
-	* @author: Callan Moore
-	* @parameter: _force: Force vector of the force to apply (Direction and magnitude)
-	* @return: void
-	********************/
-	void AddWindForce(v3float _force);
 	
 	/***********************
 	* ReleaseCloth: Release all the pins that holds the cloth in place
@@ -115,7 +106,7 @@ public:
 	void ReleaseCloth();
 	
 	/***********************
-	* MoveHooks: Move the hooked particles closer or further away from the centre
+	* MoveHooks: Move the hooked particles closer or further away from the center
 	* @author: Callan Moore
 	* @parameter: _closer: true to move closer. False to move particles away
 	* @return: void
@@ -168,22 +159,56 @@ public:
 	********************/
 	void CreateHooks();
 
-	// TO DO CAL
-	void FloorCollision(float _floorPos);
-	void SphereCollision(v3float _center, float _radius);
-	void CapsuleCollision(v3float _endPoint2, v3float _endPoint1, float _capsuleRadius);
-	void PyramidCollision();
-	void UpdateWindSpeed(float _speed);
-	void ReleaseSelected();
-
-	// FOR JC
-	// TO DO CAL
-	void Ignite(TCameraRay _camRay, float _selectRadius);
-	void Cut(TCameraRay _camRay, float _selectRadius);
-	void Manipulate(TCameraRay _camRay, float _selectRadius, bool _firstCast);
-	void ToggleWeave() { m_complexWeave = !m_complexWeave; m_initialisedParticles = false; ResetCloth(); };
-	void SelfCollisions();
+	/***********************
+	* UpdateWindSpeed: Add the speed change to the current wind speed
+	* @author: Callan Moore
+	* @parameter: float _speed: The amount to change the speed by
+	* @return: void
+	********************/
+	void UpdateWindSpeed(float _speedChange);
 	
+	/***********************
+	* ReleaseSelected: Set all the selected particles to unselected
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void ReleaseSelected();
+	
+	/***********************
+	* Ignite: Ignites all particles that are in the ray
+	* @author: Callan Moore
+	* @parameter: _camRay: The current camera ray cast at the mouse point
+	* @parameter: _selectRadius: The radius of the particles to see if they intersect the ray
+	* @return: void
+	********************/
+	void Ignite(TCameraRay _camRay, float _selectRadius);
+	
+	/***********************
+	* Cut: Cut all particles that are in the ray
+	* @author: Callan Moore
+	* @parameter: _camRay: The current camera ray cast at the mouse point
+	* @parameter: _selectRadius: The radius of the particles to see if they intersect the ray
+	* @return: void
+	********************/
+	void Cut(TCameraRay _camRay, float _selectRadius);
+	
+	/***********************
+	* Manipulate: Manipulate the cloths selected particles to follow the mouse
+	* @author: Callan Moore
+	* @parameter: _camRay: The current camera ray cast at the mouse point
+	* @parameter: _selectRadius: The radius of the particles to see if they intersect the ray
+	* @parameter: _firstCast: Whether the first cast has been done. First cast selects the particles to manipulate
+	* @return: void
+	********************/
+	void Manipulate(TCameraRay _camRay, float _selectRadius, bool _firstCast);
+	
+	/***********************
+	* ToggleWeave: Toggle the weave of the cloth between simple and complex (double stitching)
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void ToggleWeave() { m_complexWeave = !m_complexWeave; m_initialisedParticles = false; ResetCloth(); };
+		
 private:
 	
 	/***********************
@@ -210,10 +235,9 @@ private:
 	* @parameter: _particleIndexA: Index of the First particle to constrain
 	* @parameter: _particleIndexB: Index of the Second particle to constrain
 	* @parameter: _immediate: Whether the constraint is an immediate neighbor
-	* @parameter: _draw: Whether to draw the constraint
 	* @return: bool: Successful or not
 	********************/
-	bool MakeConstraint(int _particleIndexA, int _particleIndexB, bool _immediate, bool _draw = true);
+	bool MakeConstraint(int _particleIndexA, int _particleIndexB, bool _immediate);
 	
 	/***********************
 	* CalcTriangleNormal: Calculate the normal of the triangle defined by the three input particles
@@ -236,13 +260,60 @@ private:
 	********************/
 	void AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC, v3float _force);
 
-	// TO DO CAL
+	/***********************
+	* SelectParticles: Select particles that intersect with the ray
+	* @author: Callan Moore
+	* @parameter: _camRay: The current camera ray cast at the mouse point
+	* @parameter: _selectRadius: The radius of the particles to see if they intersect the ray
+	* @return: void
+	********************/
 	void SelectParticles(TCameraRay _camRay, float _selectRadius);
+	
+	/***********************
+	* IgniteConnectedConstraints: Burn all constraints connected to the input particle
+	* @author: Callan Moore
+	* @parameter: _pParticle: The particle that is connected to the constraints that need to ignite
+	* @return: void
+	********************/
+	void IgniteConnectedConstraints(Physics_Particle* _pParticle);
+	
+	/***********************
+	* CollisionsWithSelf: Calculate the collisions with itself so that it does not penetrate or clip
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void CollisionsWithSelf();
+	
+	/***********************
+	* FloorCollision: Calculate collisions with a floor (plane)
+	* @author: Callan Moore
+	* @parameter: float _floorPos: The Y position of the floor
+	* @return: void
+	********************/
+	void FloorCollision(float _floorPos);
+	
+	/***********************
+	* SphereCollision: Calculate collisions with a sphere
+	* @author: Callan Moore
+	* @parameter: _center:The spheres centre position
+	* @parameter: _sphereRadius: The radius of the sphere
+	* @return: void
+	********************/
+	void SphereCollision(v3float _center, float _sphereRadius);
+	
+	/***********************
+	* CapsuleCollision: Calculate collisions with a capsule
+	* @author: Callan Moore
+	* @parameter: _sphereCentre1: The first sphere of the capsules centre position
+	* @parameter: _sphereCentre2: The second sphere of the capsules centre position
+	* @parameter: float _capsuleRadius: The radius of the capsule
+	* @return: void
+	********************/
+	void CapsuleCollision(v3float _sphereCentre1, v3float _sphereCentre2, float _capsuleRadius);
 
-	// FOR JC
 	// TO DO CAL
-	void BurnConnectedConstraints(Physics_Particle* _pParticle);
-
+	void PyramidCollision();
+	
 private:
 	DX10_Shader_Cloth* m_pShader;
 
@@ -259,6 +330,7 @@ private:
 	int m_hooks;
 	int m_minHooks;
 	int m_maxHooks;	
+	float m_selfCollisionRad;
 
 	int m_particleCount;
 	int m_constraintIterations;
@@ -279,8 +351,7 @@ private:
 
 	std::vector<Physics_Particle*> m_selectedParticles;
 
-	// FOR JC
-	std::vector<Physics_Particle*>* m_ignitedParticles;
+	// Ignition Variables
 	float m_burnTime;
 	bool m_complexWeave;
 };

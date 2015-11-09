@@ -21,6 +21,7 @@ Physics_Cloth::Physics_Cloth()
 
 Physics_Cloth::~Physics_Cloth()
 {
+	// Release allocated memory
 	ReleasePtr(m_pMesh);
 	ReleasePtrArray(m_pParticles);
 }
@@ -51,11 +52,13 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_Cloth* _pS
 	m_minHooks = 2;
 	m_maxHooks = m_maxWidth;
 
+	m_selfCollisionRad = 0.9f;
+
 	m_constraintIterations = 3;
-	m_breakModifier = 2.0f;
+	m_breakModifier = 2.4f;
 	m_windSpeed = 1.0f;
 	m_initialisedParticles = false;
-	m_burnTime = 3.0f;
+	m_burnTime = 1.5f;
 	m_complexWeave = false;
 
 	// Set the cloth to initial positions and constraints
@@ -66,16 +69,15 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_Cloth* _pS
 
 void Physics_Cloth::Process(eCollisionType _collisionType)
 {	
-
 	CalcWorldMatrix();
+
 	// Adding Gravity
-	AddForce({ 0.0f, -9.81f, 0.0f }, FT_UNIVERSAL, false);
+	AddForce({ 0.0f, -9.81f, 0.0f }, FT_GENERIC, false);
 
 	TVertexColor* pVertexBuffer = m_pMesh->GetVertexBufferCloth();
 	DWORD* pIndices = m_pMesh->GetIndexBuffer();
 
 	// Process each Particle
-	// FOR JC
 	for (int i = 0; i < m_particleCount; i++)
 	{
 		m_pParticles[i].Process();
@@ -93,7 +95,7 @@ void Physics_Cloth::Process(eCollisionType _collisionType)
 			}
 		}
 	
-		// FOR JC
+		// Calculate the collisions with object, if any
 		switch (_collisionType)
 		{
 			case CT_SPHERE:
@@ -113,71 +115,41 @@ void Physics_Cloth::Process(eCollisionType _collisionType)
 			default: break;
 		}
 
+		// Calculate the permanent collisions
 		FloorCollision(-15.0f);
-		SelfCollisions();
+		CollisionsWithSelf();
 	}
 
-	// FOR JC
-	//SelfCollisions();
-
-	//if (m_collide_Sphere)
-	//{
-	//	m_pObj_Sphere->Process(_dt);
-	//	m_pCloth->SphereCollision(m_pObj_Sphere->GetPosition(), 5.0f + 0.2f);
-	//}
-	//if (m_collide_Capsule)
-	//{
-	//	m_pObj_Capsule->Process(_dt);
-	//	m_pCloth->CapsuleCollision();
-	//}
-	//
-	//if (m_collide_Pyramid)
-	//{
-	//	m_pObj_Pyramid->Process(_dt);
-	//	m_pCloth->PyramidCollision();
-	//}
-	//
-	//m_pCloth->FloorCollision(m_pObj_Floor->GetPosition().y);
-
-
-
-	// FOR JC
+	// Cycle through all constraints and check their burning status
 	for (int j = 0; j < (int)m_contraints.size(); j++)
 	{
 		Physics_Particle* pIgnitedParticle = 0;
 		switch (m_contraints[j].BurnDown(m_timeStep, pIgnitedParticle))
 		{
-		case CB_IGNITEOTHERS:
+		case IA_IGNITEPARTICLE:
 		{
-			BurnConnectedConstraints(pIgnitedParticle);
+			// The constraint burnt long enough to ignite the particle on the other end
+			IgniteConnectedConstraints(pIgnitedParticle);
 		}
 		break;
-		case CB_DESTROYED:
+		case IA_DESTROYCONSTRAINT:
 		{
+			// The constraint burnt long enough to be destroyed
 			pIndices[(j * 2) + 1] = pIndices[j * 2] = 0;
 		}
 		break;
-		case CB_NOACTION: // Fall Through
+		case IA_NOACTION: // Fall Through
 		default: break;
 		}	// End Switch
 	}
 
-	//SelfCollisions();
-
-	// Process each Particle
+	// Update the vertex for each Particle
 	for (int i = 0; i < m_particleCount; i++)
 	{
-
-		//m_pParticles[i].Process();
-		
 		pVertexBuffer[i].pos.x = m_pParticles[i].GetPosition()->x;
 		pVertexBuffer[i].pos.y = m_pParticles[i].GetPosition()->y;
 		pVertexBuffer[i].pos.z = m_pParticles[i].GetPosition()->z;
 	}
-
-
-
-	//
 
 	// Update the Buffer
 	m_pMesh->UpdateBufferCloth();
@@ -185,10 +157,12 @@ void Physics_Cloth::Process(eCollisionType _collisionType)
 
 void Physics_Cloth::Render()
 {
+	// Create the struct to hold the cloth rendering variables
 	TCloth cloth;
 	cloth.pMatWorld = &m_matWorld;
 	cloth.pMesh = m_pMesh;
 
+	// Render the cloth
 	m_pShader->Render(cloth);
 }
 
@@ -196,7 +170,7 @@ void Physics_Cloth::AddForce(v3float _force, eForceType _forceType, bool _select
 {
 	switch (_forceType)
 	{
-	case FT_UNIVERSAL: // Adding a Universal Force - The force on each particle is universal (apply the same force to each particle)
+	case FT_GENERIC: // Adds the same generic force to each particle
 	{
 		for (int i = 0; i < m_particleCount; i++)
 		{
@@ -207,14 +181,17 @@ void Physics_Cloth::AddForce(v3float _force, eForceType _forceType, bool _select
 		}
 	}
 	break;
-	case FT_WIND: // Adding a Wind Force - The force on each particle is Dependant on in normal
+	case FT_WIND: // Add a wind force that bases the strength of the force on the normal of triangles
 	{
-		// Normalise and Multiply the wind force
+		// Multiply the force direction by the current wind speed
 		_force = _force.Normalise() * m_windSpeed;
+
+		// Cycle through the particles based on the rows and columns (Due to using a triangle strip topology)
 		for (int x = 0; x < m_particlesWidthCount - 1; x++)
 		{
 			for (int y = 0; y < m_particlesHeightCount - 1; y++)
 			{
+				// Add wind force to both triangles in the current grid selection
 				AddWindForceForTri(GetParticle(x + 1, y + 1), GetParticle(x, y + 1), GetParticle(x, y), _force);
 				AddWindForceForTri(GetParticle(x, y), GetParticle(x + 1, y), GetParticle(x + 1, y + 1), _force);
 			}
@@ -222,22 +199,6 @@ void Physics_Cloth::AddForce(v3float _force, eForceType _forceType, bool _select
 	}
 	break;
 	default:break;
-	}
-}
-
-void Physics_Cloth::AddWindForce(v3float _force)
-{
-	_force = _force.Normalise() * m_windSpeed;
-
-	// Cycle through the particles based on the rows and columns (Due to using a triangle strip topology)
-	for (int col = 0; col < m_particlesWidthCount - 1; col++)
-	{
-		for (int row = 0; row < m_particlesHeightCount- 1; row++)
-		{
-			// Add wind force to the triangles
-			AddWindForceForTri(GetParticle(col + 1, row + 1), GetParticle(col, row + 1), GetParticle(col, row), _force);
-			AddWindForceForTri(GetParticle(col, row), GetParticle(col + 1, row), GetParticle(col + 1, row + 1), _force);	
-		}
 	}
 }
 
@@ -312,9 +273,11 @@ bool Physics_Cloth::ResetCloth()
 		int secondaryConstraintCount = 0;
 		if (m_complexWeave == true)
 		{
+			// Calculate the secondary indices count only if the weave is set to complex
 			secondaryConstraintCount = (m_particlesWidthCount - 2) * (m_particlesHeightCount - 2) * 4 + ((m_particlesWidthCount - 2) * 2) + ((m_particlesHeightCount - 2) * 2);
 		}
 		
+		// Create the indices buffer with the amount of calculated constraints
 		m_indexCount = (immediateConstraintCount + secondaryConstraintCount) * 2;
 		m_pIndices = new DWORD[m_indexCount];
 	}
@@ -334,15 +297,15 @@ bool Physics_Cloth::ResetCloth()
 			if (m_initialisedParticles == false)
 			{
 				// First time. Initialise			
-				m_pVertices[index] = { { pos.x, pos.y, pos.z }, d3dxColors::Black };
-				(m_pParticles[index].Initialise(index, &m_pVertices[index], pos, m_timeStep, m_damping));
+				m_pVertices[index] = { { pos.x, pos.y, pos.z }, d3dxColors::White };
+				VALIDATE(m_pParticles[index].Initialise(index, &m_pVertices[index], pos, m_timeStep, m_damping));
 			}
 			else
 			{
 				// Particle has already been initialized so just reset the position
 				m_pParticles[index].Reset();
-				m_pParticles[index].SetPosition(pos);
-				m_pVertices[index] = { { pos.x, pos.y, pos.z }, d3dxColors::Black };
+				m_pParticles[index].SetPosition(pos, true);
+				m_pVertices[index].color = d3dxColors::White;
 			}
 		}
 	}
@@ -356,6 +319,8 @@ bool Physics_Cloth::ResetCloth()
 			if (col < m_particlesWidthCount - 1)
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 1, row), true));
+				
+				// Add the constraint index to each attached particle
 				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
 				GetParticle(col + 1, row)->AddContraintIndex(m_contraints.size() - 1);
 			}
@@ -364,6 +329,8 @@ bool Physics_Cloth::ResetCloth()
 			if (row < m_particlesHeightCount - 1)
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col, row + 1), true));
+
+				// Add the constraint index to each attached particle
 				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
 				GetParticle(col, row + 1)->AddContraintIndex(m_contraints.size() - 1);
 			}
@@ -372,9 +339,14 @@ bool Physics_Cloth::ResetCloth()
 			if ((col < m_particlesWidthCount - 1) && (row < m_particlesHeightCount - 1))
 			{
 				VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 1, row + 1), true));
+
+				// Add the constraint index to each attached particle
 				GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
 				GetParticle(col + 1, row + 1)->AddContraintIndex(m_contraints.size() - 1);
+
 				VALIDATE(MakeConstraint(GetParticleIndex(col + 1, row), GetParticleIndex(col, row + 1), true));
+
+				// Add the constraint index to each attached particle
 				GetParticle(col + 1, row)->AddContraintIndex(m_contraints.size() - 1);
 				GetParticle(col, row + 1)->AddContraintIndex(m_contraints.size() - 1);
 			}
@@ -392,6 +364,8 @@ bool Physics_Cloth::ResetCloth()
 				if (col < m_particlesWidthCount - 2)
 				{
 					VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row), false));
+
+					// Add the constraint index to each attached particle
 					GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
 					GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
 				}
@@ -400,6 +374,8 @@ bool Physics_Cloth::ResetCloth()
 				if (row < m_particlesHeightCount - 2)
 				{
 					VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col, row + 2), false));
+
+					// Add the constraint index to each attached particle
 					GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
 					GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
 				}
@@ -408,9 +384,14 @@ bool Physics_Cloth::ResetCloth()
 				if ((col < m_particlesWidthCount - 2) && (row < m_particlesHeightCount - 2))
 				{
 					VALIDATE(MakeConstraint(GetParticleIndex(col, row), GetParticleIndex(col + 2, row + 2), false));
+
+					// Add the constraint index to each attached particle
 					GetParticle(col, row)->AddContraintIndex(m_contraints.size() - 1);
 					GetParticle(col + 2, row + 2)->AddContraintIndex(m_contraints.size() - 1);
+
 					VALIDATE(MakeConstraint(GetParticleIndex(col + 2, row), GetParticleIndex(col, row + 2), false));
+
+					// Add the constraint index to each attached particle
 					GetParticle(col + 2, row)->AddContraintIndex(m_contraints.size() - 1);
 					GetParticle(col, row + 2)->AddContraintIndex(m_contraints.size() - 1);
 				}
@@ -428,8 +409,8 @@ bool Physics_Cloth::ResetCloth()
 	// Create the hooks and pin the cloth
 	CreateHooks();
 
-	// Add a little wind force to settle the cloth
-	AddWindForce({ 0.0f, 0.0f, 0.001f });
+	// Add a wind force of 1 down the Z axis to settle the cloth
+	AddForce({ 0.0f, 0.0f, 1.0f }, FT_WIND, false);
 	Process(CT_NONE);
 
 	m_initialisedParticles = true;
@@ -449,7 +430,7 @@ void Physics_Cloth::ResizeWidth(bool _smaller)
 
 			// Set the initialized to false to recreate the cloth again
 			m_initialisedParticles = false;
-			ResetCloth();
+			ResetCloth();	// reset the cloth to see changes
 		}
 	}
 	else	// Make the cloth bigger in width
@@ -463,7 +444,7 @@ void Physics_Cloth::ResizeWidth(bool _smaller)
 
 			// Set the initialized to false to recreate the cloth again
 			m_initialisedParticles = false;
-			ResetCloth();
+			ResetCloth();	// reset the cloth to see changes
 		}
 	}
 }
@@ -481,7 +462,7 @@ void Physics_Cloth::ResizeHeight(bool _smaller)
 
 			// Set the initialized to false to recreate the cloth again
 			m_initialisedParticles = false;
-			ResetCloth();
+			ResetCloth();	// reset the cloth to see changes
 		}
 	}
 	else	// Make the cloth bigger in height
@@ -495,7 +476,7 @@ void Physics_Cloth::ResizeHeight(bool _smaller)
 
 			// Set the initialized to false to recreate the cloth again
 			m_initialisedParticles = false;
-			ResetCloth();
+			ResetCloth();	// reset the cloth to see changes
 		}
 	}	
 }
@@ -504,205 +485,210 @@ void Physics_Cloth::ResizeHooks(bool _less)
 {
 	if (_less == true)
 	{
+		// Reduce the number of hooks provided that wouldn't reduce it past the minimum
 		if (m_hooks > m_minHooks)
 		{
 			m_hooks--;
-			ResetCloth();
+			ResetCloth();	// reset the cloth to see changes
 		}
 	}
 	else
 	{
+		// Increase the number of hooks provided that wouldn't increase it past the maximum
 		if (m_hooks < m_maxHooks && m_hooks < m_particlesWidthCount)
 		{
 			m_hooks++;
-			ResetCloth();
+			ResetCloth();	// reset the cloth to see changes
 		}
 	}
 }
 
 void Physics_Cloth::CreateHooks()
 {
-	// Position the particles Closer Together, to create the Curtain effect
+	// Move the particles closer together make it look more like a curtain
 	for (int i = 0; i < (m_particlesWidthCount - 1) / 2; i++)
 	{
-		float movement = 1.0f - ((float)i / ((float)(m_particlesWidthCount - 1) / 2.0f));
-		GetParticle(i, 0)->Move({ movement, 0.0f, 0.0f });
-		GetParticle((m_particlesWidthCount - i - 1), 0)->Move({ -movement, 0.0f, 0.0f });
+		// Determine the ratio of movement
+		float ratio = 1.0f - ((float)i / ((float)(m_particlesWidthCount - 1) / 2.0f));
+		GetParticle(i, 0)->Move({ ratio, 0.0f, 0.0f });
+		GetParticle((m_particlesWidthCount - i - 1), 0)->Move({ -ratio, 0.0f, 0.0f });
 	}
 
-	// Select the Particles and Pin them
-	float pinDist = (float)m_width / (float)(m_hooks - 1);
-	int roundedDist = (int)round(pinDist);
+	// Calculate the exact distance apart the hooks should be
+	float hookDist = (float)m_width / (float)(m_hooks - 1);
 
 	int increment = 0;
 	for (int i = 0; i < m_hooks; i++)
 	{
-		if (i % 2 == 0) // Even i - Go Right from Left
+		// Calculate a rounded distance so the hook points line up with particle points
+		int roundedDist = (int)round(increment * hookDist);
+
+		if (i % 2 == 0) // Hook particle on the left
 		{
-			HookParticle(GetParticle((int)(increment * roundedDist), 0));
+			HookParticle(GetParticle(roundedDist, 0));
 		}
-		else // Odd i - Go Left from Right
+		else // Hook particle on the right
 		{
-			HookParticle(GetParticle((m_width - (int)(increment * roundedDist)), 0));
+			HookParticle(GetParticle((m_width - roundedDist), 0));
+
+			// Increment the distance every odd/second hook
 			increment++;
 		}
-	 }
-
-
-	//for (int i = 0; i < (m_particlesWidthCount - 1) / 2; i++)
-	//{
-	//	float movement = 1.0f - ((float)i / ((float)(m_particlesWidthCount - 1) / 2.0f));
-	//
-	//	GetParticle(i, 0)->Move({ movement, 0.0f, 0.0f });
-	//	GetParticle((m_particlesWidthCount - i - 1), 0)->Move({ -movement, 0.0f, 0.0f });
-	//}
-	//
-	//// Determine the number of hooks to place limited by the width of the current cloth
-	//int hooks = m_hooks;
-	//if (m_width < m_hooks)
-	//{
-	//	hooks = m_width;
-	//}
-	//
-	//float increment = (float)m_width / ((float)hooks - 1.0f);
-	//
-	//for (int i = 0; i < hooks; i++)
-	//{
-	//	HookParticle(GetParticle((int)(i * increment), 0));
-	//	HookParticle(GetParticle((m_particlesWidthCount - (int)(i * increment) - 1), 0));
-	//}	
+	}
 }
 
 void Physics_Cloth::FloorCollision(float _floorPos)
 {
 	v3float up = { 0.0f, 1.0f, 0.0f };
 
+	// Cycle through all particles
 	for (int i = 0; i < m_particleCount; i++)
 	{
+		// Check if the particles position is less than the floors position
 		if (m_pParticles[i].GetPosition()->y <= _floorPos + 0.1f)
 		{
 			// Push the particles up if they are under the floor
 			float pierce = abs(m_pParticles[i].GetPosition()->y - (_floorPos));
 			//m_pParticles[i].Move(up*pierce);
-			m_pParticles[i].SetPosition(*m_pParticles[i].GetPosition() + (up*pierce));
-
+			// TO DO CAL - Get Jc to update me on this
+			m_pParticles[i].SetPosition(*m_pParticles[i].GetPosition() + (up*pierce), true);
 		}
 	}
 }
 
-void Physics_Cloth::SphereCollision(v3float _center, float _radius)
+void Physics_Cloth::SphereCollision(v3float _center, float _sphereRadius)
 {
-	// TO DO CAL - re comment
+	// Cycle through all the particles
 	for (int i = 0; i < m_particleCount; i++)
 	{
-		// Calculate the Direction of and length of a potential Pierce
-		v3float pierce = *m_pParticles[i].GetPosition() - _center;
-		float pierceLength = pierce.Magnitude();
+		// Calculate the line between the particle and the sphere
+		v3float line = *m_pParticles[i].GetPosition() - _center;
+		float distanceApart = line.Magnitude();
 
-		// Check if the Particle is Inside the Sphere
-		if (pierceLength < _radius)
+		// Check if the distance apart is less than the spheres radius
+		if (distanceApart < _sphereRadius)
 		{
-			// Push the Particle out of the Sphere
-			m_pParticles[i].Move(pierce.Normalise() * (_radius - pierceLength));
+			// The particle is in the sphere. Push it out using the shortest path possible
+			m_pParticles[i].Move(line.Normalise() * (_sphereRadius - distanceApart));
 		}
 	}
 }
 
-void  Physics_Cloth::CapsuleCollision(v3float _endPoint1, v3float _endPoint2, float _capsuleRadius)
+void  Physics_Cloth::CapsuleCollision(v3float _sphereCentre1, v3float _sphereCentre2, float _capsuleRadius)
 {
+	// Cycle through all particles
 	for (int i = 0; i < m_particleCount; i++)
 	{
-		
-		v3float particlePos =(*m_pParticles[i].GetPosition()) ;// v3float(0.0f, 0.0f, 0.0f);
+		v3float particlePos = (*m_pParticles[i].GetPosition());
 
-		v3float LineDiffVect = _endPoint2 - _endPoint1;
-		float lineSegSqrLength = LineDiffVect.Magnitude();
-		lineSegSqrLength *= lineSegSqrLength;
+		// Calculate the line within the capsule (sphere centre to sphere centre)
+		v3float capsuleLine = _sphereCentre2 - _sphereCentre1;
+		float capsuleLineLengthSq = pow(capsuleLine.Magnitude(), 2.0f);
 
-		v3float LineToPointVect = particlePos - _endPoint1;
-		float dotProduct = LineToPointVect.Dot(LineDiffVect);
+		// Calculate the line between the capsule and particle and project that onto the capsule line
+		v3float capsuleToParticle = particlePos - _sphereCentre1;
+		float dot = capsuleToParticle.Dot(capsuleLine);
 
-		float percAlongLine = dotProduct / lineSegSqrLength ;
+		// Calculate the ratio down the length of the capsule line
+		float ratioOnCapuleLine = dot / capsuleLineLengthSq;
 
-		if (percAlongLine  < 0.0f)
+		// Clamp the ratio to 0-1 range
+		if (ratioOnCapuleLine < 0.0f)
 		{
-			percAlongLine = 0.0f;
+			ratioOnCapuleLine = 0.0f;
 		}
-		else if(percAlongLine  > 1.0f)
+		else if (ratioOnCapuleLine > 1.0f)
 		{
-			percAlongLine = 1.0f;
-		}
-		else
-		{
-			int c = 9;
+			ratioOnCapuleLine = 1.0f;
 		}
 
-		v3float pointOnLine = (_endPoint1 + (LineDiffVect *percAlongLine));
+		// Calculate the closest point on the capsule line to the particle
+		v3float closestCapsulePoint = (_sphereCentre1 + (capsuleLine *ratioOnCapuleLine));
 
-		if ((!(pointOnLine == _endPoint2)) || (!(pointOnLine == _endPoint2)))
-		{
-		
-			int c = 0;
-
-		}
-		// Calculate the Direction of and length of a potential Pierce
-		v3float pierce = particlePos - pointOnLine;
-		float pierceLength = pierce.Magnitude();
-
-		// Check if the Particle is Inside the Sphere
-		if (pierceLength < _capsuleRadius)
-		{
-			// Push the Particle out of the Sphere
-			m_pParticles[i].Move(pierce.Normalise() * (_capsuleRadius - pierceLength));
-		}
-
-
-
-		//v3float capsuleCentreVector = _endPoint2 - _endPoint1;
-		//float distanceFactorFromEP1 = (*m_pParticles[i].GetPosition()).Dot(_endPoint1) / capsuleCentreVector.Dot(capsuleCentreVector);
-		//if (distanceFactorFromEP1 < 0){ distanceFactorFromEP1 = 0; }
-		//if (distanceFactorFromEP1 > 1){ distanceFactorFromEP1 = 1; }
-		//v3float closetPoint = _endPoint1 + (capsuleCentreVector * distanceFactorFromEP1);
-		//v3float collisionVector = (*m_pParticles[i].GetPosition()) - closetPoint;
-		//float distance = collisionVector.Magnitude();
-		//v3float collisionNormal = collisionVector.Normalise();
-		//if (distance < _capsuleRadius)
-		//{
-		//	m_pParticles[i].Move(collisionVector.Normalise() * (_capsuleRadius - distance));
-		//}
-
-
-
+		// Calculate a sphere collision to determine if the point is inside the capsule
+		SphereCollision(closestCapsulePoint, _capsuleRadius);
 	}
-	//vector cylCenterVector = endPoint2 - endpoint1;
-	//float distanceFactorFromEP1 = Dot(sphereCenter - endPoint1) / Dot(cylCenterVector, cylCenterVector);
-	//if (distanceFactorFromEP1 < 0) distanceFactorFromEP1 = 0;// clamp to endpoints if neccesary
-	//if (distanceFactorFromEP1 > 1) distanceFactorFromEP1 = 1;
-	//vector closestPoint = endPoint1 + (cylCenterVector * distanceFactorFromEP1);
-	//vector collisionVector = sphereCenter - closestPoint;
-	//float distance = collisionVector.Length();
-	//vector collisionNormal = collisionVector / distance;
-	//if (distance < sphereRadius + cylRadius)
-	//{
-	//	//collision occurred. use collisionNormal to reflect sphere off cyl
-	//	float factor = Dot(velocity, collisionNormal);
-	//	velocity = velocity - (2 * factor * collisionNormal);
-	//}
-
-
 }
 
 void  Physics_Cloth::PyramidCollision()
 {
+	// TO DO CAL - Comment
 
+	v3float tetraPointA = { 0.0f, 0.408248f * 10.0f, 0.0f + 7.0f };
+	v3float tetraPointD = { -0.5f * 10.0f, -0.408248f * 10.0f, -0.288675f * 10.0f + 7.0f };
+	v3float tetraPointC = { 0.0f, -0.408248f * 10.0f, 0.577350f * 10.0f + 7.0f };
+	v3float tetraPointB = { 0.5f * 10.0f, -0.408248f * 10.0f, -0.288675f * 10.0f + 7.0f };
+
+	// Cycle through all particles
+	for (int i = 0; i < m_particleCount; i++)
+	{
+		v3float particlePos = *m_pParticles[i].GetPosition();
+		v3float closestPt = particlePos;
+		float closestDist = FLT_MAX;
+
+		v3float q;
+		float dist;
+
+		q = ClosestPointOnTriangle(particlePos, tetraPointA, tetraPointB, tetraPointC);
+		dist = pow((particlePos - q).Magnitude(), 2);
+		if (dist < closestDist)
+		{
+			closestDist = dist;
+			closestPt = q;
+		}
+
+		q = ClosestPointOnTriangle(particlePos, tetraPointA, tetraPointC, tetraPointD);
+		dist = pow((particlePos - q).Magnitude(), 2);
+		if (dist < closestDist)
+		{
+			closestDist = dist;
+			closestPt = q;
+		}
+
+		q = ClosestPointOnTriangle(particlePos, tetraPointA, tetraPointD, tetraPointB);
+		dist = pow((particlePos - q).Magnitude(), 2);
+		if (dist < closestDist)
+		{
+			closestDist = dist;
+			closestPt = q;
+		}
+
+		q = ClosestPointOnTriangle(particlePos, tetraPointB, tetraPointD, tetraPointC);
+		dist = pow((particlePos - q).Magnitude(), 2);
+		if (dist < closestDist)
+		{
+			closestDist = dist;
+			closestPt = q;
+		}
+
+		if (	(PointOutsideOfPlane(particlePos, tetraPointA, tetraPointB, tetraPointC) == true)
+			&&	(PointOutsideOfPlane(particlePos, tetraPointA, tetraPointC, tetraPointD) == true)
+			&&	(PointOutsideOfPlane(particlePos, tetraPointA, tetraPointD, tetraPointB) == true)
+			&&	(PointOutsideOfPlane(particlePos, tetraPointB, tetraPointD, tetraPointC) == true))
+		{
+			closestPt = closestPt + ((closestPt - particlePos).Normalise() * 0.5f);
+			m_pParticles[i].SetPosition(closestPt, true);
+		}
+		else
+		{
+			v3float diff = particlePos - closestPt;
+			dist = diff.Magnitude();
+			
+			if (dist < 0.5f)
+			{
+				closestPt = closestPt + ((particlePos - closestPt).Normalise() * 0.5f);
+				m_pParticles[i].SetPosition(closestPt, true);
+			}
+		}
+	}
 }
 
-void Physics_Cloth::UpdateWindSpeed(float _speed)
+void Physics_Cloth::UpdateWindSpeed(float _speedChange)
 {
 	// Update the Wind Speed
-	m_windSpeed += _speed;
+	m_windSpeed += _speedChange;
 
-	// Ensure the Windspeed exists
+	// Ensure the Wind speed exists
 	if (m_windSpeed < 1.0f)
 	{
 		m_windSpeed = 1.0f;
@@ -711,142 +697,158 @@ void Physics_Cloth::UpdateWindSpeed(float _speed)
 
 void Physics_Cloth::Ignite(TCameraRay _camRay, float _selectRadius)
 {
+	// Select the particles that intersect with the ray
 	SelectParticles(_camRay, _selectRadius);
-	// FOR JC
+
 	// Cycle through all the currently selected particles
 	for (UINT i = 0; i < m_selectedParticles.size(); i++)
 	{
-		BurnConnectedConstraints(m_selectedParticles[i]);
+		// Ignite all the connected constraints each selected particle
+		IgniteConnectedConstraints(m_selectedParticles[i]);
 	}
 }
 
 void Physics_Cloth::Cut(TCameraRay _camRay, float _selectRadius)
 {
+	// Select the particles that intersect with the ray
 	SelectParticles(_camRay, _selectRadius);
-	// FOR JC
+
 	// Cycle through all the currently selected particles
 	for (UINT i = 0; i < m_selectedParticles.size(); i++)
 	{
-		m_selectedParticles[i]->SetPositionIfSelected({ 1000000.0f, 1000000.0f, 10000000.0f });
+		// Set the position extremely far away to simulate the cutting of the cloth (The particle breaks all constraints)
+		m_selectedParticles[i]->SetPosition({ 1000000.0f, 1000000.0f, 10000000.0f }, true);
 	}
 }
 
 void Physics_Cloth::Manipulate(TCameraRay _camRay, float _selectRadius, bool _firstCast)
 {
+	// Check if this is the first cast
 	if (_firstCast == true)
 	{
+		// Select the particles that intersect with the ray
 		SelectParticles(_camRay, _selectRadius);
 	}
 
 	// Cycle through all the currently selected particles
 	for (UINT i = 0; i < m_selectedParticles.size(); i++)
 	{
-		// TO DO CAL - re comment
-		v3float tmpA = (*(m_selectedParticles[i]->GetPosition()) - _camRay.Origin);
+		// Calculate the direction and distance of the ray origin to the particle
+		v3float rayOriginToParticle = (*(m_selectedParticles[i]->GetPosition()) - _camRay.Origin);
+		
+		// ensure the direction of the camRay is normalised
 		_camRay.Direction.Normalise();
-		float tmpC = (_camRay.Direction.Dot(tmpA));
-		v3float Result = _camRay.Origin + _camRay.Direction * tmpC;
-		Result.z = m_selectedParticles[i]->GetPosition()->z;
-		m_selectedParticles[i]->SetPositionIfSelected(Result);
+
+		// Project the particle onto the rays direction
+		float distanceDownRay = _camRay.Direction.Dot(rayOriginToParticle);
+
+		v3float newPos = _camRay.Origin + (_camRay.Direction * distanceDownRay);
+		m_selectedParticles[i]->SetPosition(newPos, false);
 	}
 }
 
 void Physics_Cloth::SelectParticles(TCameraRay _camRay, float _selectRadius)
 {
-	// TO DO CAL
-
+	// Release all selected particles before selecting new ones
 	ReleaseSelected();
-	// Check The Ray with each particle
+
+	// Cycle through all particles
 	for (int i = 0; i < m_particleCount; i++)
 	{
-		// Calculate the Individual World matrix of each particle
-		D3DXMATRIX translationMatrix;
-		D3DXMATRIX transWorldMatrix;
-		D3DXMatrixTranslation(&translationMatrix, m_pParticles[i].GetPosition()->x, m_pParticles[i].GetPosition()->y, m_pParticles[i].GetPosition()->z);
-		D3DXMatrixMultiply(&transWorldMatrix, &m_matWorld, &translationMatrix);
+		 // Calculate the world matrix for the current particle
+		D3DXMATRIX particleWorldMatrix;
+		D3DXMatrixTranslation(&particleWorldMatrix, m_pParticles[i].GetPosition()->x, m_pParticles[i].GetPosition()->y, m_pParticles[i].GetPosition()->z);
+		D3DXMatrixMultiply(&particleWorldMatrix, &m_matWorld, &particleWorldMatrix);
 
-		// Get the Inverse of the Translated World Matrix
+		// Calculate the inverse of the particles world matrix
 		D3DXMATRIX invWorldMatrix;
-		D3DXMatrixInverse(&invWorldMatrix, NULL, &transWorldMatrix);
+		D3DXMatrixInverse(&invWorldMatrix, NULL, &particleWorldMatrix);
 
-		// Transform the Ray Origin and the Ray Direction from View Space to World Space
-		D3DXVECTOR3 Origin = { _camRay.Origin.x, _camRay.Origin.y, _camRay.Origin.z };
-		D3DXVECTOR3 Direction = { _camRay.Direction.x, _camRay.Direction.y, _camRay.Direction.z };
-		D3DXVECTOR3  tmpRayDirection, tmpRayOrigin;
-		D3DXVec3TransformCoord(&tmpRayOrigin, &Origin, &invWorldMatrix);
-		D3DXVec3TransformNormal(&tmpRayDirection, &Direction, &invWorldMatrix);
-		TCameraRay TransformedRay({ tmpRayOrigin.x, tmpRayOrigin.y, tmpRayOrigin.z }, { tmpRayDirection.x, tmpRayDirection.y, tmpRayDirection.z });
+		// Convert the camRay variables into D3DXVECTOR3
+		D3DXVECTOR3 rayOrigin = { _camRay.Origin.x, _camRay.Origin.y, _camRay.Origin.z };
+		D3DXVECTOR3 rayDirection = { _camRay.Direction.x, _camRay.Direction.y, _camRay.Direction.z };
+
+		// Transform the ray by the inverse world matrix
+		D3DXVec3TransformCoord(&rayOrigin, &rayOrigin, &invWorldMatrix);
+		D3DXVec3TransformNormal(&rayDirection, &rayDirection, &invWorldMatrix);
+
+		// Convert the D3DXVECTOR3 back into a camera ray struct
+		TCameraRay TransformedRay({ rayOrigin.x, rayOrigin.y, rayOrigin.z }, { rayDirection.x, rayDirection.y, rayDirection.z });
 		TransformedRay.Direction.Normalise();
 
-		// Perform the Ray-Sphere Intersection Test
-		// Where the Sphere is Around each individual Cloth Particle
+		// Test particle with the transformed ray
 		bool intersect = TransformedRay.RaySphereIntersect(_selectRadius);
-		// Handle the Intersection
+
+		// Check if the particle intersected
 		if (intersect == true)
 		{
+			// Set the select state for the particle to true and push it onto the vector
 			m_pParticles[i].SetSelectedState(true);
-			// Color Selected Particles Red
-			//m_pVertices[i].color = d3dxColors::Red;
-
 			m_selectedParticles.push_back(&m_pParticles[i]);
-			//pSelectedParticle = &m_pParticleArray[i];
 		}
-		else
-		{
-			m_pParticles[i].SetSelectedState(false);
-		}
+
+		//// Calculate the world matrix for the current particle
+		//D3DXMATRIX translationMatrix;
+		//D3DXMATRIX transWorldMatrix;
+		//D3DXMatrixTranslation(&translationMatrix, m_pParticles[i].GetPosition()->x, m_pParticles[i].GetPosition()->y, m_pParticles[i].GetPosition()->z);
+		//D3DXMatrixMultiply(&transWorldMatrix, &m_matWorld, &translationMatrix);
+		//
+		//// Get the Inverse of the Translated World Matrix
+		//D3DXMATRIX invWorldMatrix;
+		//D3DXMatrixInverse(&invWorldMatrix, NULL, &transWorldMatrix);
+		//
+		//// Transform the Ray Origin and the Ray Direction from View Space to World Space
+		//D3DXVECTOR3 Origin = { _camRay.Origin.x, _camRay.Origin.y, _camRay.Origin.z };
+		//D3DXVECTOR3 Direction = { _camRay.Direction.x, _camRay.Direction.y, _camRay.Direction.z };
+		//D3DXVECTOR3  tmpRayDirection, tmpRayOrigin;
+		//D3DXVec3TransformCoord(&tmpRayOrigin, &Origin, &invWorldMatrix);
+		//D3DXVec3TransformNormal(&tmpRayDirection, &Direction, &invWorldMatrix);
+		//TCameraRay TransformedRay({ tmpRayOrigin.x, tmpRayOrigin.y, tmpRayOrigin.z }, { tmpRayDirection.x, tmpRayDirection.y, tmpRayDirection.z });
+		//TransformedRay.Direction.Normalise();
+		//
+		//// Test each 
+		//bool intersect = TransformedRay.RaySphereIntersect(_selectRadius);
+		//
+		//// Check if the particle intersected
+		//if (intersect == true)
+		//{
+		//	// Set the select state for the particle to true and push it onto the vector
+		//	m_pParticles[i].SetSelectedState(true);
+		//	m_selectedParticles.push_back(&m_pParticles[i]);
+		//}
 	}
 }
 
 void Physics_Cloth::ReleaseSelected()
 {
-	// TO DO CAL - re comment
-
+	// Cycle through all currently selected particles
 	for (UINT i = 0; i < m_selectedParticles.size(); i++)
 	{
-		int ID = m_selectedParticles[i]->GetParticleID();
-		if (m_selectedParticles[i]->GetStaticState())
-		{
-			m_pVertices[ID].color = d3dxColors::Blue;
-		}
-		else if (m_selectedParticles[i]->GetIgnitedState())
-		{
-			m_pVertices[ID].color = d3dxColors::Red;
-		}
-		else
-		{
-			m_pVertices[ID].color = d3dxColors::Black;
-		}
+		// Set particle select state to false
 		m_selectedParticles[i]->SetSelectedState(false);
 	}
+
+	// Clear all members out of the vector
 	m_selectedParticles.clear();
 }
 
-
-
-
-
 // Private Functions
 
-bool Physics_Cloth::MakeConstraint(int _particleIndexA, int _particleIndexB, bool _immediate, bool _draw)
+bool Physics_Cloth::MakeConstraint(int _particleIndexA, int _particleIndexB, bool _immediate)
 {
 	// Create and initialize a new constraint
 	m_contraints.push_back(Physics_Constraint());
 	VALIDATE(m_contraints.back().Initialise(&m_pParticles[_particleIndexA], &m_pParticles[_particleIndexB], _immediate, m_breakModifier));
 
-	if (_draw == true)
-	{
-		// Add indices to the index array to draw them
-		m_pIndices[m_nextIndex++] = _particleIndexA;
-		m_pIndices[m_nextIndex++] = _particleIndexB;
-	}
-
+	// Add indices to the index array to draw them
+	m_pIndices[m_nextIndex++] = _particleIndexA;
+	m_pIndices[m_nextIndex++] = _particleIndexB;
 	return true;
 }
 
 v3float Physics_Cloth::CalcTriangleNormal(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC)
 {
-	// retrieve the positions of the 3 particles
+	// Retrieve the positions of the 3 particles
 	v3float posA = *_pParticleA->GetPosition();
 	v3float posB = *_pParticleB->GetPosition();
 	v3float posC = *_pParticleC->GetPosition();
@@ -861,6 +863,7 @@ v3float Physics_Cloth::CalcTriangleNormal(Physics_Particle* _pParticleA, Physics
 
 void Physics_Cloth::AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Particle* _pParticleB, Physics_Particle* _pParticleC, v3float _force)
 {
+	// Calculate the 3 lines and lengths of the triangle
 	v3float vecA = (*_pParticleB->GetPosition() - *_pParticleA->GetPosition());
 	v3float vecB = (*_pParticleC->GetPosition() - *_pParticleA->GetPosition());
 	v3float vecC = (*_pParticleB->GetPosition() - *_pParticleC->GetPosition());
@@ -888,24 +891,29 @@ void Physics_Cloth::AddWindForceForTri(Physics_Particle* _pParticleA, Physics_Pa
 	_pParticleC->AddForce(force);
 }
 
-void Physics_Cloth::BurnConnectedConstraints(Physics_Particle* _pParticle)
+void Physics_Cloth::IgniteConnectedConstraints(Physics_Particle* _pParticle)
 {
+	// Ensure the particle pointer is not NULL
 	if (_pParticle != 0)
 	{
+		// Ensure the particle has not already been ignited
 		if (_pParticle->GetIgnitedState() == false)
 		{
-			float modifier = 1 + (float)((rand() % 60) - 30) / 100.0f;
+			// Calculate a variable burn time for each particle individually
+			float modifier = 1 + (float)((rand() % 80) - 40) / 100.0f;
 			float modifiedBurnTime = m_burnTime * modifier;
 
-			// Ignite the Particles
+			// Ignite the Particle
 			_pParticle->Ignite(modifiedBurnTime);
 
+			// Cycle through all connected constraints
 			std::vector<UINT> connectedConstraints = _pParticle->GetContraintIndices();
 			for (UINT i = 0; i < connectedConstraints.size(); i++)
 			{
+				// Ensure the constraint can be ignited
 				if (m_contraints[connectedConstraints[i]].CanBeIgnited() == true)
 				{
-					// TO DO CAL - create variable for burn time and random function to 
+					// Ignite the constraint with the the burn time of the particle
 					m_contraints[connectedConstraints[i]].Ignite(modifiedBurnTime);
 				}
 			}
@@ -913,32 +921,27 @@ void Physics_Cloth::BurnConnectedConstraints(Physics_Particle* _pParticle)
 	}
 }
 
-void Physics_Cloth::SelfCollisions()
+void Physics_Cloth::CollisionsWithSelf()
 {
+	// Cycle through all particles
 	for (int i = 0; i < m_particleCount; i++)
 	{
-		v3float particlePos = *m_pParticles[i].GetPosition();
-
-		// TO DO CAL - re comment
+		// Cycle through all particles that are after the i'th particle
 		for (int j = i + 1; j < m_particleCount; j++)
 		{
-			// Calculate the Direction of and length of a potential Pierce
-			v3float pierce = *m_pParticles[j].GetPosition() - particlePos;
-			float pierceLength = pierce.Magnitude();
+			// Calculate the line between the particles
+			v3float line = *m_pParticles[j].GetPosition() - *m_pParticles[i].GetPosition();
+			float distanceApart = line.Magnitude();
 
-			// Check if the Particle is Inside the Sphere
-			if (pierceLength < 0.9f)
+			// Check if the distance apart is less than the self collision radius
+			if (distanceApart < m_selfCollisionRad)
 			{
-				// Push the Particle out of the Sphere
-				//m_pParticles[j].SetPosition(*m_pParticles[j].GetPosition() + ((pierce.Normalise() * (0.5f - pierceLength))/2.0f));
-				//m_pParticles[i].SetPosition(*m_pParticles[i].GetPosition() + ((pierce.Normalise() * (0.5f - pierceLength))/-2.0f));
-				m_pParticles[j].Move((pierce.Normalise() * (0.9f - pierceLength))/2.0f);
-				m_pParticles[i].Move((pierce.Normalise() * (0.9f - pierceLength)) / -2.0f);
+				// Push the Particles apart with equal force in opposite directions
+				m_pParticles[j].Move((line.Normalise() * (m_selfCollisionRad - distanceApart)) / 2.0f);
+				m_pParticles[i].Move((line.Normalise() * (m_selfCollisionRad - distanceApart)) / -2.0f);
 			}
 		}
 	}
-
-	
 }
 
 

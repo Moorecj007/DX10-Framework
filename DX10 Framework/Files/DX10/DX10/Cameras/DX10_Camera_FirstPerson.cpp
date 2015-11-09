@@ -182,25 +182,25 @@ void DX10_Camera_FirstPerson::RotatePitch(float _dir)
 
 TCameraRay DX10_Camera_FirstPerson::GetRay(v2float _mousePos)
 {
-	// TO DO CAL - Comment
-	TCameraRay Ray;
+	TCameraRay camRay;
 
-	// Adjust the points using the Projection Matrix to Account for the Aspect Ratio of the Viewport
+	// Alter the mouse position using the projection matrix to maintain the aspect ratio of the client window
 	D3DXMATRIX projectionMatrix;
 	projectionMatrix = *(m_pRenderer->GetProjMatrix());
 	float pointX = _mousePos.x / projectionMatrix._11;
 	float pointY = _mousePos.y / projectionMatrix._22;
 
-	// Get the inverse of the view matrix.
+	// Calculate the inverse of the view matrix
 	D3DXMATRIX invViewMatrix;
 	D3DXMatrixInverse(&invViewMatrix, NULL, &m_matView);
 
-	// Calculate the Direction of the Ray in View Space.
-	Ray.Direction.x = (pointX * invViewMatrix._11) + (pointY * invViewMatrix._21) + invViewMatrix._31;
-	Ray.Direction.y = (pointX * invViewMatrix._12) + (pointY * invViewMatrix._22) + invViewMatrix._32;
-	Ray.Direction.z = (pointX * invViewMatrix._13) + (pointY * invViewMatrix._23) + invViewMatrix._33;
+	// Calculate the direction of the ray using the inverse view matrix
+	camRay.Direction.x = (pointX * invViewMatrix._11) + (pointY * invViewMatrix._21) + invViewMatrix._31;
+	camRay.Direction.y = (pointX * invViewMatrix._12) + (pointY * invViewMatrix._22) + invViewMatrix._32;
+	camRay.Direction.z = (pointX * invViewMatrix._13) + (pointY * invViewMatrix._23) + invViewMatrix._33;
 
-	// Set the Origin Position of the Ray which is the Position of the Camera.
-	Ray.Origin = {m_position.x, m_position.y, m_position.z};
-	return Ray;
+	// Set the origin of the ray to the camera position
+	camRay.Origin = {m_position.x, m_position.y, m_position.z};
+
+	return camRay;
 }

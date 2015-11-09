@@ -47,7 +47,7 @@ public:
 	* Initialise: Initialise the Physics Particle for use
 	* @author: Callan Moore
 	* @parameter: _particleID: The index of the particle in the particle array in Cloth
-	* @parameter: _pVertex: Pointer to the Vertex that is used for drawing this particle // FOR JC
+	* @parameter: _pVertex: Pointer to the Vertex that is used for drawing this particle
 	* @parameter: _pos: The first position for the particle
 	* @parameter: _timeStep: The time step used for physics calculations
 	* @parameter: _damping: The damping of the particle
@@ -105,17 +105,10 @@ public:
 	* SetPosition: Set the position of the particle
 	* @author: Callan Moore
 	* @parameter: _pos: Particles new position
+	* @parameter: _stopMovement: Stops verlet integration using the old position for calculatin movement
 	* @return: void
 	********************/
-	void SetPosition(v3float _pos) { m_pos = m_prevPos = _pos; };
-	
-	/***********************
-	* SetPositionIfSelected: Sets the position of the particle if its currently selected
-	* @author: Callan Moore
-	* @parameter: _pos: The new position for the particle
-	* @return: void
-	********************/
-	void SetPositionIfSelected(v3float _pos);
+	void SetPosition(v3float _pos, bool _stopMovement);
 	
 	/***********************
 	* SetSelectedState: Set the selected state of the particle
@@ -145,8 +138,6 @@ public:
 	* @return: UINT: The ID of the particle
 	********************/
 	UINT GetParticleID() { return m_particleID; };
-
-	// FOR JC
 
 	/***********************
 	* GetContraintIndices: Retrieve the vector of constraints attached to this particle as indices
@@ -195,16 +186,14 @@ private:
 	v3float m_acceleration;
 
 	float m_mass;
-	float m_timeStep;	// FOR JC
+	float m_timeStep;
 	float m_timeStepSquared;
 	float m_damping;
 	float m_dampingInverse;
 
-	// FOR JC	
 	TVertexColor* m_pVertex;
 	std::vector<UINT> m_contraintIndices;
 
-	// FOR JC
 	// Ignition variables
 	bool m_ignited;
 	float m_lightTime;

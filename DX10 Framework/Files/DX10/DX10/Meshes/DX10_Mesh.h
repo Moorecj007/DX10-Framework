@@ -20,6 +20,8 @@
 // Local Includes
 #include "../DX10_Renderer.h"
 
+// Enumerators
+// TO DO CAL
 enum eMeshType
 {
 	MT_FINITEPLANE,

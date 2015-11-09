@@ -20,13 +20,16 @@
 // Local Includes
 #include "Physics_Particle.h"
 
-// FOR JC
 // Enumerators
-enum eConstraintBurning
+/***********************
+* eIgnitedAction: Enum for the different types of action that needs to happen after checking burning constraints
+* @author: Callan Moore
+********************/
+enum eIgnitedAction
 {
-	CB_NOACTION,
-	CB_IGNITEOTHERS,
-	CB_DESTROYED
+	IA_NOACTION,
+	IA_IGNITEPARTICLE,
+	IA_DESTROYCONSTRAINT
 };
 
 class Physics_Constraint
@@ -62,9 +65,6 @@ public:
 	********************/
 	bool SatisfyConstraint();
 
-	// FOR JC
-
-	
 	/***********************
 	* BurnDown: Process the burning of the constraint
 	* @author: Callan Moore
@@ -72,7 +72,7 @@ public:
 	* @parameter: _prParticleToIgnite: Storage variable for a particle if this constraint has fully lit
 	* @return: eConstraintBurning: The result of the burn down
 	********************/
-	eConstraintBurning BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite);
+	eIgnitedAction BurnDown(float _dt, Physics_Particle*& _prParticleToIgnite);
 	
 	/***********************
 	* Ignite: Ignite the constraint and set the burn timer
@@ -99,7 +99,6 @@ private:
 	bool m_active;
 	bool m_immediate;
 
-	// FOR JC
 	// Ignition Variables
 	bool m_ignited;
 	float m_burnTime;

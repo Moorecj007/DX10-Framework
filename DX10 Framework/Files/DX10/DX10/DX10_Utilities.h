@@ -217,8 +217,12 @@ namespace d3dxColors
 	const D3DXCOLOR YellowGreen = 0xFF9ACD32;
 }
 
-// Enums
-enum LightType
+// Enumerators
+/***********************
+* eLightType: Enum for the different types of Lights available
+* @author: Callan Moore
+********************/
+enum eLightType
 {
 	LT_DIRECTIONAL,
 	LT_POINT,
@@ -227,12 +231,20 @@ enum LightType
 };
 
 // Structs
-struct Light
+/***********************
+* TLight: Structure to hold details about a Light
+* @author: Callan Moore
+********************/
+struct TLight
 {
-	Light()
+	/***********************
+	* TLight: Default constructor for the TLight struct
+	* @author: Callan Moore
+	********************/
+	TLight()
 	{
 		// Ensure the Memory is zeroed on creation
-		ZeroMemory(this, sizeof(Light));
+		ZeroMemory(this, sizeof(TLight));
 		active = true;
 	}
 

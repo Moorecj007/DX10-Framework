@@ -197,7 +197,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	memset(m_pKeyDown, false, 255);
 
 	m_mouseDown = false;
-	m_initialRayCast = false; // FOR JC
+	m_initialRayCast = false;
 
 	VALIDATE(Initialise_DX10(_hInstance));
 
@@ -210,7 +210,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	m_deltaTick = 0;
 	m_fpsTimer = 0;
 
-	m_eCollisionType = CT_CAPSULE;
+	m_eCollisionType = CT_PYRAMID;
 	
 	return true;
 }
@@ -246,7 +246,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pMesh_Capsule->Initialise(m_pDX10_Renderer, MT_CAPSULE, { 2.0f, 2.0f, 2.0f }));
 
 	m_pMesh_Pyramid = new DX10_Mesh();
-	VALIDATE(m_pMesh_Pyramid->Initialise(m_pDX10_Renderer, MT_PYRAMID, { 5.0f, 5.0f, 5.0f }));
+	VALIDATE(m_pMesh_Pyramid->Initialise(m_pDX10_Renderer, MT_PYRAMID, { 10.0f, 10.0f, 10.0f }));
 
 	// Create the Objects
 	m_pSprite_InstructionsLeft = new DXSprite();
@@ -258,7 +258,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pSprite_InstructionsRight->SetPosition(600, 5);
 
 	m_pObj_Floor = new DX10_Obj_LitTex();
-	VALIDATE(m_pObj_Floor->Initialise(m_pDX10_Renderer, m_pMesh_Floor, m_pShader_LitTex, "WaterMap.png"));
+	VALIDATE(m_pObj_Floor->Initialise(m_pDX10_Renderer, m_pMesh_Floor, m_pShader_LitTex, "Dragon.png"));
 	m_pObj_Floor->SetPosition({ 0.0f, -15.0f, 0.0f });
 
 	m_pObj_Sphere = new DX10_Obj_LitTex();
@@ -275,7 +275,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 
 	// Create the Cloth
 	m_pCloth = new Physics_Cloth();
-	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_Cloth, 15, 15, 0.01f, 0.033f));
+	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_Cloth, 20, 20, 0.01f, 0.033f));
 
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
@@ -639,52 +639,52 @@ bool Application::HandleInput()
 
 	if (m_pKeyDown[VK_NUMPAD0])
 	{
-		m_pCloth->AddWindForce({ 0.0f, -1.0f, 0.0f });
+		m_pCloth->AddForce({ 0.0f, -1.0f, 0.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD1])
 	{
-		m_pCloth->AddWindForce({ -1.0f, 0.0f, -1.0f });
+		m_pCloth->AddForce({ -1.0f, 0.0f, -1.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD2])
 	{
-		m_pCloth->AddWindForce({ 0.0f, 0.0f, -1.0f });
+		m_pCloth->AddForce({ 0.0f, 0.0f, -1.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD3])
 	{
-		m_pCloth->AddWindForce({ 1.0f, 0.0f, -1.0f });
+		m_pCloth->AddForce({ 1.0f, 0.0f, -1.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD4])
 	{
-		m_pCloth->AddWindForce({ -1.0f, 0.0f, 0.0f });
+		m_pCloth->AddForce({ -1.0f, 0.0f, 0.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD5])
 	{
-		m_pCloth->AddWindForce({ 0.0f, 1.0f, 0.0f });
+		m_pCloth->AddForce({ 0.0f, 1.0f, 0.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD6])
 	{
-		m_pCloth->AddWindForce({ 1.0f, 0.0f, 0.0f });
+		m_pCloth->AddForce({ 1.0f, 0.0f, 0.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD7])
 	{
-		m_pCloth->AddWindForce({ -1.0f, 0.0f, 1.0f });
+		m_pCloth->AddForce({ -1.0f, 0.0f, 1.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD8])
 	{
-		m_pCloth->AddWindForce({ 0.0f, 0.0f, 1.0f });
+		m_pCloth->AddForce({ 0.0f, 0.0f, 1.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_NUMPAD9])
 	{
-		m_pCloth->AddWindForce({ 1.0f, 0.0f, 1.0f });
+		m_pCloth->AddForce({ 1.0f, 0.0f, 1.0f }, FT_WIND, false);
 	}
 
 	if (m_pKeyDown[VK_ADD])

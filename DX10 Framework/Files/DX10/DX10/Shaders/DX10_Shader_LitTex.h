@@ -136,7 +136,7 @@ public:
 				// Prepare the Input Variables to be sent to the GPU
 				int lightCount = m_pDX10_Renderer->GetLightCount();
 
-				m_pLight->SetRawValue(m_pDX10_Renderer->GetActiveLights(), 0, lightCount * sizeof(Light));
+				m_pLight->SetRawValue(m_pDX10_Renderer->GetActiveLights(), 0, lightCount * sizeof(TLight));
 				m_pLightCount->SetInt(lightCount);
 				m_pMatView->SetMatrix((float*)m_pDX10_Renderer->GetViewMatrix());
 				m_pMatWorld->SetMatrix((float*)&matWorld);
