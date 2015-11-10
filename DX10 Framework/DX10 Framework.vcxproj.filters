@@ -180,6 +180,9 @@
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Cloth.h">
       <Filter>Header Files\DX10\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\2D Objects\DX10_UI_Elements.h">
+      <Filter>Header Files\DX10\2D Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">

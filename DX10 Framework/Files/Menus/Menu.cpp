@@ -169,18 +169,18 @@ void Menu::Draw()
 		// Draw Title
 		if (m_title)
 		{
-			m_title->Draw();
+			m_title->Render();
 		}
 
 		// Draw all the buttons
 		for (auto button = m_buttons.begin(); button != m_buttons.end(); button++)
 		{
-			(*button)->m_pButton->Draw();
+			(*button)->m_pButton->Render();
 		}
 
 		for (auto button = m_toggleButtons.begin(); button != m_toggleButtons.end(); button++)
 		{
-			(*button)->Draw();
+			(*button)->Render();
 		}
 
 		// Turn the z buffer on

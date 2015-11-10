@@ -7,7 +7,7 @@
 * (c) 2005 - 2015 Media Design School
 *
 * File Name : Physics_Particle.cpp
-* Description : TO DO CAL
+* Description : Physics particle that is part of a cloth weave
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */
@@ -143,4 +143,5 @@ void Physics_Particle::Reset()
 	m_static = false;
 	m_selected = false;
 	m_ignited = false;
+	m_acceleration *= 0;
 }

@@ -7,7 +7,7 @@
 * (c) 2005 - 2015 Media Design School
 *
 * File Name : Physics_Cloth.cpp
-* Description : TO DO CAL
+* Description : Simulates a cloth using Physics
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */
@@ -110,13 +110,19 @@ void Physics_Cloth::Process(eCollisionType _collisionType)
 			break;
 			case CT_PYRAMID:
 			{
-				PyramidCollision();
+				// Hard coded points for the pyramid to use
+				v3float _pyraPointA = { 0.0f, 0.408248f * 10.0f, 0.0f + 7.0f };
+				v3float _pyraPointB = { 0.5f * 10.0f, -0.408248f * 10.0f, -0.288675f * 10.0f + 7.0f };
+				v3float _pyraPointC = { 0.0f, -0.408248f * 10.0f, 0.577350f * 10.0f + 7.0f };
+				v3float _pyraPointD = { -0.5f * 10.0f, -0.408248f * 10.0f, -0.288675f * 10.0f + 7.0f };
+
+				PyramidCollision(_pyraPointA, _pyraPointB, _pyraPointC, _pyraPointD);
 			}
 			default: break;
 		}
 
 		// Calculate the permanent collisions
-		FloorCollision(-15.0f);
+		FloorCollision(-20.0f);
 		CollisionsWithSelf();
 	}
 
@@ -410,97 +416,56 @@ bool Physics_Cloth::ResetCloth()
 	CreateHooks();
 
 	// Add a wind force of 1 down the Z axis to settle the cloth
-	AddForce({ 0.0f, 0.0f, 1.0f }, FT_WIND, false);
+	AddForce({ 0.0f, 0.0f, 1.0f }, FT_GENERIC, false);
 	Process(CT_NONE);
 
 	m_initialisedParticles = true;
 	return true;
 }
 
-void Physics_Cloth::ResizeWidth(bool _smaller)
+void Physics_Cloth::ResizeWidth(float _ratio)
 {
-	if (_smaller == true)	// Make the cloth smaller in width
+	m_width = (int)round(_ratio * (m_maxWidth - m_minWidth)) + m_minWidth;
+
+	if (m_width % 2 == 0)
 	{
-		if (m_width > m_minWidth)	// Make smaller only if the cloth isn't at minimum width already
-		{
-			m_width -= 2;
-
-			// Update Particle Width Count based on new width
-			m_particlesWidthCount = m_width + 1;
-
-			// Set the initialized to false to recreate the cloth again
-			m_initialisedParticles = false;
-			ResetCloth();	// reset the cloth to see changes
-		}
+		// Cloth is even width, want odd
+		m_width++;
 	}
-	else	// Make the cloth bigger in width
-	{
-		if (m_width < m_maxWidth)	// Make bigger only if the cloth isn't at maximum width already
-		{
-			m_width += 2;
 
-			// Update Particle Width Count based on new width
-			m_particlesWidthCount = m_width + 1;
+	// Update Particle Width Count based on new width
+	m_particlesWidthCount = m_width + 1;
 
-			// Set the initialized to false to recreate the cloth again
-			m_initialisedParticles = false;
-			ResetCloth();	// reset the cloth to see changes
-		}
-	}
+	// Set the initialized to false to recreate the cloth again
+	m_initialisedParticles = false;
+	ResetCloth();	// reset the cloth to see changes
 }
 
-void Physics_Cloth::ResizeHeight(bool _smaller)
+void Physics_Cloth::ResizeHeight(float _ratio)
 {
-	if (_smaller == true)	// Make the cloth smaller in height
+	m_height = (int)round(_ratio * (m_maxHeight - m_minHeight)) + m_minHeight;
+
+	if (m_height % 2 == 0)
 	{
-		if (m_height > m_minHeight)	// Make the cloth smaller in height
-		{
-			m_height -= 2;
-
-			// Update Particle Height Count based on new width
-			m_particlesHeightCount = m_height + 1;
-
-			// Set the initialized to false to recreate the cloth again
-			m_initialisedParticles = false;
-			ResetCloth();	// reset the cloth to see changes
-		}
+		// Cloth is even height, want odd
+		m_height++;
 	}
-	else	// Make the cloth bigger in height
-	{
-		if (m_height < m_maxHeight)	// Make bigger only if the cloth isn't at maximum height already
-		{
-			m_height += 2;
 
-			// Update Particle Height Count based on new width
-			m_particlesHeightCount = m_height + 1;
+	// Update Particle Height Count based on new height
+	m_particlesHeightCount = m_height + 1;
 
-			// Set the initialized to false to recreate the cloth again
-			m_initialisedParticles = false;
-			ResetCloth();	// reset the cloth to see changes
-		}
-	}	
+	// Set the initialized to false to recreate the cloth again
+	m_initialisedParticles = false;
+	ResetCloth();	// reset the cloth to see changes
 }
 
-void Physics_Cloth::ResizeHooks(bool _less)
+void Physics_Cloth::ResizeHooks(float _ratio)
 {
-	if (_less == true)
-	{
-		// Reduce the number of hooks provided that wouldn't reduce it past the minimum
-		if (m_hooks > m_minHooks)
-		{
-			m_hooks--;
-			ResetCloth();	// reset the cloth to see changes
-		}
-	}
-	else
-	{
-		// Increase the number of hooks provided that wouldn't increase it past the maximum
-		if (m_hooks < m_maxHooks && m_hooks < m_particlesWidthCount)
-		{
-			m_hooks++;
-			ResetCloth();	// reset the cloth to see changes
-		}
-	}
+	m_hooks = (int)round(_ratio * (m_particlesWidthCount - m_minHooks)) + m_minHooks;
+
+
+	m_hooks++;
+	ResetCloth();	// reset the cloth to see changes
 }
 
 void Physics_Cloth::CreateHooks()
@@ -548,10 +513,8 @@ void Physics_Cloth::FloorCollision(float _floorPos)
 		if (m_pParticles[i].GetPosition()->y <= _floorPos + 0.1f)
 		{
 			// Push the particles up if they are under the floor
-			float pierce = abs(m_pParticles[i].GetPosition()->y - (_floorPos));
-			//m_pParticles[i].Move(up*pierce);
-			// TO DO CAL - Get Jc to update me on this
-			m_pParticles[i].SetPosition(*m_pParticles[i].GetPosition() + (up*pierce), true);
+			float line = abs(m_pParticles[i].GetPosition()->y - (_floorPos));
+			m_pParticles[i].SetPosition(*m_pParticles[i].GetPosition() + (up * line), true);
 		}
 	}
 }
@@ -610,72 +573,81 @@ void  Physics_Cloth::CapsuleCollision(v3float _sphereCentre1, v3float _sphereCen
 	}
 }
 
-void  Physics_Cloth::PyramidCollision()
+void Physics_Cloth::PyramidCollision(v3float _pyraPointA, v3float _pyraPointB, v3float _pyraPointC, v3float _pyraPointD)
 {
-	// TO DO CAL - Comment
-
-	v3float tetraPointA = { 0.0f, 0.408248f * 10.0f, 0.0f + 7.0f };
-	v3float tetraPointD = { -0.5f * 10.0f, -0.408248f * 10.0f, -0.288675f * 10.0f + 7.0f };
-	v3float tetraPointC = { 0.0f, -0.408248f * 10.0f, 0.577350f * 10.0f + 7.0f };
-	v3float tetraPointB = { 0.5f * 10.0f, -0.408248f * 10.0f, -0.288675f * 10.0f + 7.0f };
-
 	// Cycle through all particles
 	for (int i = 0; i < m_particleCount; i++)
 	{
 		v3float particlePos = *m_pParticles[i].GetPosition();
+
+		// Starts the closest point as the position of the particle and the closest distance to infinity
 		v3float closestPt = particlePos;
 		float closestDist = FLT_MAX;
 
-		v3float q;
+		// Declare extra variables
+		v3float closestTriPoint;
 		float dist;
 
-		q = ClosestPointOnTriangle(particlePos, tetraPointA, tetraPointB, tetraPointC);
-		dist = pow((particlePos - q).Magnitude(), 2);
+		// Calculate the closest point on the first triangle and compare
+		closestTriPoint = ClosestPointOnTriangle(particlePos, _pyraPointA, _pyraPointB, _pyraPointC);
+		dist = pow((particlePos - closestTriPoint).Magnitude(), 2);
 		if (dist < closestDist)
 		{
+			// Save the new closest point and distance
 			closestDist = dist;
-			closestPt = q;
+			closestPt = closestTriPoint;
 		}
 
-		q = ClosestPointOnTriangle(particlePos, tetraPointA, tetraPointC, tetraPointD);
-		dist = pow((particlePos - q).Magnitude(), 2);
+		// Calculate the closest point on the second triangle and compare
+		closestTriPoint = ClosestPointOnTriangle(particlePos, _pyraPointA, _pyraPointC, _pyraPointD);
+		dist = pow((particlePos - closestTriPoint).Magnitude(), 2);
 		if (dist < closestDist)
 		{
+			// Save the new closest point and distance
 			closestDist = dist;
-			closestPt = q;
+			closestPt = closestTriPoint;
 		}
 
-		q = ClosestPointOnTriangle(particlePos, tetraPointA, tetraPointD, tetraPointB);
-		dist = pow((particlePos - q).Magnitude(), 2);
+		// Calculate the closest point on the third triangle and compare
+		closestTriPoint = ClosestPointOnTriangle(particlePos, _pyraPointA, _pyraPointD, _pyraPointB);
+		dist = pow((particlePos - closestTriPoint).Magnitude(), 2);
 		if (dist < closestDist)
 		{
+			// Save the new closest point and distance
 			closestDist = dist;
-			closestPt = q;
+			closestPt = closestTriPoint;
 		}
 
-		q = ClosestPointOnTriangle(particlePos, tetraPointB, tetraPointD, tetraPointC);
-		dist = pow((particlePos - q).Magnitude(), 2);
+		// Calculate the closest point on the fourth triangle and compare
+		closestTriPoint = ClosestPointOnTriangle(particlePos, _pyraPointB, _pyraPointD, _pyraPointC);
+		dist = pow((particlePos - closestTriPoint).Magnitude(), 2);
 		if (dist < closestDist)
 		{
+			// Save the new closest point and distance
 			closestDist = dist;
-			closestPt = q;
+			closestPt = closestTriPoint;
 		}
 
-		if (	(PointOutsideOfPlane(particlePos, tetraPointA, tetraPointB, tetraPointC) == true)
-			&&	(PointOutsideOfPlane(particlePos, tetraPointA, tetraPointC, tetraPointD) == true)
-			&&	(PointOutsideOfPlane(particlePos, tetraPointA, tetraPointD, tetraPointB) == true)
-			&&	(PointOutsideOfPlane(particlePos, tetraPointB, tetraPointD, tetraPointC) == true))
+		// If the point is outside all planes then the point is within the bounds of the pyramid
+		if (	(PointOutsideOfPlane(particlePos, _pyraPointA, _pyraPointB, _pyraPointC) == true)
+			&&	(PointOutsideOfPlane(particlePos, _pyraPointA, _pyraPointC, _pyraPointD) == true)
+			&&	(PointOutsideOfPlane(particlePos, _pyraPointA, _pyraPointD, _pyraPointB) == true)
+			&&	(PointOutsideOfPlane(particlePos, _pyraPointB, _pyraPointD, _pyraPointC) == true))
 		{
+			// Move the particle outside the pyramid using the closest point 
 			closestPt = closestPt + ((closestPt - particlePos).Normalise() * 0.5f);
 			m_pParticles[i].SetPosition(closestPt, true);
 		}
 		else
 		{
+			// Particle is not inside the pyramid
 			v3float diff = particlePos - closestPt;
 			dist = diff.Magnitude();
 			
+			// check if the particle is too close to the pyramid
 			if (dist < 0.5f)
 			{
+				// Move the particle a small distance from the pyramid
 				closestPt = closestPt + ((particlePos - closestPt).Normalise() * 0.5f);
 				m_pParticles[i].SetPosition(closestPt, true);
 			}
@@ -683,16 +655,10 @@ void  Physics_Cloth::PyramidCollision()
 	}
 }
 
-void Physics_Cloth::UpdateWindSpeed(float _speedChange)
+void Physics_Cloth::UpdateWindSpeed(float _ratio)
 {
 	// Update the Wind Speed
-	m_windSpeed += _speedChange;
-
-	// Ensure the Wind speed exists
-	if (m_windSpeed < 1.0f)
-	{
-		m_windSpeed = 1.0f;
-	}
+	m_windSpeed = _ratio * 40.0f;
 }
 
 void Physics_Cloth::Ignite(TCameraRay _camRay, float _selectRadius)

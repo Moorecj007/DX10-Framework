@@ -623,108 +623,101 @@ inline bool RaySphereIntersect(v3float _rayOrigin, v3float _rayDirection, float 
 	}
 }
 
-// TO DO CAL
-inline bool PointOutsideOfPlane(v3float p, v3float a, v3float b, v3float c)
+
+/***********************
+* PointOutsideOfPlane: Checks if a point is outside of the plane (on the opposite side as the normal)
+* @author: Callan Moore
+* @parameter: v3float _point: The point to check
+* @parameter: v3float _triPointA: The first point of the triangle
+* @parameter: v3float _triPointB: The second point of the triangle
+* @parameter: v3float _triPointC: The third point of the triangle
+* @return: bool: true if the point is outside the plane
+********************/
+inline bool PointOutsideOfPlane(v3float _point, v3float _triPointA, v3float _triPointB, v3float _triPointC)
 {
-	return (p - a).Dot((b - a).Cross(c - a)) >= 0.0f; // [AP AB AC] >= 0
+	v3float pointToTriA = _point - _triPointA;
+	v3float triAToTriB = _triPointB - _triPointA;
+	v3float triAToTriC = _triPointC - _triPointA;
+	
+	return (pointToTriA.Dot(triAToTriB.Cross(triAToTriC)) >= 0 ? true : false);
 }
 
-// TO DO CAL
+/***********************
+* ClosestPointOnTriangle: Calculate the closest point on a triangle to another point
+* @author: Callan Moore
+* @parameter: v3float _point: The point to check
+* @parameter: v3float _triPointA: The first point of the triangle
+* @parameter: v3float _triPointB: The second point of the triangle
+* @parameter: v3float _triPointC: The third point of the triangle
+* @return: v3float: The closest point on the triangle
+********************/
 inline v3float ClosestPointOnTriangle(v3float _point, v3float _triPointA, v3float _triPointB, v3float _triPointC)
 {
-	// Check if P in vertex region outside A
+	
 	v3float triLineAB = _triPointB - _triPointA;
 	v3float triLineAC = _triPointC - _triPointA;
-	v3float linePtToA = _point - _triPointA;
+	v3float triAToPoint = _point - _triPointA;
+	v3float triBToPoint = _point - _triPointB;
+	v3float triCToPoint = _point - _triPointC;
 
-	float d1 = triLineAB.Dot(linePtToA);
-	float d2 = triLineAC.Dot(linePtToA);
-
-	if (d1 <= 0.0f && d2 <= 0.0f) return _triPointA; // barycentric coordinates (1,0,0)
-	// Check if P in vertex region outside B
-	v3float bp = _point - _triPointB;
-	float d3 = triLineAB.Dot(bp);
-	float d4 = triLineAC.Dot(bp);
-	if (d3 >= 0.0f && d4 <= d3) return _triPointB; // barycentric coordinates (0,1,0)
-
-	// Check if P in edge region of AB, if so return projection of P onto AB
-	float vc = d1*d4 - d3*d2;
-	if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f) 
+	// Check if The point is in the vertex region outside A
+	float ABdotAP = triLineAB.Dot(triAToPoint);
+	float ACdotAP = triLineAC.Dot(triAToPoint);
+	if (ABdotAP <= 0.0f && ACdotAP <= 0.0f)
 	{
-		float v = d1 / (d1 - d3);
-		return _triPointA + triLineAB * v; // barycentric coordinates (1-v,v,0)
+		// Point is outside triangle closest to triPoint A
+		return _triPointA; 
 	}
 
-	// Check if P in vertex region outside C
-	v3float cp = _point - _triPointC;
-	float d5 = triLineAB.Dot(cp);
-	float d6 = triLineAC.Dot(cp);
-
-	if (d6 >= 0.0f && d5 <= d6) return _triPointC; // barycentric coordinates (0,0,1)
-	// Check if P in edge region of AC, if so return projection of P onto AC
-	float vb = d5*d2 - d1*d6;
-	if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) 
+	// Check if The point is in the vertex region outside B
+	float ABdotBP = triLineAB.Dot(triBToPoint);
+	float ACdotBP = triLineAC.Dot(triBToPoint);
+	if (ABdotBP >= 0.0f && ACdotBP <= ABdotBP)
 	{
-		float w = d2 / (d2 - d6);
-		return _triPointA + triLineAC * w; // barycentric coordinates (1-w,0,w)
+		// Point is outside triangle closest to triPoint B
+		return _triPointB; 
 	}
 
-	// Check if P in edge region of BC, if so return projection of P onto BC
-	float va = d3*d6 - d5*d4;
-	if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
-		float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-		return _triPointB + (_triPointC - _triPointB) * w; // barycentric coordinates (0,1-w,w)
+	// Check if The point is in the vertex region outside C
+	float ABdotCP = triLineAB.Dot(triCToPoint);
+	float ACdotCP = triLineAC.Dot(triCToPoint);
+	if (ACdotCP >= 0.0f && ABdotCP <= ACdotCP)
+	{
+		// Point is outside triangle closest to triPoint C
+		return _triPointC; 
 	}
-	// P inside face region. Compute Q through its barycentric coordinates (u,v,w)
-	float denom = 1.0f / (va + vb + vc);
-	float v = vb * denom;
-	float w = vc * denom;
-	return _triPointA + triLineAB * v + triLineAC * w; // = u*a + v*b + w*c, u = va * denom = 1.0f-v-w
+
+	// Check if the Point is in edge region of triangle points A and B, if so return projection of the Point onto triangle line AB
+	float regionCheckAB = ABdotAP * ACdotBP - ABdotBP * ACdotAP;
+	if (regionCheckAB <= 0.0f && ABdotAP >= 0.0f && ABdotBP <= 0.0f) 
+	{
+		float modifier = ABdotAP / (ABdotAP - ABdotBP);
+		return _triPointA + triLineAB * modifier; 
+	}
+
+	// Check if the Point is in edge region of triangle points A and C, if so return projection of the Point onto triangle line AC
+	float regionCheckAC = ABdotCP*ACdotAP - ABdotAP*ACdotCP;
+	if (regionCheckAC <= 0.0f && ACdotAP >= 0.0f && ACdotCP <= 0.0f) 
+	{
+		float modifier = ACdotAP / (ACdotAP - ACdotCP);
+		return _triPointA + triLineAC * modifier; 
+	}
+
+	// Check if the Point is in edge region of triangle points B and C, if so return projection of the Point onto triangle line BC
+	float regionCheckBC = ABdotBP*ACdotCP - ABdotCP*ACdotBP;
+	if (regionCheckBC <= 0.0f && (ACdotBP - ABdotBP) >= 0.0f && (ABdotCP - ACdotCP) >= 0.0f) 
+	{
+		float modifier = (ACdotBP - ABdotBP) / ((ACdotBP - ABdotBP) + (ABdotCP - ACdotCP));
+		return _triPointB + (_triPointC - _triPointB) * modifier; 
+	}
+
+	// The Point is inside face region
+	float denominator = regionCheckBC + regionCheckAC + regionCheckAB;
+	float modifierAC = regionCheckAC / denominator;
+	float modiferAB = regionCheckAB / denominator;
+
+	// Calculate the closest point inside the triangle
+	return _triPointA + triLineAB * modifierAC + triLineAC * modiferAB; 
 }
-
-// TO DO CAL
-inline v3float ClosestPtPointTetrahedron(v3float p, v3float a, v3float b, v3float c, v3float d)
-{
-	// Start out assuming point inside all halfspaces, so closest to itself
-	v3float closestPt = p;
-	float bestSqDist = FLT_MAX;
-	// If point outside face abc then compute closest point on abc
-
-	if (PointOutsideOfPlane(p, a, b, c)) 
-	{
-		v3float q = ClosestPointOnTriangle(p, a, b, c);
-		float sqDist = (q - p).Dot(q - p);
-		// Update best closest point if (squared) distance is less than current best
-		if (sqDist < bestSqDist) bestSqDist = sqDist, closestPt = q;
-	}
-
-	// Repeat test for face acd
-	if (PointOutsideOfPlane(p, a, c, d)) 
-	{
-		v3float q = ClosestPointOnTriangle(p, a, c, d);
-		float sqDist = (q - p).Dot(q - p);
-		if (sqDist < bestSqDist) bestSqDist = sqDist, closestPt = q;
-	}
-
-	// Repeat test for face adb
-	if (PointOutsideOfPlane(p, a, d, b)) 
-	{
-		v3float q = ClosestPointOnTriangle(p, a, d, b);
-		float sqDist = (q - p).Dot(q - p);
-		if (sqDist < bestSqDist) bestSqDist = sqDist, closestPt = q;
-	}
-
-	// Repeat test for face bdc
-	if (PointOutsideOfPlane(p, b, d, c)) 
-	{
-		v3float q = ClosestPointOnTriangle(p, b, d, c);
-		float sqDist = (q - p).Dot(q - p);
-		if (sqDist < bestSqDist) bestSqDist = sqDist, closestPt = q;
-	}
-	return closestPt;
-}
-
-
-
 
 #endif	// __UTILITY_MATH_H__

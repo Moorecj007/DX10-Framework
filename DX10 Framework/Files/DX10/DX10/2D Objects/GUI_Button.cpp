@@ -113,53 +113,28 @@ void GUI_Button::SetRowIndex(UINT _index)
 	m_row = _index;
 }
 
-void GUI_Button::Draw()
+void GUI_Button::Render()
 {
-	switch (m_state)
-	{
-	case BUTTON_STATE::BUTTON_STATE_DEFAULT:
-		m_pSprite->SetImageIndex(m_col + 0);
-		break;
-	case BUTTON_STATE::BUTTON_STATE_HOVER:
-		m_pSprite->SetImageIndex(m_col + 1 * m_pSprite->GetSliceWidth());
-		break;
-	case BUTTON_STATE::BUTTON_STATE_SELECTED:
-		m_pSprite->SetImageIndex(m_col + 2 * m_pSprite->GetSliceWidth());
-		break;
-	case BUTTON_STATE::BUTTON_STATE_DEACTIVATED:
-		m_pSprite->SetImageIndex(m_col + 3 * m_pSprite->GetSliceWidth());
-		break;
-	}
+	//switch (m_state)
+	//{
+	//case BUTTON_STATE::BUTTON_STATE_DEFAULT:
+	//	m_pSprite->SetImageIndex(m_col + 0);
+	//	break;
+	//case BUTTON_STATE::BUTTON_STATE_HOVER:
+	//	m_pSprite->SetImageIndex(m_col + 1 * m_pSprite->GetSliceWidth());
+	//	break;
+	//case BUTTON_STATE::BUTTON_STATE_SELECTED:
+	//	m_pSprite->SetImageIndex(m_col + 2 * m_pSprite->GetSliceWidth());
+	//	break;
+	//case BUTTON_STATE::BUTTON_STATE_DEACTIVATED:
+	//	m_pSprite->SetImageIndex(m_col + 3 * m_pSprite->GetSliceWidth());
+	//	break;
+	//}
 
-	m_pSprite->SetSize(m_width, m_height);
+	//m_pSprite->SetSize(m_width, m_height);
 	m_pSprite->SetPosition(m_position.x, m_position.y);
 	m_pSprite->Render();
 }
-
-/*void GUI_Button::Process(float _deltaTime)
-{
-	if (m_state == BUTTON_STATE::BUTTON_STATE_DEACTIVATED)
-		return;
-
-	DIMOUSESTATE mouseCurrState = m_pInput->GetMouseState();
-
-	D3DXVECTOR2 mousePosition;
-	m_pInput->GetMousePosition(mousePosition);
-
-	if (mousePosition.x >= m_bounds.m_x && mousePosition.x <= m_bounds.m_w &&
-		mousePosition.y >= m_bounds.m_y && mousePosition.y <= m_bounds.m_h)
-	{
-		if (mouseCurrState.rgbButtons[0] && !m_pInput->IsMouseBtnLocked(0))
-		{
-			m_pInput->LockMouseBtn(0);
-			m_state = eState::ES_SELECTED;
-		}
-		else
-			m_state = eState::ES_HOVER;
-	}
-	else
-		m_state = eState::ES_DEFAULT;
-}*/
 
 bool GUI_Button::IsInBounds(v2float _point)
 {

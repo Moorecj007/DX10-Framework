@@ -7,7 +7,7 @@
 * (c) 2005 - 2015 Media Design School
 *
 * File Name : Physics_Constraint.cpp
-* Description : TO DO CAL
+* Description : Class to calculate physics on a constraint between particles
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */

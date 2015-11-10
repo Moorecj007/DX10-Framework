@@ -368,9 +368,19 @@ public:
 	* @return: int: Light count
 	********************/
 	int GetLightCount() { return m_lightCount; };
-
-	// TO DO CAL
+	
+	/***********************
+	* GetWidth: Retrieve the back buffer width
+	* @author: Callan Moore
+	* @return: int: The width of the back buffer
+	********************/
 	int GetWidth() { return m_clientWidth; };
+	
+	/***********************
+	* GetHeight: Retrieve the back buffer height
+	* @author: Callan Moore
+	* @return: int: The height of the back buffer
+	********************/
 	int GetHeight() { return m_clientHeight; };
 
 	/***********************

@@ -35,8 +35,8 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdL
 	#endif // _DEBUG
 
 	// Set the client width and height
-	int clientWidth = 1000;
-	int clientHeight = 1000;
+	int clientWidth = 1400;
+	int clientHeight = 1400;
 
 	// Create the Application 
 	Application* pApp = Application::GetInstance();
@@ -88,6 +88,7 @@ LRESULT CALLBACK Application::WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam
 		case WM_LBUTTONDOWN:
 		{
 			pApp->SetMouseDown(true);
+			pApp->SelectSliders(true);
 		}
 		break;
 		case WM_MOUSEMOVE:
@@ -101,7 +102,8 @@ LRESULT CALLBACK Application::WindowProc(HWND _hWnd, UINT _uiMsg, WPARAM _wParam
 		break;
 		case WM_LBUTTONUP:
 		{
-			pApp->SetMouseDown(false);			
+			pApp->SetMouseDown(false);	
+			pApp->SelectSliders(false);
 		}
 		break;
 		default: break;
@@ -210,7 +212,7 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	m_deltaTick = 0;
 	m_fpsTimer = 0;
 
-	m_eCollisionType = CT_PYRAMID;
+	m_eCollisionType = CT_NONE;
 	
 	return true;
 }
@@ -248,7 +250,7 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pMesh_Pyramid = new DX10_Mesh();
 	VALIDATE(m_pMesh_Pyramid->Initialise(m_pDX10_Renderer, MT_PYRAMID, { 10.0f, 10.0f, 10.0f }));
 
-	// Create the Objects
+	// Create the sprites
 	m_pSprite_InstructionsLeft = new DXSprite();
 	VALIDATE(m_pSprite_InstructionsLeft->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsRed.png", 384, 140));
 	m_pSprite_InstructionsLeft->SetPosition(5, 5);
@@ -257,9 +259,23 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pSprite_InstructionsRight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "InstructionsRightRed.png", 384, 140));
 	m_pSprite_InstructionsRight->SetPosition(600, 5);
 
+	// Create the Sliders
+	m_pSlider_WindSpeed = new TSliderBar();
+	VALIDATE(m_pSlider_WindSpeed->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 1100, 300 }, 200, 50));
+
+	m_pSlider_ClothWidth = new TSliderBar();
+	VALIDATE(m_pSlider_ClothWidth->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 1100, 400 }, 200, 50));
+
+	m_pSlider_ClothHeight = new TSliderBar();
+	VALIDATE(m_pSlider_ClothHeight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 1100, 500 }, 200, 50));
+
+	m_pSlider_HookAmount = new TSliderBar();
+	VALIDATE(m_pSlider_HookAmount->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 1100, 600 }, 200, 50));
+
+	// Create the Objects
 	m_pObj_Floor = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Floor->Initialise(m_pDX10_Renderer, m_pMesh_Floor, m_pShader_LitTex, "Dragon.png"));
-	m_pObj_Floor->SetPosition({ 0.0f, -15.0f, 0.0f });
+	m_pObj_Floor->SetPosition({ 0.0f, -20.0f, 0.0f });
 
 	m_pObj_Sphere = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Sphere->Initialise(m_pDX10_Renderer, m_pMesh_Sphere, m_pShader_LitTex, "WaterMap.png"));
@@ -280,6 +296,16 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	// Create the Texture Resources for Refraction and Reflection
 	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
 	m_pDX10_Renderer->CreateTextureResource(m_pReflectionTexture);
+
+	// Set the beginning ratios of the slider bars
+	m_pSlider_WindSpeed->SetRatio(0.0f);
+	m_pSlider_ClothWidth->SetRatio(0.5f);
+	m_pSlider_ClothHeight->SetRatio(0.5f);
+	m_pSlider_HookAmount->SetRatio(0.1f);
+	m_pCloth->UpdateWindSpeed(m_pSlider_WindSpeed->GetRatio());
+	m_pCloth->ResizeWidth(m_pSlider_ClothWidth->GetRatio());
+	m_pCloth->ResizeHeight(m_pSlider_ClothHeight->GetRatio());
+	m_pCloth->ResizeHooks(m_pSlider_HookAmount->GetRatio());
 
 	return true;
 }
@@ -314,9 +340,11 @@ void Application::ShutDown()
 		ReleasePtr(m_pMesh_Sphere);
 		ReleasePtr(m_pMesh_Capsule);
 		ReleasePtr(m_pMesh_Pyramid);
-		// Release the Objects
+		// Release the Sprites
 		ReleasePtr(m_pSprite_InstructionsLeft);
 		ReleasePtr(m_pSprite_InstructionsRight);
+		ReleasePtr(m_pSlider_WindSpeed);
+		// Release the Objects
 		ReleasePtr(m_pObj_Floor);
 		ReleasePtr(m_pObj_Sphere);
 		ReleasePtr(m_pObj_Capsule);
@@ -398,6 +426,29 @@ bool Application::Process(float _dt)
 			default: break;
 		} // End Switch
 
+		if (m_mouseDown)
+		{
+			if (m_pSlider_WindSpeed->GetSelected() == true)
+			{
+				m_pSlider_WindSpeed->Process(m_mousePosActual);
+				m_pCloth->UpdateWindSpeed(m_pSlider_WindSpeed->GetRatio());
+			}
+			if (m_pSlider_ClothWidth->GetSelected() == true)
+			{
+				m_pSlider_ClothWidth->Process(m_mousePosActual);
+				m_pCloth->ResizeWidth(m_pSlider_ClothWidth->GetRatio());
+			}
+			if (m_pSlider_ClothHeight->GetSelected() == true)
+			{
+				m_pSlider_ClothHeight->Process(m_mousePosActual);
+				m_pCloth->ResizeHeight(m_pSlider_ClothHeight->GetRatio());
+			}
+			if (m_pSlider_HookAmount->GetSelected() == true)
+			{
+				m_pSlider_HookAmount->Process(m_mousePosActual);
+				m_pCloth->ResizeHooks(m_pSlider_HookAmount->GetRatio());
+			}
+		}
 	}
 
 	return true;
@@ -445,12 +496,15 @@ void Application::Render()
 			default: break;
 		} // End Switch
 
-
 		m_pCloth->Render();
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		//m_pSprite_InstructionsLeft->Render();
 		//m_pSprite_InstructionsRight->Render();
+		m_pSlider_WindSpeed->Render();
+		m_pSlider_ClothWidth->Render();
+		m_pSlider_ClothHeight->Render();
+		m_pSlider_HookAmount->Render();
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_NORMAL);
 		
 		// Tell the Renderer the data input is over and present the outcome
@@ -687,17 +741,18 @@ bool Application::HandleInput()
 		m_pCloth->AddForce({ 1.0f, 0.0f, 1.0f }, FT_WIND, false);
 	}
 
-	if (m_pKeyDown[VK_ADD])
+	if (m_pKeyDown[input::VK_C])
 	{
-		m_pCloth->UpdateWindSpeed(1.0f);
-		SetKeyDown(VK_ADD, false);
+		ToggleCollisionType();
+		SetKeyDown(input::VK_C, false);
 	}
 
-	if (m_pKeyDown[VK_SUBTRACT])
+	if (m_pKeyDown[input::VK_Z])
 	{
-		m_pCloth->UpdateWindSpeed(-1.0f);
-		SetKeyDown(VK_SUBTRACT, false);
+		m_pCamera->Reset();
+		SetKeyDown(input::VK_Z, false);
 	}
+
 
 	if (m_pKeyDown[VK_CAPITAL])
 	{
@@ -780,10 +835,49 @@ void Application::UpdateClientSize()
 
 void Application::UpdateMousePos(POINT _mousePos)
 {
+	m_mousePosActual.x = (float)_mousePos.x;
+	m_mousePosActual.y = (float)_mousePos.y;
+
 	// Change the mouse coordinates into -1 to +1 range
 	m_mousePos.x = ((float)(2.0f * _mousePos.x) / (float)m_pDX10_Renderer->GetWidth()) - 1.0f;
 	m_mousePos.y = ((float)(2.0f * _mousePos.y) / (float)m_pDX10_Renderer->GetHeight()) - 1.0f; 
 
 	// Flip the Y axis around to that positive Y goes up ( Screen coordinates use top left as (0,0))
 	m_mousePos.y *= -1.0f;
+}
+
+void Application::SelectSliders(bool _selected)
+{
+	m_pSlider_WindSpeed->SelectSlider(m_mousePosActual, _selected);
+	m_pSlider_ClothWidth->SelectSlider(m_mousePosActual, _selected);
+	m_pSlider_ClothHeight->SelectSlider(m_mousePosActual, _selected);
+	m_pSlider_HookAmount->SelectSlider(m_mousePosActual, _selected);
+}
+
+void Application::ToggleCollisionType()
+{
+	switch (m_eCollisionType)
+	{
+		case CT_NONE:
+		{
+			m_eCollisionType = CT_SPHERE;
+		}
+		break;
+		case CT_SPHERE:
+		{
+			m_eCollisionType = CT_CAPSULE;
+		}
+		break;
+		case CT_CAPSULE:
+		{
+			m_eCollisionType = CT_PYRAMID;
+		}
+		break;
+		case CT_PYRAMID:
+		{
+		m_eCollisionType = CT_NONE;
+		}
+		break;
+		default: break;
+	}
 }

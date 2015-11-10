@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="Files\Application.h" />
     <ClInclude Include="Files\DX10\DX10.h" />
+    <ClInclude Include="Files\DX10\DX10\2D Objects\DX10_UI_Elements.h" />
     <ClInclude Include="Files\DX10\DX10\2D Objects\DXSprite.h" />
     <ClInclude Include="Files\DX10\DX10\2D Objects\GUI_Button.h" />
     <ClInclude Include="Files\DX10\DX10\3D Objects\DX10_Obj_Generic.h" />

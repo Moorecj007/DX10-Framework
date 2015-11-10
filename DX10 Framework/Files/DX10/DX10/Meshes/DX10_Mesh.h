@@ -21,7 +21,10 @@
 #include "../DX10_Renderer.h"
 
 // Enumerators
-// TO DO CAL
+/***********************
+* eMeshType: Enum to define a preset mesh type
+* @author: Callan Moore
+********************/
 enum eMeshType
 {
 	MT_FINITEPLANE,

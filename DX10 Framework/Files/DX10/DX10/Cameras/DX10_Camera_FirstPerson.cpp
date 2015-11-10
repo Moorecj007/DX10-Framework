@@ -204,3 +204,22 @@ TCameraRay DX10_Camera_FirstPerson::GetRay(v2float _mousePos)
 
 	return camRay;
 }
+
+void DX10_Camera_FirstPerson::Reset()
+{
+	m_position = D3DXVECTOR3(0.0f, 30.0f, -80.0f);
+	m_target = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	m_forward = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+	m_right = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
+	m_defaultForward = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+	m_defaultRight = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
+
+	m_moveStrafe = 0.0f;
+	m_moveForwards = 0.0f;
+	m_moveFly = 0.0f;
+	m_yaw = 0.0f;
+	m_pitch = DegreesToRadians(30.0f);
+	m_yawChange = 0.0f;
+	m_pitchChange = 0.0f;
+}

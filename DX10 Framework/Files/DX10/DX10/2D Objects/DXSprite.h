@@ -20,7 +20,7 @@
 #include <fstream>      // std::ifstream
 
 // Local Includes
-#include "../DX10_Utilities.h"
+//#include "../DX10_Utilities.h"
 #include "../DX10_Renderer.h"
 #include "../Shaders/DX10_Shader_Sprite.h"
 
@@ -154,6 +154,14 @@ class DXSprite
 		void SetLooped(bool _looped);
 
 		/*******************
+		* SetScale: Sets the scale of the object.
+		* @author: Juran Griffith.
+		* @parameter: _scale: The scale amount.
+		* @return: void.
+		********************/
+		void SetScale(float _scale);
+
+		/*******************
 		* IsAtLastFrame: Checks to see if we have reached the last frame.
 		* @author: Juran Griffith.
 		* @return: bool: True if we are at the last frame.
@@ -190,7 +198,7 @@ class DXSprite
 		********************/
 		bool UpdateBuffers();
 
-		/******************* (doesn't work) To Do - Juran
+		/******************* (doesn't work) Note - Juran
 		* GetPngSize: Gets the PNG width and height of the image and updates this sprites width and height variables.
 		* @author: Juran Griffith.
 		* @return: bool: True if the file can be read and the variables are updated.
@@ -209,8 +217,6 @@ class DXSprite
 		v2float					m_position;
 		v2float					m_previousPosition;
 
-		//int						m_screenWidth;
-		//int						m_screenHeight;
 		float					m_offsetScreenWidthPrev;
 		float					m_offsetScreenHeightPrev;
 		UINT					m_imageWidth;
@@ -231,6 +237,7 @@ class DXSprite
 		float					m_offsetImageHeight;
 		float					m_offsetU;
 		float					m_offsetV;
+		float					m_scale;
 
 		DX10_Renderer*				m_pDX10_Renderer;
 		ID3D10ShaderResourceView*	m_pTex;

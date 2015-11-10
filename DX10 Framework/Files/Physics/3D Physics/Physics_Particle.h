@@ -7,7 +7,7 @@
 * (c) 2005 - 2015 Media Design School
 *
 * File Name : Physics_Particle.h
-* Description : Physics particle that is part of a cloth weave.
+* Description : Physics particle that is part of a cloth weave
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */
@@ -85,7 +85,7 @@ public:
 	* @parameter: _state: The new state
 	* @return: void
 	********************/
-	void SetStaticState(bool _state) { m_static = _state; };
+	void SetStaticState(bool _state) { m_static = _state; m_pVertex->color = d3dxColors::Blue; };
 	
 	/***********************
 	* ResetAcceleration: Reset the acceleration of the particle to zero

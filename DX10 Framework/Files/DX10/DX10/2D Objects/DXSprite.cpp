@@ -17,9 +17,10 @@
 // Local Includes
 #include "DXSprite.h"
 
-DXSprite::DXSprite():
-	m_pDX10_Renderer(0),
-	m_pTex(0)
+DXSprite::DXSprite()
+	: m_pDX10_Renderer(0)
+	, m_pTex(0)
+	, m_scale(1.0f)
 {
 	m_offsetScreenWidthPrev = 0.0f;
 	m_offsetScreenHeightPrev = 0.0f;
@@ -61,27 +62,11 @@ bool DXSprite::Initialise(DX10_Renderer* _pDX10_Renderer, DX10_Shader_Sprite* _p
 	m_realImageWidth = _imageWidth;
 	m_realImageHeight = _imageHeight;
 
-	// Set the size to the same size of the actual image
-	m_imageWidth = _imageWidth;
-	m_imageHeight = _imageHeight;
-
-	//m_offsetImageWidth = m_imageWidth;
-	//m_offsetImageHeight = m_imageHeight;
-
-	// Save the screen size.
-	/*RECT rect;
-	if (GetClientRect(m_pShader_Sprite->GetHWnd(), &rect))
-	{
-		m_screenWidth = rect.right - rect.left;
-		m_screenHeight = rect.bottom - rect.top;
-	}*/
-
-	// Calculate offsets to reduce the amount of divides in the update call.
-	//m_offsetScreenWidth = (static_cast<float>(m_screenWidth) / 2.0f) * -1.0f;
-	//m_offsetScreenHeight = (static_cast<float>(m_screenHeight) / 2.0f);
-
 	m_offsetImageWidth = static_cast<float>(_imageWidth) / static_cast<float>(m_sliceWidth);
 	m_offsetImageHeight = static_cast<float>(_imageHeight) / static_cast<float>(m_sliceHeight);
+
+	m_imageWidth = (UINT)m_offsetImageWidth;
+	m_imageHeight = (UINT)m_offsetImageHeight;
 
 	m_offsetU = 1.0f / static_cast<float>(m_sliceWidth);
 	m_offsetV = 1.0f / static_cast<float>(m_sliceHeight);
@@ -123,12 +108,12 @@ int DXSprite::GetSliceHeight()
 
 float DXSprite::GetWidth()
 {
-	return m_offsetImageWidth;
+	return (float)m_imageWidth;
 }
 
 float DXSprite::GetHeight()
 {
-	return m_offsetImageHeight;
+	return (float)m_imageHeight;
 }
 
 float DXSprite::GetImageWidth()
@@ -159,13 +144,19 @@ void DXSprite::SetSize(float _width, float _height)
 	m_imageWidth = (UINT)_width;
 	m_imageHeight = (UINT)_height;
 
-	m_offsetImageWidth = _width / static_cast<float>(m_sliceWidth);
-	m_offsetImageHeight = _height / static_cast<float>(m_sliceHeight);
+	//m_offsetImageWidth = _width / static_cast<float>(m_sliceWidth);
+	//m_offsetImageHeight = _height / static_cast<float>(m_sliceHeight);
 }
 
 void DXSprite::SetLooped(bool _looped)
 {
 	m_animationLooped = _looped;
+}
+
+void DXSprite::SetScale(float _scale)
+{
+	m_scale = _scale;
+	SetSize(m_imageWidth * _scale, m_imageHeight * _scale);
 }
 
 void DXSprite::IncrementIndex()

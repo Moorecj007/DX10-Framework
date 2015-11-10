@@ -7,7 +7,7 @@
 * (c) 2005 - 2015 Media Design School
 *
 * File Name : Physics_Cloth.h
-* Description : TO DO CAL
+* Description : Simulates a cloth using Physics
 * Author :	Callan Moore
 * Mail :	Callan.Moore@mediadesign.school.nz
 */
@@ -131,26 +131,26 @@ public:
 	/***********************
 	* ResizeWidth: Resize the width of the cloth
 	* @author: Callan Moore
-	* @parameter: _smaller: True to make the cloth smaller. False to enlarge
+	* @parameter: _ratio: The new ratio of the Width size
 	* @return: void
 	********************/
-	void ResizeWidth(bool _smaller);
+	void ResizeWidth(float _ratio);
 
 	/***********************
 	* ResizeHeight: Resize the height of the cloth
 	* @author: Callan Moore
-	* @parameter: _smaller: True to make the cloth smaller. False to enlarge
+	* @parameter: _ratio: The new ratio of the height size
 	* @return: void
 	********************/
-	void ResizeHeight(bool _smaller);
+	void ResizeHeight(float _ratio);
 	
 	/***********************
 	* ResizeHooks: Resize the amount of hooks used by the cloth
 	* @author: Callan Moore
-	* @parameter: _less: true to have less hooks. false to make more hooks
+	* @parameter: _ratio: The new ratio of the hook amount
 	* @return: void
 	********************/
-	void ResizeHooks(bool _less);
+	void ResizeHooks(float _ratio);
 	
 	/***********************
 	* CreateHooks: Create and attach the number of hooks
@@ -162,10 +162,10 @@ public:
 	/***********************
 	* UpdateWindSpeed: Add the speed change to the current wind speed
 	* @author: Callan Moore
-	* @parameter: float _speed: The amount to change the speed by
+	* @parameter: float _speed: The ratio of max wind speed
 	* @return: void
 	********************/
-	void UpdateWindSpeed(float _speedChange);
+	void UpdateWindSpeed(float _ratio);
 	
 	/***********************
 	* ReleaseSelected: Set all the selected particles to unselected
@@ -310,9 +310,17 @@ private:
 	* @return: void
 	********************/
 	void CapsuleCollision(v3float _sphereCentre1, v3float _sphereCentre2, float _capsuleRadius);
-
-	// TO DO CAL
-	void PyramidCollision();
+	
+	/***********************
+	* PyramidCollision: Calculate collisions with a pyramid
+	* @author: Callan Moore
+	* @parameter: v3float _pyraPointA: First point of the pyramid
+	* @parameter: v3float _pyraPointB: Second point of the pyramid
+	* @parameter: v3float _pyraPointC: Third point of the pyramid
+	* @parameter: v3float _pyraPointD: Fourth point of the pyramid
+	* @return: void
+	********************/
+	void PyramidCollision(v3float _pyraPointA, v3float _pyraPointB, v3float _pyraPointC, v3float _pyraPointD);
 	
 private:
 	DX10_Shader_Cloth* m_pShader;

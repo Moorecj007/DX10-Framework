@@ -142,7 +142,7 @@ class GUI_Button
 		@parameter:	None.
 		@return:	void
 		********************/
-		virtual void Draw();
+		virtual void Render();
 
 		/*******************
 		-> Process the object

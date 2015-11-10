@@ -35,7 +35,7 @@
 //#include "Utility\Utilities.h"
 #include "Utility\Timer.h"
 #include "DX10\DX10.h"
-//#include "DX10\DX10\2D Objects\GUI_Button.h"
+#include "DX10\DX10\2D Objects\DX10_UI_Elements.h"
 //#include "Input\InputGamePad.h"
 //#include "Menus\Menu.h"
 #include "Physics\Physics_3D.h"
@@ -213,6 +213,17 @@ private:
 	********************/
 	void UpdateClientSize();
 
+	/***********************
+	* SelectSliders: Update all the slider selected states
+	* @author: Callan Moore
+	* @parameter: bool _selected: If the sliders are being checked for selection
+	* @return: void
+	********************/
+	void SelectSliders(bool _selected);
+
+	// TO DO CAL
+	void ToggleCollisionType();
+
 private:
 	// Singleton Instance
 	static Application* s_pApp;
@@ -233,6 +244,7 @@ private:
 	bool* m_pKeyDown;
 	bool m_mouseDown;
 	v2float m_mousePos;
+	v2float m_mousePosActual;
 	bool m_initialRayCast;
 
 	// Renderer Variables
@@ -253,9 +265,18 @@ private:
 	DX10_Mesh* m_pMesh_Capsule;
 	DX10_Mesh* m_pMesh_Pyramid;
 
-	// Objects
+	// Sprites
 	DXSprite* m_pSprite_InstructionsLeft;
 	DXSprite* m_pSprite_InstructionsRight;
+
+	// Sliders
+	TSliderBar* m_pSlider_WindSpeed;
+	TSliderBar* m_pSlider_ClothWidth;
+	TSliderBar* m_pSlider_ClothHeight;
+	TSliderBar* m_pSlider_HookAmount;
+
+
+	// Objects
 	DX10_Obj_LitTex* m_pObj_Floor;
 	DX10_Obj_LitTex* m_pObj_Sphere;
 	DX10_Obj_LitTex* m_pObj_Capsule;

@@ -162,6 +162,15 @@ public:
 	********************/
 	TCameraRay GetRay(v2float _mousePos);
 
+	// TO DO CAL
+	
+	/***********************
+	* Reset: Reset the camera to starting position
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void Reset();
+
 private:
 	DX10_Renderer* m_pRenderer;
 	DirectInput* m_pDirectInput;
