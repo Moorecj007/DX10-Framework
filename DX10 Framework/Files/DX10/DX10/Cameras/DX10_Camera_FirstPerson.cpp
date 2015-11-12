@@ -30,7 +30,7 @@ bool DX10_Camera_FirstPerson::Initialise(DX10_Renderer* _pRenderer, HINSTANCE _h
 	m_pDirectInput = new DirectInput();
 	VALIDATE(m_pDirectInput->Initialise(_hInstance, _hWnd));
 
-	m_position = D3DXVECTOR3(0.0f, 30.0f, -80.0f);
+	m_position = D3DXVECTOR3(0.0f, 25.0f, -50.0f);
 	m_target = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	m_forward = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
@@ -207,7 +207,7 @@ TCameraRay DX10_Camera_FirstPerson::GetRay(v2float _mousePos)
 
 void DX10_Camera_FirstPerson::Reset()
 {
-	m_position = D3DXVECTOR3(0.0f, 30.0f, -80.0f);
+	m_position = D3DXVECTOR3(0.0f, 25.0f, -50.0f);
 	m_target = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	m_forward = D3DXVECTOR3(0.0f, 0.0f, 1.0f);

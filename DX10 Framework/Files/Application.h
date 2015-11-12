@@ -221,7 +221,11 @@ private:
 	********************/
 	void SelectSliders(bool _selected);
 
-	// TO DO CAL
+	/***********************
+	* ToggleCollisionType: Toggle the collision type
+	* @author: Callan Moore
+	* @return: void
+	********************/
 	void ToggleCollisionType();
 
 private:
@@ -274,6 +278,7 @@ private:
 	TSliderBar* m_pSlider_ClothWidth;
 	TSliderBar* m_pSlider_ClothHeight;
 	TSliderBar* m_pSlider_HookAmount;
+	TSliderBar* m_pSlider_BlastRadius;
 
 
 	// Objects

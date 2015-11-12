@@ -52,14 +52,17 @@ bool Physics_Cloth::Initialise(DX10_Renderer* _pRenderer, DX10_Shader_Cloth* _pS
 	m_minHooks = 2;
 	m_maxHooks = m_maxWidth;
 
-	m_selfCollisionRad = 0.9f;
+	m_selfCollisionRad = 0.85f;
 
 	m_constraintIterations = 3;
 	m_breakModifier = 2.4f;
 	m_windSpeed = 1.0f;
 	m_initialisedParticles = false;
 	m_burnTime = 1.5f;
-	m_complexWeave = false;
+	m_complexWeave = true;
+
+	m_maxBlastRadius = 25.0f;
+	m_blastRadius = 10.0f;
 
 	// Set the cloth to initial positions and constraints
 	VALIDATE(ResetCloth());
@@ -105,7 +108,7 @@ void Physics_Cloth::Process(eCollisionType _collisionType)
 			break;
 			case CT_CAPSULE:
 			{
-				CapsuleCollision({ 0.0f, -2.0f, 4.0f }, { 0.0f, 2.0f, 4.0f }, 2.0f);
+				CapsuleCollision({ 0.0f, -3.0f, 6.0f }, { 0.0f, 3.0f, 6.0f }, 3.0f);
 			}
 			break;
 			case CT_PYRAMID:
@@ -215,6 +218,15 @@ void Physics_Cloth::ReleaseCloth()
 	for (pinnedIter = m_hookedParticles.begin(); pinnedIter != m_hookedParticles.end(); pinnedIter++)
 	{
 		(*pinnedIter)->SetStaticState(false);
+
+		if ((*pinnedIter)->GetIgnitedState() == true)
+		{
+			m_pVertices[(*pinnedIter)->GetParticleID()].color = d3dxColors::Red;
+		}
+		else
+		{
+			m_pVertices[(*pinnedIter)->GetParticleID()].color = d3dxColors::White;
+		}
 	}
 
 	// Clear the entire list of pinned particles
@@ -261,6 +273,7 @@ bool Physics_Cloth::ResetCloth()
 {
 	// Clear Memory
 	ReleaseCloth();
+	ReleaseSelected();
 	m_contraints.clear();
 	m_nextIndex = 0;
 
@@ -892,24 +905,63 @@ void Physics_Cloth::CollisionsWithSelf()
 	// Cycle through all particles
 	for (int i = 0; i < m_particleCount; i++)
 	{
-		// Cycle through all particles that are after the i'th particle
-		for (int j = i + 1; j < m_particleCount; j++)
+		if (m_pParticles[i].GetActiveState() == true)
 		{
-			// Calculate the line between the particles
-			v3float line = *m_pParticles[j].GetPosition() - *m_pParticles[i].GetPosition();
-			float distanceApart = line.Magnitude();
-
-			// Check if the distance apart is less than the self collision radius
-			if (distanceApart < m_selfCollisionRad)
+			// Cycle through all particles that are after the i'th particle
+			for (int j = i + 1; j < m_particleCount; j++)
 			{
-				// Push the Particles apart with equal force in opposite directions
-				m_pParticles[j].Move((line.Normalise() * (m_selfCollisionRad - distanceApart)) / 2.0f);
-				m_pParticles[i].Move((line.Normalise() * (m_selfCollisionRad - distanceApart)) / -2.0f);
+				if (m_pParticles[j].GetActiveState() == true)
+				{
+					// Calculate the line between the particles
+					v3float line = *m_pParticles[j].GetPosition() - *m_pParticles[i].GetPosition();
+					float distanceApart = line.Magnitude();
+
+					// Check if the distance apart is less than the self collision radius
+					if (distanceApart < m_selfCollisionRad)
+					{
+						// Push the Particles apart with equal force in opposite directions
+						m_pParticles[j].Move((line.Normalise() * (m_selfCollisionRad - distanceApart)) / 2.0f);
+						m_pParticles[i].Move((line.Normalise() * (m_selfCollisionRad - distanceApart)) / -2.0f);
+
+						if (distanceApart < 0.6f)
+						{
+							if (m_pParticles[j].GetIgnitedState() == true)
+							{
+								IgniteConnectedConstraints(&m_pParticles[i]);
+							}
+
+							if (m_pParticles[i].GetIgnitedState() == true)
+							{
+								IgniteConnectedConstraints(&m_pParticles[j]);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 }
 
+void Physics_Cloth::Explode(float _ratio)
+{
+	v3float center = { 0, 0, 0 };
+	m_blastRadius = m_maxBlastRadius * _ratio;
 
+	// Cycle through all the particles
+	for (int i = 0; i < m_particleCount; i++)
+	{
+		// Calculate the line between the particle and the sphere
+		v3float line = *m_pParticles[i].GetPosition() - center;
+		float distanceApart = line.Magnitude();
 
+		// Check if the distance apart is less than the spheres radius
+		if (distanceApart < m_blastRadius)
+		{
+			// The particle is in the sphere. Push it out using the shortest path possible
+			m_pParticles[i].Move(line.Normalise() * (m_blastRadius - distanceApart));
+
+			IgniteConnectedConstraints(&m_pParticles[i]);
+		}
+	}
+}
 

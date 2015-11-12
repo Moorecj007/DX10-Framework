@@ -94,7 +94,7 @@ struct TSliderBar
 		sprite_slider = new DXSprite();
 
 		// Create the Bar 
-		VALIDATE(sprite_bar->Initialise(_pRenderer, _pShader, "WaterMap.png", _width + 20, (_height / 4)));
+		VALIDATE(sprite_bar->Initialise(_pRenderer, _pShader, "SliderBar.png", _width + 20, (_height / 4)));
 		sprite_bar->SetPosition(minX, barMinY);
 
 		// Extend the min and max so that the centre of the slider reaches the min and max positions of the bar

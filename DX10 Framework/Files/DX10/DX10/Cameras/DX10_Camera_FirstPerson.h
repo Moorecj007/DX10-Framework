@@ -162,8 +162,6 @@ public:
 	********************/
 	TCameraRay GetRay(v2float _mousePos);
 
-	// TO DO CAL
-	
 	/***********************
 	* Reset: Reset the camera to starting position
 	* @author: Callan Moore

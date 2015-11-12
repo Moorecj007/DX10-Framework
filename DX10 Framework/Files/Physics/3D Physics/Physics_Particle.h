@@ -176,8 +176,16 @@ public:
 	********************/
 	void Reset();
 
+	/***********************
+	* GetActiveState: Retrieve the current active state of the particle
+	* @author: Callan Moore
+	* @return: bool: Active or not
+	********************/
+	bool GetActiveState() { return m_active; };
+
 private:
 	UINT m_particleID;
+	bool m_active;
 	bool m_static;
 	bool m_selected;
 	

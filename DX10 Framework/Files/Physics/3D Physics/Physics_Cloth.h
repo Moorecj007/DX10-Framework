@@ -209,6 +209,14 @@ public:
 	********************/
 	void ToggleWeave() { m_complexWeave = !m_complexWeave; m_initialisedParticles = false; ResetCloth(); };
 		
+	/***********************
+	* Explode: Explode the centre of the cloth
+	* @author: Callan Moore
+	* @parameter: _ratio: Ratio to determine the blast radius
+	* @return: void
+	********************/
+	void Explode(float _ratio);
+
 private:
 	
 	/***********************
@@ -322,6 +330,7 @@ private:
 	********************/
 	void PyramidCollision(v3float _pyraPointA, v3float _pyraPointB, v3float _pyraPointC, v3float _pyraPointD);
 	
+	
 private:
 	DX10_Shader_Cloth* m_pShader;
 
@@ -362,5 +371,8 @@ private:
 	// Ignition Variables
 	float m_burnTime;
 	bool m_complexWeave;
+
+	float m_maxBlastRadius;
+	float m_blastRadius;
 };
 #endif	// __PHYSICS_CLOTH_H__
