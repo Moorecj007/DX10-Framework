@@ -221,13 +221,6 @@ private:
 	********************/
 	void SelectSliders(bool _selected);
 
-	/***********************
-	* ToggleCollisionType: Toggle the collision type
-	* @author: Callan Moore
-	* @return: void
-	********************/
-	void ToggleCollisionType();
-
 private:
 	// Singleton Instance
 	static Application* s_pApp;
@@ -260,7 +253,6 @@ private:
 
 	// Shaders
 	DX10_Shader_LitTex* m_pShader_LitTex;
-	DX10_Shader_Cloth* m_pShader_Cloth;
 	DX10_Shader_Sprite* m_pShader_Sprite;
 
 	// Meshes
@@ -273,13 +265,6 @@ private:
 	DXSprite* m_pSprite_InstructionsLeft;
 	DXSprite* m_pSprite_InstructionsRight;
 
-	// Sliders
-	TSliderBar* m_pSlider_WindSpeed;
-	TSliderBar* m_pSlider_ClothWidth;
-	TSliderBar* m_pSlider_ClothHeight;
-	TSliderBar* m_pSlider_HookAmount;
-	TSliderBar* m_pSlider_BlastRadius;
-
 
 	// Objects
 	DX10_Obj_LitTex* m_pObj_Floor;
@@ -288,12 +273,8 @@ private:
 	DX10_Obj_LitTex* m_pObj_Pyramid;
 
 	// Texture Resources
-	TextureResource* m_pRefractionTexture;
-	TextureResource* m_pReflectionTexture;
-
-	// Cloth Simulation
-	Physics_Cloth* m_pCloth;
-	eCollisionType m_eCollisionType;
+	DX10_TextureResource* m_pRefractionTexture;
+	DX10_TextureResource* m_pReflectionTexture;
 };
 
 #endif // __APPLICATION_H__

@@ -120,7 +120,7 @@
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_Debug.cpp" />
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.cpp" />
     <ClCompile Include="Files\DX10\DX10\DX10_Renderer.cpp" />
-    <ClCompile Include="Files\DX10\DX10\Systems\TextureResource.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Systems\DX10_TextureResource.cpp" />
     <ClCompile Include="Files\Input\InputGamePad.cpp" />
     <ClCompile Include="Files\Menus\Menu.cpp" />
     <ClCompile Include="Files\Physics\3D Physics\Physics_Cloth.cpp" />
@@ -150,7 +150,7 @@
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Sprite.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Water.h" />
     <ClInclude Include="Files\DX10\DX10\Systems\DX10_Buffer.h" />
-    <ClInclude Include="Files\DX10\DX10\Systems\TextureResource.h" />
+    <ClInclude Include="Files\DX10\DX10\Systems\DX10_TextureResource.h" />
     <ClInclude Include="Files\Input\InputGamePad.h" />
     <ClInclude Include="Files\Menus\Menu.h" />
     <ClInclude Include="Files\Physics\3D Physics\Physics_Cloth.h" />

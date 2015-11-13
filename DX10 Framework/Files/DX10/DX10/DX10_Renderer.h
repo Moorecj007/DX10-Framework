@@ -28,7 +28,7 @@
 #include "../../Utility/Utilities.h"
 #include "DX10_Vertex.h"
 #include "Systems/DX10_Buffer.h"
-#include "Systems/TextureResource.h"
+#include "Systems/DX10_TextureResource.h"
 
 struct PolygonType
 {
@@ -238,9 +238,10 @@ public:
 	* CreateTextureResource: Create and initialize a Texture Resource class
 	* @author: Callan Moore
 	* @parameter: _prTextureResource: Storage variable to hold the created Texture Resource
+	* @parameter: _type: Type of texture resource to create
 	* @return: bool
 	********************/
-	bool CreateTextureResource(TextureResource*& _prTextureResource);
+	bool CreateTextureResource(DX10_TextureResource*& _prTextureResource, eTexResourceType _type);
 
 	/***********************
 	* ResetRenderTarget: Reset the Devices Render Target to be the default back buffer on the swap chain
@@ -410,6 +411,7 @@ private:
 	IDXGISwapChain*  m_pDX10SwapChain;
 	ID3D10RenderTargetView* m_pRenderTargetView;
 	ID3D10DepthStencilView* m_pDepthStencilView;
+	D3D10_VIEWPORT m_viewPort;
 
 	ID3D10DepthStencilState* m_pDepthStencilStateNormal;
 	ID3D10DepthStencilState* m_pDepthStencilStateZDisabled;

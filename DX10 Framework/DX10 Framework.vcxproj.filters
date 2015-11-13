@@ -162,9 +162,6 @@
     <ClInclude Include="Files\DX10\DX10\DX10_Renderer.h">
       <Filter>Header Files\DX10</Filter>
     </ClInclude>
-    <ClInclude Include="Files\DX10\DX10\Systems\TextureResource.h">
-      <Filter>Header Files\DX10\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="Files\Physics\Physics_3D.h">
       <Filter>Header Files\Physics\3D Physics</Filter>
     </ClInclude>
@@ -182,6 +179,9 @@
     </ClInclude>
     <ClInclude Include="Files\DX10\DX10\2D Objects\DX10_UI_Elements.h">
       <Filter>Header Files\DX10\2D Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Systems\DX10_TextureResource.h">
+      <Filter>Header Files\DX10\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -224,9 +224,6 @@
     <ClCompile Include="Files\DX10\DX10\3D Objects\DX10_Obj_Water.cpp">
       <Filter>Source Files\DX10\3D Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Files\DX10\DX10\Systems\TextureResource.cpp">
-      <Filter>Source Files\DX10\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="Files\Physics\3D Physics\Physics_Cloth.cpp">
       <Filter>Source Files\Physics\3D Physics</Filter>
     </ClCompile>
@@ -235,6 +232,9 @@
     </ClCompile>
     <ClCompile Include="Files\Physics\3D Physics\Physics_Particle.cpp">
       <Filter>Source Files\Physics\3D Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Files\DX10\DX10\Systems\DX10_TextureResource.cpp">
+      <Filter>Source Files\DX10\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
