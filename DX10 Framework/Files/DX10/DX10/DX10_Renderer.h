@@ -29,6 +29,7 @@
 #include "DX10_Vertex.h"
 #include "Systems/DX10_Buffer.h"
 #include "Systems/TextureResource.h"
+#include "Systems/DX10_ShadowMap.h"
 
 struct PolygonType
 {
@@ -389,6 +390,28 @@ public:
 	* @return: bool: true when fullscreen is set otherwise false.
 	********************/
 	bool IsFullscreen() { return m_fullScreen; };
+	
+	/***********************
+	* CreateShadowMap: Create a ShadowMap object for storing depth values
+	* @author: Callan Moore
+	* @parameter: _prShadowMap: Storage variable for the created Shadow Map
+	* @return: bool: Successful or not
+	********************/
+	bool CreateShadowMap(DX10_ShadowMap*& _prShadowMap);
+	
+	/***********************
+	* CreateShadowProjMatrix: Create a orthographic projection matrix for shadowing effects
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void CreateShadowProjMatrix();
+	
+	/***********************
+	* GetShadowProjMatrix: Retrieve the shadow projection matrix
+	* @author: Callan Moore
+	* @return: D3DXMATRIX: The shadow projection matrix
+	********************/
+	D3DXMATRIX GetShadowProjMatrix() { return m_matShadowProj; };
 
 private:
 	// Window Variables
@@ -398,6 +421,7 @@ private:
 	int m_clientWidth;
 	int m_clientHeight;
 	bool m_fullScreen;
+	D3D10_VIEWPORT m_viewPort;
 
 	// Matrices for Rendering
 	D3DXMATRIX m_matView;
@@ -450,6 +474,9 @@ private:
 	std::map<std::string, TLight*> m_mapLights;
 	TLight* m_pArrLights;
 	int m_lightCount;
+
+	// Shadowing Variables
+	D3DXMATRIX m_matShadowProj;
 };
 
 #endif // __DX10_RENDERER_H__

@@ -340,22 +340,22 @@ bool DX10_Renderer::onResize()
 	//m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 	
 	// Set the View Port for the Device
-	D3D10_VIEWPORT viewPort;
-	viewPort.TopLeftX = 0;
-	viewPort.TopLeftY = 0;
-	viewPort.Width = m_clientWidth;
-	viewPort.Height = m_clientHeight;
-	viewPort.MinDepth = 0.0f;
-	viewPort.MaxDepth = 1.0f;
+	m_viewPort.TopLeftX = 0;
+	m_viewPort.TopLeftY = 0;
+	m_viewPort.Width = m_clientWidth;
+	m_viewPort.Height = m_clientHeight;
+	m_viewPort.MinDepth = 0.0f;
+	m_viewPort.MaxDepth = 1.0f;
 	
 	// Binds the View port to the Rasterizer stage of the pipeline
-	m_pDX10Device->RSSetViewports(1, &viewPort);
+	m_pDX10Device->RSSetViewports(1, &m_viewPort);
 
 	// Calculate the new Projection Matrix
 	CalcProjMatrix();
 
 	// Create an orthographic projection matrix for 2D rendering.
 	D3DXMatrixOrthoLH(&m_matOrtho, static_cast<float>(m_clientWidth), static_cast<float>(m_clientHeight), 0.1f, 100.0f);
+	CreateShadowProjMatrix();
 
 	return true;
 }
@@ -587,6 +587,9 @@ void DX10_Renderer::RenderBuffer(DX10_Buffer* _buffer)
 
 void DX10_Renderer::StartRender()
 {
+	m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
+	m_pDX10Device->RSSetViewports(1, &m_viewPort);
+
 	m_pDX10Device->ClearRenderTargetView(m_pRenderTargetView, m_clearColor);
 	m_pDX10Device->ClearDepthStencilView(m_pDepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 }
@@ -995,4 +998,17 @@ void DX10_Renderer::CalcProjMatrix()
 {
 	float aspect = float(m_clientWidth) / m_clientHeight;
 	D3DXMatrixPerspectiveFovLH(&m_matProj, 0.25f*PI, aspect, 1.0f, 10000.0f);
+}
+
+bool DX10_Renderer::CreateShadowMap(DX10_ShadowMap*& _prShadowMap)
+{
+	_prShadowMap = new DX10_ShadowMap();
+	VALIDATE(_prShadowMap->Initialise(m_pDX10Device, 1024, 1024 ));
+
+	return true;
+}
+
+void DX10_Renderer::CreateShadowProjMatrix()
+{
+	D3DXMatrixOrthoLH(&m_matShadowProj, 30.0f, 30.0f, 1.0f, 100.0f);
 }

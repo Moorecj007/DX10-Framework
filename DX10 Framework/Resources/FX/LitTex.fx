@@ -1,7 +1,7 @@
 //=============================================================================
 // LitTex.fx                                                                                                   
 //
-// Transforms, lights, and textures geometry.
+// Transforms, lights, and textures geometry
 //=============================================================================
 
 // Local Includes

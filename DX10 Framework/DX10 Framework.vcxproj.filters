@@ -183,6 +183,15 @@
     <ClInclude Include="Files\DX10\DX10\2D Objects\DX10_UI_Elements.h">
       <Filter>Header Files\DX10\2D Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Systems\DX10_ShadowMap.h">
+      <Filter>Header Files\DX10\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_ShadowMap.h">
+      <Filter>Header Files\DX10\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Shadow.h">
+      <Filter>Header Files\DX10\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
@@ -236,6 +245,9 @@
     <ClCompile Include="Files\Physics\3D Physics\Physics_Particle.cpp">
       <Filter>Source Files\Physics\3D Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Files\DX10\DX10\Systems\DX10_ShadowMap.cpp">
+      <Filter>Source Files\DX10\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\FX\LightStructures.fx">
@@ -251,6 +263,9 @@
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
     <FxCompile Include="Resources\FX\Cloth.fx">
+      <Filter>Resource Files\FX Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\FX\ShadowMap.fx">
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
   </ItemGroup>

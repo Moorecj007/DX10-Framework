@@ -52,8 +52,10 @@
 #include "DX10\Shaders\DX10_Shader_Sprite.h"
 #include "DX10\Shaders\DX10_Shader_Water.h"
 #include "DX10\Shaders\DX10_Shader_Cloth.h"
+#include "DX10\Shaders\DX10_Shader_ShadowMap.h"
 
 // Systems
 #include "DX10\Systems\TextureResource.h"
+#include "DX10\Systems\DX10_ShadowMap.h"
 
 #endif	// __DX10_H__

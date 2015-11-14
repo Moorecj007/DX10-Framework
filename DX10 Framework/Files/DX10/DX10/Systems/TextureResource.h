@@ -25,7 +25,7 @@ class TextureResource
 public:
 
 	/***********************
-	* ~TextureResource: Default Constructor for Texture Resource class
+	* TextureResource: Default Constructor for Texture Resource class
 	* @author: Callan Moore
 	********************/
 	TextureResource();

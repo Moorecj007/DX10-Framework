@@ -211,8 +211,6 @@ bool Application::Initialise(int _clientWidth, int _clientHeight, HINSTANCE _hIn
 	m_fps = 0;
 	m_deltaTick = 0;
 	m_fpsTimer = 0;
-
-	m_eCollisionType = CT_NONE;
 	
 	return true;
 }
@@ -223,21 +221,31 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pDX10_Renderer = new DX10_Renderer();
 	VALIDATE(m_pDX10_Renderer->Initialise(m_clientWidth, m_clientHeight, m_hWnd));
 
-	// Initialise the Objects
+	
+	//--------------------------------------------------------------
+	// Initialise the Cameras
+	//--------------------------------------------------------------
+
 	m_pCamera = new DX10_Camera_FirstPerson();
 	VALIDATE(m_pCamera->Initialise(m_pDX10_Renderer, _hInstance, m_hWnd));
 
+	//--------------------------------------------------------------
 	// Create the Shaders
+	//--------------------------------------------------------------
+
 	m_pShader_LitTex = new DX10_Shader_LitTex();
 	VALIDATE(m_pShader_LitTex->Initialise(m_pDX10_Renderer));
-
-	m_pShader_Cloth = new DX10_Shader_Cloth();
-	VALIDATE(m_pShader_Cloth->Initialise(m_pDX10_Renderer));
 
 	m_pShader_Sprite = new DX10_Shader_Sprite();
 	VALIDATE(m_pShader_Sprite->Initialise(m_pDX10_Renderer, &m_hWnd));
 
+	m_pShader_ShadowMap = new DX10_Shader_ShadowMap();
+	VALIDATE(m_pShader_ShadowMap->Initialise(m_pDX10_Renderer));
+
+	//--------------------------------------------------------------
 	// Create the Meshes
+	//--------------------------------------------------------------
+
 	m_pMesh_Floor = new DX10_Mesh();
 	VALIDATE(m_pMesh_Floor->Initialise(m_pDX10_Renderer, MT_FINITEPLANE, { 100.0f, 100.0f, 100.0f }));
 
@@ -250,7 +258,10 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pMesh_Pyramid = new DX10_Mesh();
 	VALIDATE(m_pMesh_Pyramid->Initialise(m_pDX10_Renderer, MT_PYRAMID, { 10.0f, 10.0f, 10.0f }));
 
+	//--------------------------------------------------------------
 	// Create the sprites
+	//--------------------------------------------------------------
+
 	m_pSprite_InstructionsLeft = new DXSprite();
 	VALIDATE(m_pSprite_InstructionsLeft->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "Cloth_Instructions_Left.png", 300, 900));
 	m_pSprite_InstructionsLeft->SetPosition(10, 0);
@@ -259,58 +270,57 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	VALIDATE(m_pSprite_InstructionsRight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, "Cloth_Instructions_Right.png", 300, 900));
 	m_pSprite_InstructionsRight->SetPosition(1050, 0);
 
+	//--------------------------------------------------------------
 	// Create the Sliders
-	m_pSlider_WindSpeed = new TSliderBar();
-	VALIDATE(m_pSlider_WindSpeed->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 1150, 400 }, 140, 40));
+	//--------------------------------------------------------------
 
-	m_pSlider_ClothWidth = new TSliderBar();
-	VALIDATE(m_pSlider_ClothWidth->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 100, 535 }, 140, 40));
+	//m_pSlider_WindSpeed = new TSliderBar();
+	//VALIDATE(m_pSlider_WindSpeed->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 1150, 400 }, 140, 40));
+	//
+	//m_pSlider_ClothWidth = new TSliderBar();
+	//VALIDATE(m_pSlider_ClothWidth->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 100, 535 }, 140, 40));
+	//
+	//m_pSlider_ClothHeight = new TSliderBar();
+	//VALIDATE(m_pSlider_ClothHeight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 100, 615 }, 140, 40));
+	//
+	//m_pSlider_HookAmount = new TSliderBar();
+	//VALIDATE(m_pSlider_HookAmount->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 100, 690 }, 140, 40));
+	//
+	//m_pSlider_BlastRadius = new TSliderBar();
+	//VALIDATE(m_pSlider_BlastRadius->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 1150, 715 }, 140, 40));
 
-	m_pSlider_ClothHeight = new TSliderBar();
-	VALIDATE(m_pSlider_ClothHeight->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 100, 615 }, 140, 40));
-
-	m_pSlider_HookAmount = new TSliderBar();
-	VALIDATE(m_pSlider_HookAmount->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 100, 690 }, 140, 40));
-
-	m_pSlider_BlastRadius = new TSliderBar();
-	VALIDATE(m_pSlider_BlastRadius->Initialise(m_pDX10_Renderer, m_pShader_Sprite, { 1150, 715 }, 140, 40));
-
+	//--------------------------------------------------------------
 	// Create the Objects
+	//--------------------------------------------------------------
+
 	m_pObj_Floor = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Floor->Initialise(m_pDX10_Renderer, m_pMesh_Floor, m_pShader_LitTex, "Dragon.png"));
-	m_pObj_Floor->SetPosition({ 0.0f, -20.0f, 0.0f });
+	m_pObj_Floor->SetPosition({ 0.0f, 0.0f, 0.0f });
 
 	m_pObj_Sphere = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Sphere->Initialise(m_pDX10_Renderer, m_pMesh_Sphere, m_pShader_LitTex, "WaterMap.png"));
-	m_pObj_Sphere->SetPosition({ 0.0f, 0.0f, 7.0f });
+	m_pObj_Sphere->SetPosition({ 0.0f, 4.0f, 7.0f });
 
 	m_pObj_Capsule = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Capsule->Initialise(m_pDX10_Renderer, m_pMesh_Capsule, m_pShader_LitTex, "WaterMap.png"));
-	m_pObj_Capsule->SetPosition({ 0.0f, 0.0f, 6.0f });
+	m_pObj_Capsule->SetPosition({ -10.0f, 4.0f, 6.0f });
 
 	m_pObj_Pyramid = new DX10_Obj_LitTex();
 	VALIDATE(m_pObj_Pyramid->Initialise(m_pDX10_Renderer, m_pMesh_Pyramid, m_pShader_LitTex, "WaterMap.png"));
-	m_pObj_Pyramid->SetPosition({ 0.0f, 0.0f, 7.0f });
-
-	// Create the Cloth
-	m_pCloth = new Physics_Cloth();
-	VALIDATE(m_pCloth->Initialise(m_pDX10_Renderer, m_pShader_Cloth, 20, 20, 0.01f, 0.033f));
-
-	// Create the Texture Resources for Refraction and Reflection
-	m_pDX10_Renderer->CreateTextureResource(m_pRefractionTexture);
-	m_pDX10_Renderer->CreateTextureResource(m_pReflectionTexture);
+	m_pObj_Pyramid->SetPosition({ 10.0f, 4.0f, 7.0f });
 
 	// Set the beginning ratios of the slider bars
-	m_pSlider_WindSpeed->SetRatio(0.0f);
-	m_pSlider_ClothWidth->SetRatio(0.5f);
-	m_pSlider_ClothHeight->SetRatio(0.5f);
-	m_pSlider_HookAmount->SetRatio(0.1f);
-	m_pSlider_BlastRadius->SetRatio(0.4f);
-	m_pCloth->UpdateWindSpeed(m_pSlider_WindSpeed->GetRatio());
-	m_pCloth->ResizeWidth(m_pSlider_ClothWidth->GetRatio());
-	m_pCloth->ResizeHeight(m_pSlider_ClothHeight->GetRatio());
-	m_pCloth->ResizeHooks(m_pSlider_HookAmount->GetRatio());
-	m_pCloth->ResizeHooks(m_pSlider_BlastRadius->GetRatio());
+	//m_pSlider_WindSpeed->SetRatio(0.0f);
+	//m_pSlider_ClothWidth->SetRatio(0.5f);
+	//m_pSlider_ClothHeight->SetRatio(0.5f);
+	//m_pSlider_HookAmount->SetRatio(0.1f);
+	//m_pSlider_BlastRadius->SetRatio(0.4f);
+
+	//--------------------------------------------------------------
+	// Create Shadowing variables
+	//--------------------------------------------------------------
+
+	VALIDATE(m_pDX10_Renderer->CreateShadowMap(m_pShadowMap));
 
 	return true;
 }
@@ -338,8 +348,8 @@ void Application::ShutDown()
 		ReleasePtr(m_pCamera);
 		// Release the Shaders
 		ReleasePtr(m_pShader_LitTex);
-		ReleasePtr(m_pShader_Cloth);
 		ReleasePtr(m_pShader_Sprite);
+		ReleasePtr(m_pShader_ShadowMap);
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Floor);
 		ReleasePtr(m_pMesh_Sphere);
@@ -348,21 +358,18 @@ void Application::ShutDown()
 		// Release the Sprites
 		ReleasePtr(m_pSprite_InstructionsLeft);
 		ReleasePtr(m_pSprite_InstructionsRight);
-		ReleasePtr(m_pSlider_WindSpeed);
-		ReleasePtr(m_pSlider_ClothWidth);
-		ReleasePtr(m_pSlider_ClothHeight);
-		ReleasePtr(m_pSlider_HookAmount);
-		ReleasePtr(m_pSlider_BlastRadius);
+		//ReleasePtr(m_pSlider_WindSpeed);
+		//ReleasePtr(m_pSlider_ClothWidth);
+		//ReleasePtr(m_pSlider_ClothHeight);
+		//ReleasePtr(m_pSlider_HookAmount);
+		//ReleasePtr(m_pSlider_BlastRadius);
 		// Release the Objects
 		ReleasePtr(m_pObj_Floor);
 		ReleasePtr(m_pObj_Sphere);
 		ReleasePtr(m_pObj_Capsule);
 		ReleasePtr(m_pObj_Pyramid);
-		// Release the Texture Resources
-		ReleasePtr(m_pRefractionTexture);
-		ReleasePtr(m_pReflectionTexture);
-		// Release the Cloth
-		ReleasePtr(m_pCloth);
+		// Release Shadowing Variables 	
+		ReleasePtr(m_pShadowMap);
 
 		// Release the Renderers resources
 		m_pDX10_Renderer->ShutDown();
@@ -407,61 +414,15 @@ bool Application::Process(float _dt)
 
 	// Processes to run when using DX10 Renderer
 	if (m_pDX10_Renderer != 0)
-	{		
+	{
 		m_pCamera->Process(_dt);
 
 		ProcessShaders();
 
-		m_pCloth->Process(m_eCollisionType);
 		m_pObj_Floor->Process(_dt);
-
-		switch (m_eCollisionType)
-		{
-			case CT_SPHERE:
-			{
-				m_pObj_Sphere->Process(_dt);
-			}
-			break;
-			case CT_CAPSULE:
-			{
-				m_pObj_Capsule->Process(_dt);
-			}
-			break;
-			case CT_PYRAMID:
-			{
-				m_pObj_Pyramid->Process(_dt);
-			}
-			break;
-			default: break;
-		} // End Switch
-
-		if (m_mouseDown)
-		{
-			if (m_pSlider_WindSpeed->GetSelected() == true)
-			{
-				m_pSlider_WindSpeed->Process(m_mousePosActual);
-				m_pCloth->UpdateWindSpeed(m_pSlider_WindSpeed->GetRatio());
-			}
-			if (m_pSlider_ClothWidth->GetSelected() == true)
-			{
-				m_pSlider_ClothWidth->Process(m_mousePosActual);
-				m_pCloth->ResizeWidth(m_pSlider_ClothWidth->GetRatio());
-			}
-			if (m_pSlider_ClothHeight->GetSelected() == true)
-			{
-				m_pSlider_ClothHeight->Process(m_mousePosActual);
-				m_pCloth->ResizeHeight(m_pSlider_ClothHeight->GetRatio());
-			}
-			if (m_pSlider_HookAmount->GetSelected() == true)
-			{
-				m_pSlider_HookAmount->Process(m_mousePosActual);
-				m_pCloth->ResizeHooks(m_pSlider_HookAmount->GetRatio());
-			}
-			if (m_pSlider_BlastRadius->GetSelected() == true)
-			{
-				m_pSlider_BlastRadius->Process(m_mousePosActual);
-			}
-		}
+		m_pObj_Sphere->Process(_dt);
+		m_pObj_Capsule->Process(_dt);
+		m_pObj_Pyramid->Process(_dt);
 	}
 
 	return true;
@@ -470,7 +431,6 @@ bool Application::Process(float _dt)
 void Application::ProcessShaders()
 {
 	m_pShader_LitTex->SetUpPerFrame();
-	m_pShader_Cloth->SetUpPerFrame();
 	m_pShader_Sprite->Update(m_deltaTick);
 }
 
@@ -478,90 +438,50 @@ void Application::Render()
 {
 	// Render calls when using the DX10 Renderer
 	if (m_pDX10_Renderer != 0)
-	{
-		// Render the Refraction and Reflection Textures
-		//RenderRefraction();
-		//RenderReflection();
+	{		
+		m_pDX10_Renderer->RestoreDefaultRenderStates();
+
+		D3DXVECTOR3 lightPos;
+		lightPos.x =   0.0f;
+		lightPos.y =  40.0f;
+		lightPos.z = -40.0f;
+
+		D3DXMATRIX matLightView;
+		D3DXMatrixLookAtLH(&matLightView, &lightPos, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), &D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+
+		m_pShadowMap->StartRender();
 		
+		m_pShader_ShadowMap->Render(m_pObj_Floor, matLightView);
+		m_pShader_ShadowMap->Render(m_pObj_Sphere, matLightView);
+		m_pShader_ShadowMap->Render(m_pObj_Capsule, matLightView);
+		m_pShader_ShadowMap->Render(m_pObj_Pyramid, matLightView);
+		
+		m_pShadowMap->EndRender();
+
+
 		// Tell the Renderer that the data input for the back buffer is about to commence
 		m_pDX10_Renderer->StartRender();
 
 		// Render the Objects of the Scene	
 		m_pObj_Floor->Render();
-
-		switch (m_eCollisionType)
-		{
-			case CT_SPHERE:
-			{
-				m_pObj_Sphere->Render();
-			}
-			break;
-			case CT_CAPSULE:
-			{
-				m_pObj_Capsule->Render();
-			}
-			break;
-			case CT_PYRAMID:
-			{
-				m_pObj_Pyramid->Render();
-			}
-			break;
-			default: break;
-		} // End Switch
-
-		m_pCloth->Render();
+		m_pObj_Floor->Render();
+		m_pObj_Sphere->Render();
+		m_pObj_Capsule->Render();
+		m_pObj_Pyramid->Render();
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
-		m_pSprite_InstructionsLeft->Render();
-		m_pSprite_InstructionsRight->Render();
-		m_pSlider_WindSpeed->Render();
-		m_pSlider_ClothWidth->Render();
-		m_pSlider_ClothHeight->Render();
-		m_pSlider_HookAmount->Render();
-		m_pSlider_BlastRadius->Render();
+		//m_pSprite_InstructionsLeft->Render();
+		//m_pSprite_InstructionsRight->Render();
+		//m_pSlider_WindSpeed->Render();
+		//m_pSlider_ClothWidth->Render();
+		//m_pSlider_ClothHeight->Render();
+		//m_pSlider_HookAmount->Render();
+		//m_pSlider_BlastRadius->Render();
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_NORMAL);
 		
 		// Tell the Renderer the data input is over and present the outcome
 		m_pDX10_Renderer->EndRender();
 	}
-}
-
-void Application::RenderRefraction()
-{
-	// Create a clip plane for the Water so nothing above it is rendered for the refraction
-	D3DXPLANE clipPlane = D3DXPLANE(0.0f, -1.0f, 0.0f, 2.0f);
-
-	// Set the Refraction Texture to be the Render Target of the Graphics Device and clear it 
-	m_pRefractionTexture->SetRenderTarget();
-	m_pRefractionTexture->ClearRenderTarget();
-
-	// Render all objects that will be refracted
-
-
-	// Reset the Devices Render Target to be the default back buffer on the swap chain
-	m_pDX10_Renderer->ResetRenderTarget();
-}
-
-void Application::RenderReflection()
-{
-	// Set the Reflection Texture to be the Render Target of the Graphics Device and clear it 
-	m_pReflectionTexture->SetRenderTarget();
-	m_pReflectionTexture->ClearRenderTarget();
-
-	// Create a mirror plane for the reflective surface
-	D3DXPLANE mirrorPlane = { 0.0f, -1.0f, 0.0f, 0.0f };
-
-	// Reflect the Lights across the plane so they are lighting the correct sides of the reflected objects
-	m_pDX10_Renderer->ReflectLightsAcrossPlane(mirrorPlane);
-
-	// Render all objects that will be reflected
-
-
-	// Reflect the Lights back across the plane to resume normal lighting
-	m_pDX10_Renderer->ReflectLightsAcrossPlane(mirrorPlane);
-
-	// Reset the Devices Render Target to be the default back buffer on the swap chain
-	m_pDX10_Renderer->ResetRenderTarget();
 }
 
 bool Application::HandleInput()
@@ -649,173 +569,11 @@ bool Application::HandleInput()
 		// Right arrow pressed
 		m_pCamera->RotateYaw(1);
 	}
-
-	// Application Specific Keys
-	if (m_pKeyDown[input::VK_1])
-	{
-		m_pCloth->ReleaseCloth();
-		SetKeyDown(input::VK_1, false);
-	}
-
-	if (m_pKeyDown[input::VK_2])
-	{
-		m_pCloth->Explode(m_pSlider_BlastRadius->GetRatio());
-		SetKeyDown(input::VK_2, false);
-	}
-
-	if (m_pKeyDown[VK_ADD])
-	{
-		m_pCloth->MoveHooks(true);
-	}
-
-	if (m_pKeyDown[VK_SUBTRACT])
-	{
-		m_pCloth->MoveHooks(false);
-	}
-
-	//if (m_pKeyDown[input::VK_9])
-	//{
-	//	m_pCloth->ResizeHooks(true);
-	//	SetKeyDown(input::VK_9, false);
-	//}
-	//
-	//if (m_pKeyDown[input::VK_0])
-	//{
-	//	m_pCloth->ResizeHooks(false);
-	//	SetKeyDown(input::VK_0, false);
-	//}
-
-	//if (m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_LEFT])
-	//{
-	//	m_pCloth->ResizeWidth(true);
-	//}
-	//
-	//if(m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_RIGHT])
-	//{
-	//	m_pCloth->ResizeWidth(false);
-	//}
-	//
-	//if (m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_UP])
-	//{
-	//	m_pCloth->ResizeHeight(true);
-	//}
-	//
-	//if (m_pKeyDown[VK_CONTROL] && m_pKeyDown[VK_DOWN])
-	//{
-	//	m_pCloth->ResizeHeight(false);
-	//}
-
-	if (m_pKeyDown[input::VK_R])
-	{
-		m_pCloth->ResetCloth();
-		SetKeyDown(input::VK_R, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD0])
-	{
-		m_pCloth->AddForce({ 0.0f, -1.0f, 0.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD1])
-	{
-		m_pCloth->AddForce({ -1.0f, 0.0f, -1.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD2])
-	{
-		m_pCloth->AddForce({ 0.0f, 0.0f, -1.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD3])
-	{
-		m_pCloth->AddForce({ 1.0f, 0.0f, -1.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD4])
-	{
-		m_pCloth->AddForce({ -1.0f, 0.0f, 0.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD5])
-	{
-		m_pCloth->AddForce({ 0.0f, 1.0f, 0.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD6])
-	{
-		m_pCloth->AddForce({ 1.0f, 0.0f, 0.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD7])
-	{
-		m_pCloth->AddForce({ -1.0f, 0.0f, 1.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD8])
-	{
-		m_pCloth->AddForce({ 0.0f, 0.0f, 1.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[VK_NUMPAD9])
-	{
-		m_pCloth->AddForce({ 1.0f, 0.0f, 1.0f }, FT_WIND, false);
-	}
-
-	if (m_pKeyDown[input::VK_C])
-	{
-		ToggleCollisionType();
-		SetKeyDown(input::VK_C, false);
-	}
-
+	
 	if (m_pKeyDown[input::VK_Z])
 	{
 		m_pCamera->Reset();
 		SetKeyDown(input::VK_Z, false);
-	}
-
-
-	if (m_pKeyDown[input::VK_X])
-	{
-		m_pCloth->ToggleWeave();
-		SetKeyDown(input::VK_X, false);
-	}
-
-	if (m_mouseDown)
-	{
-		// Cast a Ray
-		TCameraRay camRay = m_pCamera->GetRay(m_mousePos);
-
-		if (m_pKeyDown[VK_SHIFT] && !m_pKeyDown[VK_CONTROL])
-		{
-			// Select the particles
-			m_pCloth->Cut(camRay, 0.707f);
-		}
-		else if (m_pKeyDown[VK_CONTROL] && !m_pKeyDown[VK_SHIFT])
-		{
-			// Ignite the Selected Particles
-			m_pCloth->Ignite(camRay, 0.707f);
-		}
-		else
-		{
-			// Check if the initial Ray has been Cast
-			if (!m_initialRayCast)
-			{
-				// Move the Selected The Particles
-				m_pCloth->Manipulate(camRay, 0.707f, true);
-				m_initialRayCast = true;
-			}
-			else
-			{
-				// Move the Selected The Particles
-				m_pCloth->Manipulate(camRay, 0.707f, false);
-			}
-		}
-	}
-	else
-	{
-		// Reset the Initial Ray cast and release all selected particles of cloth
-		m_initialRayCast = false;
-		m_pCloth->ReleaseSelected();
 	}
 
 	return true;
@@ -868,37 +626,10 @@ void Application::UpdateMousePos(POINT _mousePos)
 
 void Application::SelectSliders(bool _selected)
 {
-	m_pSlider_WindSpeed->SelectSlider(m_mousePosActual, _selected);
-	m_pSlider_ClothWidth->SelectSlider(m_mousePosActual, _selected);
-	m_pSlider_ClothHeight->SelectSlider(m_mousePosActual, _selected);
-	m_pSlider_HookAmount->SelectSlider(m_mousePosActual, _selected);
-	m_pSlider_BlastRadius->SelectSlider(m_mousePosActual, _selected);
+	//m_pSlider_WindSpeed->SelectSlider(m_mousePosActual, _selected);
+	//m_pSlider_ClothWidth->SelectSlider(m_mousePosActual, _selected);
+	//m_pSlider_ClothHeight->SelectSlider(m_mousePosActual, _selected);
+	//m_pSlider_HookAmount->SelectSlider(m_mousePosActual, _selected);
+	//m_pSlider_BlastRadius->SelectSlider(m_mousePosActual, _selected);
 }
 
-void Application::ToggleCollisionType()
-{
-	switch (m_eCollisionType)
-	{
-		case CT_NONE:
-		{
-			m_eCollisionType = CT_SPHERE;
-		}
-		break;
-		case CT_SPHERE:
-		{
-			m_eCollisionType = CT_CAPSULE;
-		}
-		break;
-		case CT_CAPSULE:
-		{
-			m_eCollisionType = CT_PYRAMID;
-		}
-		break;
-		case CT_PYRAMID:
-		{
-		m_eCollisionType = CT_NONE;
-		}
-		break;
-		default: break;
-	}
-}

@@ -265,6 +265,38 @@ public:
 		m_scrollSpeed = _scrollSpeed;
 		m_scrollDir = _scrollDir.Normalise();
 	}
+
+	/***********************
+	* Draw: Direct call to get the object to draw itself without going through its shader
+	* @author: Callan Moore
+	* @return: void
+	********************/
+	void Draw()
+	{
+		m_pMesh->Render();
+	}
+
+	/***********************
+	* GetWorldMatrix: Retrieve the objects world matrix
+	* @author: Callan Moore
+	* @return: D3DXMATRIX: A world matrix
+	********************/
+	D3DXMATRIX GetWorldMatrix() { return m_matWorld; };
+	
+	/***********************
+	* GetTexture: Retrieve the objects texture
+	* @author: Callan Moore
+	* @return: ID3D10ShaderResourceView*: The objects texture as a dx10 resource
+	********************/
+	ID3D10ShaderResourceView* GetTexture() { return (*m_pTextures)[0]; };
+	
+	/***********************
+	* GetMesh: Retrieve the mesh of the object
+	* @author: Callan Moore
+	* @return: DX10_Mesh*: The mesh of the object
+	********************/
+	DX10_Mesh* GetMesh() { return m_pMesh; };
+
 protected:
 	DX10_Renderer* m_pRenderer;
 	DX10_Mesh* m_pMesh;

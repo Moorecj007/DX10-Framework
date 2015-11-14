@@ -120,6 +120,7 @@
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_Debug.cpp" />
     <ClCompile Include="Files\DX10\DX10\Cameras\DX10_Camera_FirstPerson.cpp" />
     <ClCompile Include="Files\DX10\DX10\DX10_Renderer.cpp" />
+    <ClCompile Include="Files\DX10\DX10\Systems\DX10_ShadowMap.cpp" />
     <ClCompile Include="Files\DX10\DX10\Systems\TextureResource.cpp" />
     <ClCompile Include="Files\Input\InputGamePad.cpp" />
     <ClCompile Include="Files\Menus\Menu.cpp" />
@@ -147,9 +148,12 @@
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Cloth.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h" />
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Shadow.h" />
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_ShadowMap.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Sprite.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Water.h" />
     <ClInclude Include="Files\DX10\DX10\Systems\DX10_Buffer.h" />
+    <ClInclude Include="Files\DX10\DX10\Systems\DX10_ShadowMap.h" />
     <ClInclude Include="Files\DX10\DX10\Systems\TextureResource.h" />
     <ClInclude Include="Files\Input\InputGamePad.h" />
     <ClInclude Include="Files\Menus\Menu.h" />
@@ -164,6 +168,7 @@
     <ClInclude Include="Files\Utility\Utility_Math.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Resources\FX\ShadowMap.fx" />
     <FxCompile Include="Resources\FX\Cloth.fx" />
     <FxCompile Include="Resources\FX\LightStructures.fx" />
     <FxCompile Include="Resources\FX\LitTex.fx" />
