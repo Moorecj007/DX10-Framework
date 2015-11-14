@@ -54,6 +54,6 @@
 #include "DX10\Shaders\DX10_Shader_Cloth.h"
 
 // Systems
-#include "DX10\Systems\DX10_TextureResource.h"
+#include "DX10\Systems\TextureResource.h"
 
 #endif	// __DX10_H__

@@ -45,8 +45,7 @@ enum eTech_LitTex
 	TECH_LITTEX_REFRACT,
 	TECH_LITTEX_REFLECT,
 	TECH_LITTEX_STAR,
-	TECH_LITTEX_NOCULL,
-	TECH_LITTEX_SHADOW
+	TECH_LITTEX_NOCULL
 };
 
 class DX10_Shader_LitTex
@@ -181,7 +180,6 @@ private:
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "ReflectTech", m_pFX, m_pTech_Reflect));
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "StarTech", m_pFX, m_pTech_Star));
 		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "NoCullTech", m_pFX, m_pTech_NoCull));
-		VALIDATE(m_pDX10_Renderer->BuildFX("litTex.fx", "NoCullTech", m_pFX, m_pTech_Shadow));
 
 		return true;
 	}
@@ -211,10 +209,6 @@ private:
 		m_pMapDiffuse = m_pFX->GetVariableByName("g_mapDiffuse")->AsShaderResource();
 		m_pMapDiffuse2 = m_pFX->GetVariableByName("g_mapDiffuse2")->AsShaderResource();
 		m_pMapSpecular = m_pFX->GetVariableByName("g_mapSpec")->AsShaderResource();
-
-		// TO DO CAL
-		//mfxLightWVPVar = fx::ShadowFX->GetVariableByName("gLightWVP")->AsMatrix();
-		//mfxShadowMapVar = fx::ShadowFX->GetVariableByName("gShadowMap")->AsShaderResource();
 
 		VALIDATE(m_pLight != 0);
 		VALIDATE(m_pEyePos != 0);
@@ -256,7 +250,6 @@ private:
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Refract, m_pVertexLayout_Reflect);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Star, m_pVertexLayout_Star);
 		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_NoCull, m_pVertexLayout_NoCull);
-		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Shadow, m_pVertexLayout_Shadow);
 
 		return true;
 	}
@@ -311,12 +304,6 @@ private:
 			m_pCurrentTech = m_pTech_NoCull;
 		}
 		break;
-		case TECH_LITTEX_SHADOW:
-		{
-			m_pCurrentVertexLayout = m_pVertexLayout_Shadow;
-			m_pCurrentTech = m_pTech_Shadow;
-		}
-			break;
 		default:
 		{
 			m_pCurrentVertexLayout = 0;
@@ -338,7 +325,6 @@ private:
 	ID3D10InputLayout* m_pVertexLayout_Reflect;
 	ID3D10InputLayout* m_pVertexLayout_Star;
 	ID3D10InputLayout* m_pVertexLayout_NoCull;
-	ID3D10InputLayout* m_pVertexLayout_Shadow;
 
 	ID3D10EffectTechnique* m_pCurrentTech;
 	ID3D10EffectTechnique* m_pTech_Standard;
@@ -348,7 +334,6 @@ private:
 	ID3D10EffectTechnique* m_pTech_Reflect;
 	ID3D10EffectTechnique* m_pTech_Star;
 	ID3D10EffectTechnique* m_pTech_NoCull;
-	ID3D10EffectTechnique* m_pTech_Shadow;
 
 	DX10_Renderer*						m_pDX10_Renderer;
 

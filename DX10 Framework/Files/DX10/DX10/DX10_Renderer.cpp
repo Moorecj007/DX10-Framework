@@ -339,22 +339,23 @@ bool DX10_Renderer::onResize()
 	// Bind the Render Target View to the output-merger stage of the pipeline
 	//m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 	
-	// Set the View Port for the Device	
-	m_viewPort.TopLeftX = 0;
-	m_viewPort.TopLeftY = 0;
-	m_viewPort.Width = m_clientWidth;
-	m_viewPort.Height = m_clientHeight;
-	m_viewPort.MinDepth = 0.0f;
-	m_viewPort.MaxDepth = 1.0f;
+	// Set the View Port for the Device
+	D3D10_VIEWPORT viewPort;
+	viewPort.TopLeftX = 0;
+	viewPort.TopLeftY = 0;
+	viewPort.Width = m_clientWidth;
+	viewPort.Height = m_clientHeight;
+	viewPort.MinDepth = 0.0f;
+	viewPort.MaxDepth = 1.0f;
 	
 	// Binds the View port to the Rasterizer stage of the pipeline
-	m_pDX10Device->RSSetViewports(1, &m_viewPort);
+	m_pDX10Device->RSSetViewports(1, &viewPort);
 
 	// Calculate the new Projection Matrix
 	CalcProjMatrix();
 
 	// Create an orthographic projection matrix for 2D rendering.
-	D3DXMatrixOrthoLH(&m_matOrtho, static_cast<float>(m_clientWidth), static_cast<float>(m_clientHeight), 0.1f, 10000.0f);
+	D3DXMatrixOrthoLH(&m_matOrtho, static_cast<float>(m_clientWidth), static_cast<float>(m_clientHeight), 0.1f, 100.0f);
 
 	return true;
 }
@@ -586,10 +587,6 @@ void DX10_Renderer::RenderBuffer(DX10_Buffer* _buffer)
 
 void DX10_Renderer::StartRender()
 {
-	//Set the Render Target and view port to the original states for the renderer ( in case of another target begin used)
-	m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
-	m_pDX10Device->RSSetViewports(1, &m_viewPort);
-
 	m_pDX10Device->ClearRenderTargetView(m_pRenderTargetView, m_clearColor);
 	m_pDX10Device->ClearDepthStencilView(m_pDepthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, 1.0f, 0);
 }
@@ -829,11 +826,54 @@ bool DX10_Renderer::LoadMeshObj(std::string _fileName, TVertexNormalUV*& _prVert
 	return true;
 }
 
-bool DX10_Renderer::CreateTextureResource(DX10_TextureResource*& _prTextureResource, eTexResourceType _type)
+bool DX10_Renderer::CreateTextureResource(TextureResource*& _prTextureResource)
 {
+	// Initialise the Texture 2D description
+	D3D10_TEXTURE2D_DESC textureDesc;
+	ZeroMemory(&textureDesc, sizeof(textureDesc));
+
+	// Setup the render target texture description.
+	textureDesc.Width = m_clientWidth;
+	textureDesc.Height = m_clientHeight;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D10_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D10_BIND_RENDER_TARGET | D3D10_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	// Create the Texture 2D from the Description
+	ID3D10Texture2D* pTexture2D;
+	VALIDATEHR(m_pDX10Device->CreateTexture2D(&textureDesc, NULL, &pTexture2D));
+
+	// Initialise the Render Target View Description
+	D3D10_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+
+	renderTargetViewDesc.Format = textureDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the Render Target View from the created Texture 2D and the Description
+	ID3D10RenderTargetView* pRenderTargetView;
+	VALIDATEHR(m_pDX10Device->CreateRenderTargetView(pTexture2D, &renderTargetViewDesc, &pRenderTargetView));
+
+	// Initialise the Shader Resource View Description
+	D3D10_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+
+	shaderResourceViewDesc.Format = textureDesc.Format;
+	shaderResourceViewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	// Create the Shader Resource View from the Texture 2D and the Description
+	ID3D10ShaderResourceView* pShaderResourceView;
+	VALIDATEHR(m_pDX10Device->CreateShaderResourceView(pTexture2D, &shaderResourceViewDesc, &pShaderResourceView));
+
 	// Create and Initialise a Texture Resource
-	DX10_TextureResource* pTexRes = new DX10_TextureResource();
-	VALIDATE(pTexRes->Initialise(m_pDX10Device, m_pDepthStencilView, m_clientWidth, m_clientHeight, _type));
+	TextureResource* pTexRes = new TextureResource();
+	VALIDATE(pTexRes->Initialise(m_pDX10Device, m_pDepthStencilView, m_clearColor, pTexture2D, pRenderTargetView, pShaderResourceView));
 	_prTextureResource = pTexRes;
 
 	return true;
