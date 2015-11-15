@@ -82,7 +82,7 @@ public:
 	// TO DO CAL
 	* @return: void
 	********************/
-	void Render(ID3D10ShaderResourceView* _pTexture, eTech_Blur _eTech)
+	void Render(ID3D10ShaderResourceView* _pSRV, DX10_Buffer* _pBuff, eTech_Blur _eTech)
 	{	
 		SetCurrentPtrs(_eTech);
 		m_pDX10_Renderer->SetInputLayout(m_pVertexLayout_Current);
@@ -92,9 +92,10 @@ public:
 
 		for (UINT i = 0; i < techDesc.Passes; ++i)
 		{
-			m_pTexture->SetResource(_pTexture);
+			m_pTexture->SetResource(_pSRV);
 
 			m_pTech_Current->GetPassByIndex(i)->Apply(0);
+			_pBuff->Render();
 		}
 	}
 
@@ -164,13 +165,13 @@ private:
 	{
 		switch (_tech)
 		{
-			case TECH_LITTEX_STANDARD:
+			case TECH_BLUR_HORIZONTAL:
 			{
 				m_pVertexLayout_Current = m_pVertexLayout_Horizontal;
 				m_pTech_Current = m_pTech_Horizontal;
 			}
 			break;
-			case TECH_LITTEX_FADE:
+			case TECH_BLUR_VERTICAL:
 			{
 				m_pVertexLayout_Current = m_pVertexLayout_Vertical;
 				m_pTech_Current = m_pTech_Vertical;

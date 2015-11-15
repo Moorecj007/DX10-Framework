@@ -18,7 +18,8 @@
 #define __DX10_SHADOWMAP_H__
 
 // Local Includes
-#include "../DX10_Utilities.h"
+#include "DX10_Buffer.h"
+#include "../DX10_Vertex.h"
 
 class DX10_ShadowMap
 {
@@ -67,6 +68,12 @@ public:
 	********************/
 	void EndRender();
 
+	// TO DO CAL
+	bool InitialiseBuffer();
+	void RenderBuffer();
+	DX10_Buffer* GetBuffer() { return m_pBuff; };
+	ID3D10ShaderResourceView* GetBlurredMap() { return m_ShaderResourceView_Blurred; };
+
 private:
 	// Disallowing copies
 	DX10_ShadowMap(const DX10_ShadowMap& rhs);
@@ -76,16 +83,20 @@ private:
 	ID3D10Device* m_pDX10Device;
 	D3D10_VIEWPORT mViewport;
 
-	ID3D10ShaderResourceView* m_ShaderResourceView;
+	ID3D10ShaderResourceView* m_ShaderResourceView_Depth;
 	ID3D10DepthStencilView* m_pDepthStencilView;
+
+	ID3D10RenderTargetView* m_pRenderTargetView_Blurred;
+	ID3D10ShaderResourceView* m_ShaderResourceView_Blurred;
+	ID3D10DepthStencilView* m_pDepthStencilView_Blurred;
 
 	UINT m_width;
 	UINT m_height;	
 
 	// Blurring Variables  TO DO CAL
-	//DX10_Mesh* m_pMesh;
-	//D3DXMATRIX m_matWorld;
-
+	UINT m_vertexCount;
+	UINT m_indexCount;
+	DX10_Buffer* m_pBuff;
 };
 
 #endif // __DX10_SHADOWMAP_H__
