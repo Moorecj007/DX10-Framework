@@ -7,7 +7,7 @@
 
 #include "LightStructures.fx"
  
-static const float SHADOW_EPSILON = 0.003f;
+static const float SHADOW_EPSILON = 0.001f;
 static const float SMAP_SIZE = 1024.0f;
 static const float SMAP_DX = 1.0f / SMAP_SIZE;
  

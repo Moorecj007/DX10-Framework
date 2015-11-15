@@ -22,13 +22,8 @@ DX10_ShadowMap::DX10_ShadowMap()
 
 	// Initialise all pointer to NULL
 	m_pDX10Device = 0;
-
 	m_ShaderResourceView_Depth = 0;
 	m_pDepthStencilView = 0;
-
-	m_pRenderTargetView_Blurred = 0;
-	m_ShaderResourceView_Blurred = 0;
-	m_pDepthStencilView_Blurred = 0;
 
 	m_width = 0;
 	m_height = 0;
@@ -39,10 +34,6 @@ DX10_ShadowMap::~DX10_ShadowMap()
 	// Release allocated memory
 	ReleaseCOM(m_ShaderResourceView_Depth);
 	ReleaseCOM(m_pDepthStencilView);
-
-	ReleaseCOM(m_pRenderTargetView_Blurred);
-	ReleaseCOM(m_ShaderResourceView_Blurred);
-	ReleaseCOM(m_pDepthStencilView_Blurred);
 
 	ReleasePtr(m_pBuff);
 }
@@ -93,7 +84,7 @@ bool DX10_ShadowMap::Initialise(ID3D10Device* _pDevice, UINT _width, UINT _heigh
 	dsvDesc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
 	VALIDATEHR(m_pDX10Device->CreateDepthStencilView(pTexture, &dsvDesc, &m_pDepthStencilView));
-	
+	VALIDATEHR(m_pDX10Device->CreateDepthStencilView(pTexture, &dsvDesc, &m_pDepthStencilView_Blurred));
 
 	// Create a shader resource view of the texture 
 	D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -103,14 +94,10 @@ bool DX10_ShadowMap::Initialise(ID3D10Device* _pDevice, UINT _width, UINT _heigh
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	VALIDATEHR(m_pDX10Device->CreateShaderResourceView(pTexture, &srvDesc, &m_ShaderResourceView_Depth));
 
-	ReleaseCOM(pTexture);
-	VALIDATEHR(m_pDX10Device->CreateTexture2D(&texDesc, 0, &pTexture));
-	VALIDATEHR(m_pDX10Device->CreateDepthStencilView(pTexture, &dsvDesc, &m_pDepthStencilView_Blurred));
-
 	// Release the reference to the texture as it is saved in the views
 	ReleaseCOM(pTexture);
 
-	//Recreate the texture description for a render target
+	// Recreate the texture description for a render target
 	ZeroMemory(&texDesc, sizeof(texDesc));
 	texDesc.Width = m_width;
 	texDesc.Height = m_height;
@@ -125,17 +112,10 @@ bool DX10_ShadowMap::Initialise(ID3D10Device* _pDevice, UINT _width, UINT _heigh
 	VALIDATEHR(m_pDX10Device->CreateTexture2D(&texDesc, 0, &pTexture));
 
 	// Create the Shader Resource View
-	D3D10_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-	renderTargetViewDesc.Format = texDesc.Format;
-	renderTargetViewDesc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
-	renderTargetViewDesc.Texture2D.MipSlice = 0;
 	VALIDATEHR(m_pDX10Device->CreateRenderTargetView(pTexture, 0, &m_pRenderTargetView_Blurred));
 	VALIDATEHR(m_pDX10Device->CreateShaderResourceView(pTexture, 0, &m_ShaderResourceView_Blurred));
-	
-	ReleaseCOM(pTexture);
 
-	VALIDATE(InitialiseBuffer());
-	VALIDATE(PopulateBuffer());
+	VALIDATE(InitialiseBuffer())
 
 	return true;
 }
@@ -151,7 +131,7 @@ void DX10_ShadowMap::StartRender()
 	ID3D10RenderTargetView* renderTargets[1] = { 0 };
 	m_pDX10Device->OMSetRenderTargets(1, renderTargets, m_pDepthStencilView);
 	m_pDX10Device->RSSetViewports(1, &mViewport);
-	
+
 	m_pDX10Device->ClearDepthStencilView(m_pDepthStencilView, D3D10_CLEAR_DEPTH, 1.0f, 0);
 }
 
@@ -161,10 +141,8 @@ void DX10_ShadowMap::EndRender()
 	ID3D10RenderTargetView* renderTargets[1] = { m_pRenderTargetView_Blurred };
 	m_pDX10Device->OMSetRenderTargets(1, renderTargets, m_pDepthStencilView_Blurred);
 	m_pDX10Device->RSSetViewports(1, &mViewport);
-
-	m_pDX10Device->ClearRenderTargetView(m_pRenderTargetView_Blurred, d3dxColors::Black);
 	m_pDX10Device->ClearDepthStencilView(m_pDepthStencilView_Blurred, D3D10_CLEAR_DEPTH, 1.0f, 0);
-	
+
 	m_pDX10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
@@ -206,8 +184,11 @@ bool DX10_ShadowMap::InitialiseBuffer()
 	VALIDATE(m_pBuff->Initialise(pVertices, pIndices, m_vertexCount, m_indexCount, (UINT)sizeof(TVertexUV), D3D10_USAGE_DYNAMIC, D3D10_USAGE_DEFAULT));
 
 	// Clean up
-	ReleasePtr(pVertices);
-	ReleasePtr(pIndices);
+	delete[] pVertices;
+	pVertices = 0;
+
+	delete[] pIndices;
+	pIndices = 0;
 
 	return true;
 }
@@ -215,56 +196,4 @@ bool DX10_ShadowMap::InitialiseBuffer()
 void DX10_ShadowMap::RenderBuffer()
 {
 	m_pBuff->Render();
-}
-
-bool DX10_ShadowMap::PopulateBuffer()
-{
-	TVertexUV* vertices;
-	void* verticesPtr;
-
-	// Create the vertex array.
-	vertices = new TVertexUV[m_vertexCount];
-	if (!vertices)
-	{
-		return false;
-	}
-
-	// Load the vertex array with data.
-	// First triangle.
-	vertices[0].pos = D3DXVECTOR3(0, 0, 0.0f);  // Top left.
-	vertices[0].uv = v2float(0, 0);
-
-	vertices[1].pos = D3DXVECTOR3((float)m_width, (float)m_height, 0.0f);  // Bottom right.
-	vertices[1].uv = v2float(1, 1);
-
-	vertices[2].pos = D3DXVECTOR3(0, (float)m_height, 0.0f);  // Bottom left.
-	vertices[2].uv = v2float(0, 1);
-
-	// Second triangle.
-	vertices[3].pos = D3DXVECTOR3(0, 0, 0.0f);  // Top left.
-	vertices[3].uv = v2float(0, 0);
-
-	vertices[4].pos = D3DXVECTOR3((float)m_width, 0, 0.0f);  // Top right.
-	vertices[4].uv = v2float(1, 0);
-
-	vertices[5].pos = D3DXVECTOR3((float)m_width, (float)m_height, 0.0f);  // Bottom right.
-	vertices[5].uv = v2float(1, 1);
-
-	// Initialize the vertex buffer pointer.
-	verticesPtr = 0;
-
-	// Lock the vertex buffer.
-	ID3D10Buffer* pVertexBuff = m_pBuff->GetVertexBuffer();
-	VALIDATEHR(pVertexBuff->Map(D3D10_MAP_WRITE_DISCARD, 0, (void**)&verticesPtr));
-
-	// Copy the data into the vertex buffer.
-	memcpy(verticesPtr, (void*)vertices, (sizeof(TVertexUV) * m_vertexCount));
-
-	// Unlock the vertex buffer.
-	pVertexBuff->Unmap();
-
-	// Release the vertex array as it is no longer needed.
-	ReleasePtr(vertices);
-
-	return true;
 }

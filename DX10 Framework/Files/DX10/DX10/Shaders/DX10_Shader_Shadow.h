@@ -79,15 +79,13 @@ public:
 	// TO DO CAL
 	* @return: void
 	********************/
-	void Render(DX10_Obj_Generic* _pObj, D3DXMATRIX _matLightView, ID3D10ShaderResourceView* _pShadowMap)
+	void Render(DX10_Obj_Generic* _pObj, D3DXMATRIX _matLightView, DX10_ShadowMap* _pShadowMap)
 	{
-		m_pDX10_Renderer->SetInputLayout(m_pVertexLayout_Standard);
-
 		int lightCount = m_pDX10_Renderer->GetLightCount();
 
 		m_pEyePos->SetRawValue(m_pDX10_Renderer->GetEyePos(), 0, sizeof(D3DXVECTOR3));		
 		m_pLights->SetRawValue(m_pDX10_Renderer->GetActiveLights(), 0, lightCount * sizeof(TLight));
-		m_pShadowMap->SetResource(_pShadowMap);
+		m_pShadowMap->SetResource(_pShadowMap->GetShaderResourceView());
 
 		// Don't transform texture coordinates
 		D3DXMATRIX matTex;
@@ -108,12 +106,7 @@ public:
 
 			m_pTech_Standard->GetPassByIndex(i)->Apply(0);
 			_pObj->GetMesh()->Render();
-
-			// Remove the Shader Resource as an input so it can be written to again
-			m_pShadowMap->SetResource(NULL);
-			m_pTech_Standard->GetPassByIndex(i)->Apply(0);
 		}
-		
 	}
 
 private:
@@ -196,16 +189,22 @@ private:
 	ID3D10InputLayout*					m_pVertexLayout_Standard;
 	ID3D10EffectTechnique*				m_pTech_Standard;
 
+	//ID3D10EffectMatrixVariable*			m_pMatWVP;
+	//ID3D10EffectShaderResourceVariable* m_pMapDiffuse;
+
 	ID3D10EffectVariable* m_pLights;
 	ID3D10EffectVariable* m_pEyePos;
 	ID3D10EffectMatrixVariable* m_pMatWVP_Light;
 	ID3D10EffectMatrixVariable* m_pMatWVP_Object;
 	ID3D10EffectMatrixVariable* m_pMatWorld;
 	ID3D10EffectMatrixVariable* m_pMatTex;
+	//ID3D10EffectVectorVariable* mfxReflectMtrlVar;
+	//ID3D10EffectScalarVariable* mfxCubeMapEnabledVar;
 	ID3D10EffectShaderResourceVariable* m_pMapDiffuse;
 	ID3D10EffectShaderResourceVariable* m_pMapSpec;
+	//ID3D10EffectShaderResourceVariable* mfxNormalMapVar;
 	ID3D10EffectShaderResourceVariable* m_pShadowMap;
-
+	//ID3D10EffectShaderResourceVariable* mfxCubeMapVar;
 };
 
 #endif	// __DX10_SHADER_SHADOW_H__
