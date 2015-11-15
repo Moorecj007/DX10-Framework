@@ -971,7 +971,7 @@ TLight* DX10_Renderer::GetActiveLights()
 	m_lightCount = index;
 
 	return m_pArrLights;
-}
+};
 
 void DX10_Renderer::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY _primitiveType)
 {

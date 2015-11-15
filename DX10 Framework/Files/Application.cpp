@@ -470,13 +470,13 @@ void Application::Render()
 
 		// Render the Objects of the Scene	
 		//m_pObj_Floor->Render();
-		//m_pObj_Sphere->Render();
-		//m_pObj_Capsule->Render();
-		//m_pObj_Pyramid->Render();
+		m_pObj_Sphere->Render();
+		m_pObj_Capsule->Render();
+		m_pObj_Pyramid->Render();
 		m_pShader_Shadow->Render(m_pObj_Floor, matLightView, m_pShadowMap);
-		m_pShader_Shadow->Render(m_pObj_Sphere, matLightView, m_pShadowMap);
-		m_pShader_Shadow->Render(m_pObj_Capsule, matLightView, m_pShadowMap);
-		m_pShader_Shadow->Render(m_pObj_Pyramid, matLightView, m_pShadowMap);
+		//m_pShader_Shadow->Render(m_pObj_Sphere, matLightView, m_pShadowMap);
+		//m_pShader_Shadow->Render(m_pObj_Capsule, matLightView, m_pShadowMap);
+		//m_pShader_Shadow->Render(m_pObj_Pyramid, matLightView, m_pShadowMap);
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		//m_pSprite_InstructionsLeft->Render();
