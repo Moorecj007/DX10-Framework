@@ -53,6 +53,8 @@
 #include "DX10\Shaders\DX10_Shader_Water.h"
 #include "DX10\Shaders\DX10_Shader_Cloth.h"
 #include "DX10\Shaders\DX10_Shader_ShadowMap.h"
+#include "DX10\Shaders\DX10_Shader_Shadow.h"
+#include "DX10\Shaders\DX10_Shader_Blur.h"
 
 // Systems
 #include "DX10\Systems\TextureResource.h"

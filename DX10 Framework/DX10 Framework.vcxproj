@@ -146,6 +146,7 @@
     <ClInclude Include="Files\DX10\DX10\DX10_Utilities.h" />
     <ClInclude Include="Files\DX10\DX10\DX10_Vertex.h" />
     <ClInclude Include="Files\DX10\DX10\Meshes\DX10_Mesh.h" />
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Blur.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Cloth.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Shadow.h" />
@@ -168,6 +169,8 @@
     <ClInclude Include="Files\Utility\Utility_Math.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Resources\FX\Blur.fx" />
+    <FxCompile Include="Resources\FX\Shadow.fx" />
     <FxCompile Include="Resources\FX\ShadowMap.fx" />
     <FxCompile Include="Resources\FX\Cloth.fx" />
     <FxCompile Include="Resources\FX\LightStructures.fx" />

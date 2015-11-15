@@ -36,7 +36,6 @@ public:
 	********************/
 	~DX10_ShadowMap();
 
-	
 	/***********************
 	* Initialise: Initialise the Shadow Map for use
 	* @author: Callan Moore
@@ -53,7 +52,6 @@ public:
 	* @return: ID3D10ShaderResourceView*: The shader resource view of the shadow map
 	********************/
 	ID3D10ShaderResourceView* GetShaderResourceView();
-
 	
 	/***********************
 	* StartRender: Start rendering to the shadow map by switching the render target
@@ -83,6 +81,11 @@ private:
 
 	UINT m_width;
 	UINT m_height;	
+
+	// Blurring Variables  TO DO CAL
+	//DX10_Mesh* m_pMesh;
+	//D3DXMATRIX m_matWorld;
+
 };
 
 #endif // __DX10_SHADOWMAP_H__

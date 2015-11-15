@@ -192,6 +192,9 @@
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Shadow.h">
       <Filter>Header Files\DX10\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Blur.h">
+      <Filter>Header Files\DX10\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
@@ -266,6 +269,12 @@
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
     <FxCompile Include="Resources\FX\ShadowMap.fx">
+      <Filter>Resource Files\FX Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\FX\Shadow.fx">
+      <Filter>Resource Files\FX Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\FX\Blur.fx">
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
   </ItemGroup>

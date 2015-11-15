@@ -35,7 +35,7 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE _hPrevInstance, LPSTR _lpCmdL
 	#endif // _DEBUG
 
 	// Set the client width and height
-	int clientWidth = 1400;
+	int clientWidth = 900;
 	int clientHeight = 900;
 
 	// Create the Application 
@@ -242,6 +242,9 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pShader_ShadowMap = new DX10_Shader_ShadowMap();
 	VALIDATE(m_pShader_ShadowMap->Initialise(m_pDX10_Renderer));
 
+	m_pShader_Shadow = new DX10_Shader_Shadow();
+	VALIDATE(m_pShader_Shadow->Initialise(m_pDX10_Renderer));
+
 	//--------------------------------------------------------------
 	// Create the Meshes
 	//--------------------------------------------------------------
@@ -350,6 +353,7 @@ void Application::ShutDown()
 		ReleasePtr(m_pShader_LitTex);
 		ReleasePtr(m_pShader_Sprite);
 		ReleasePtr(m_pShader_ShadowMap);
+		ReleasePtr(m_pShader_Shadow);
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Floor);
 		ReleasePtr(m_pMesh_Sphere);
@@ -416,7 +420,6 @@ bool Application::Process(float _dt)
 	if (m_pDX10_Renderer != 0)
 	{
 		m_pCamera->Process(_dt);
-
 		ProcessShaders();
 
 		m_pObj_Floor->Process(_dt);
@@ -424,7 +427,6 @@ bool Application::Process(float _dt)
 		m_pObj_Capsule->Process(_dt);
 		m_pObj_Pyramid->Process(_dt);
 	}
-
 	return true;
 }
 
@@ -432,6 +434,8 @@ void Application::ProcessShaders()
 {
 	m_pShader_LitTex->SetUpPerFrame();
 	m_pShader_Sprite->Update(m_deltaTick);
+	m_pShader_ShadowMap->SetUpPerFrame();
+	m_pShader_Shadow->SetUpPerFrame();
 }
 
 void Application::Render()
@@ -443,15 +447,17 @@ void Application::Render()
 
 		D3DXVECTOR3 lightPos;
 		lightPos.x =   0.0f;
-		lightPos.y =  40.0f;
-		lightPos.z = -40.0f;
+		lightPos.y =  20.0f;
+		lightPos.z = -50.0f;
 
 		D3DXMATRIX matLightView;
 		D3DXMatrixLookAtLH(&matLightView, &lightPos, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), &D3DXVECTOR3(0.0f, 1.0f, 0.0f));
 
+		D3DXMATRIX camView = *m_pDX10_Renderer->GetViewMatrix();
+
 		m_pShadowMap->StartRender();
 		
-		m_pShader_ShadowMap->Render(m_pObj_Floor, matLightView);
+		//m_pShader_ShadowMap->Render(m_pObj_Floor, matLightView);
 		m_pShader_ShadowMap->Render(m_pObj_Sphere, matLightView);
 		m_pShader_ShadowMap->Render(m_pObj_Capsule, matLightView);
 		m_pShader_ShadowMap->Render(m_pObj_Pyramid, matLightView);
@@ -463,11 +469,14 @@ void Application::Render()
 		m_pDX10_Renderer->StartRender();
 
 		// Render the Objects of the Scene	
-		m_pObj_Floor->Render();
-		m_pObj_Floor->Render();
+		//m_pObj_Floor->Render();
 		m_pObj_Sphere->Render();
 		m_pObj_Capsule->Render();
 		m_pObj_Pyramid->Render();
+		m_pShader_Shadow->Render(m_pObj_Floor, matLightView, m_pShadowMap);
+		//m_pShader_Shadow->Render(m_pObj_Sphere, matLightView, m_pShadowMap);
+		//m_pShader_Shadow->Render(m_pObj_Capsule, matLightView, m_pShadowMap);
+		//m_pShader_Shadow->Render(m_pObj_Pyramid, matLightView, m_pShadowMap);
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		//m_pSprite_InstructionsLeft->Render();

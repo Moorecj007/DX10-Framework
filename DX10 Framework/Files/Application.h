@@ -279,7 +279,11 @@ private:
 
 	// Shadowing Variables
 	DX10_Shader_ShadowMap* m_pShader_ShadowMap;
+	DX10_Shader_Shadow* m_pShader_Shadow;
 	DX10_ShadowMap* m_pShadowMap;
+
+	// TO DO CAL
+	DX10_Shader_Blur* m_pShader_Blur;
 };
 
 #endif // __APPLICATION_H__

@@ -333,11 +333,6 @@ bool DX10_Renderer::onResize()
 
 	// Create the state using the device.
 	VALIDATEHR(m_pDX10Device->CreateDepthStencilState(&depthDisabledStencilDesc, &m_pDepthStencilStateZDisabled));
-
-	//VALIDATEHR(m_pDX10Device->CreateDepthStencilView(m_pDepthStencilBuffer, NULL, &m_pDepthStencilView));
-	
-	// Bind the Render Target View to the output-merger stage of the pipeline
-	//m_pDX10Device->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 	
 	// Set the View Port for the Device
 	m_viewPort.TopLeftX = 0;
@@ -1003,12 +998,12 @@ void DX10_Renderer::CalcProjMatrix()
 bool DX10_Renderer::CreateShadowMap(DX10_ShadowMap*& _prShadowMap)
 {
 	_prShadowMap = new DX10_ShadowMap();
-	VALIDATE(_prShadowMap->Initialise(m_pDX10Device, 1024, 1024 ));
+	VALIDATE(_prShadowMap->Initialise(m_pDX10Device, 2048, 2048));
 
 	return true;
 }
 
 void DX10_Renderer::CreateShadowProjMatrix()
 {
-	D3DXMatrixOrthoLH(&m_matShadowProj, 30.0f, 30.0f, 1.0f, 100.0f);
+	D3DXMatrixOrthoLH(&m_matShadowProj, 100, 100, 1.0f, 200.0f);
 }

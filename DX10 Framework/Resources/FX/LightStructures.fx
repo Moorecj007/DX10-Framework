@@ -33,7 +33,7 @@ struct SurfaceInfo
 	float4 spec;
 };
 
-float3 ParallelLight(SurfaceInfo v, Light L, float3 eyePos)
+float3 ParallelLight(SurfaceInfo v, Light L, float3 eyePos, float _shadowFactor = 1.0f)
 {
 	float3 litColor = float3(0.0f, 0.0f, 0.0f);
 
@@ -56,14 +56,14 @@ float3 ParallelLight(SurfaceInfo v, Light L, float3 eyePos)
 		float specFactor = pow(max(dot(R, toEye), 0.0f), specPower);
 
 		// diffuse and specular terms
-		litColor += diffuseFactor * (float3)(v.diffuse * L.diffuse);
-		litColor += specFactor * (float3)(v.spec * L.spec);
+		litColor += _shadowFactor * diffuseFactor * (float3)(v.diffuse * L.diffuse);
+		litColor += _shadowFactor * specFactor * (float3)(v.spec * L.spec);
 	}
 
 	return litColor;
 }
 
-float3 PointLight(SurfaceInfo v, Light L, float3 eyePos)
+float3 PointLight(SurfaceInfo v, Light L, float3 eyePos, float _shadowFactor = 1.0f)
 {
 	float3 litColor = float3(0.0f, 0.0f, 0.0f);
 
@@ -100,8 +100,8 @@ float3 PointLight(SurfaceInfo v, Light L, float3 eyePos)
 				float specFactor = pow(max(dot(R, toEye), 0.0f), specPower);
 
 			// diffuse and specular terms
-			litColor += diffuseFactor * (float3)(v.diffuse * L.diffuse);
-			litColor += specFactor * (float3)(v.spec * L.spec);
+			litColor += _shadowFactor * diffuseFactor * (float3)(v.diffuse * L.diffuse);
+			litColor += _shadowFactor * specFactor * (float3)(v.spec * L.spec);
 		}
 
 		// attenuate
@@ -109,9 +109,9 @@ float3 PointLight(SurfaceInfo v, Light L, float3 eyePos)
 	}
 }
 
-float3 SpotLight(SurfaceInfo v, Light L, float3 eyePos)
+float3 SpotLight(SurfaceInfo v, Light L, float3 eyePos, float _shadowFactor = 1.0f)
 {
-	float3 litColor = PointLight(v, L, eyePos);
+	float3 litColor = PointLight(v, L, eyePos, _shadowFactor);
 
 	// The vector from the surface to the light.
 	float3 lightVec = normalize(L.pos_range.xyz - v.pos);

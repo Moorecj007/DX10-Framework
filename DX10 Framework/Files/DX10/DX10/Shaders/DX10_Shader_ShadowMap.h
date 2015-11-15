@@ -84,13 +84,13 @@ public:
 
 		for (UINT i = 0; i < techDesc.Passes; ++i)
 		{
-			D3DXMATRIX objWVP = *_obj->GetWorldMatrix() * _matLightView * m_pDX10_Renderer->GetShadowProjMatrix();
+			D3DXMATRIX objWVP = _obj->GetWorldMatrix() *_matLightView * m_pDX10_Renderer->GetShadowProjMatrix();
 
 			m_pMatWVP->SetMatrix((float*)&objWVP);
 			m_pMapDiffuse->SetResource(_obj->GetTexture());
 
 			m_pTech_Standard->GetPassByIndex(i)->Apply(0);
-			_obj->Draw();
+			_obj->GetMesh()->Render();
 		}
 	}
 
