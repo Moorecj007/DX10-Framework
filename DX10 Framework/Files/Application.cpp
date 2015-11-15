@@ -245,6 +245,9 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pShader_Shadow = new DX10_Shader_Shadow();
 	VALIDATE(m_pShader_Shadow->Initialise(m_pDX10_Renderer));
 
+	m_pShader_Blur = new DX10_Shader_Blur();
+	VALIDATE(m_pShader_Blur->Initialise(m_pDX10_Renderer));
+
 	//--------------------------------------------------------------
 	// Create the Meshes
 	//--------------------------------------------------------------
@@ -354,6 +357,7 @@ void Application::ShutDown()
 		ReleasePtr(m_pShader_Sprite);
 		ReleasePtr(m_pShader_ShadowMap);
 		ReleasePtr(m_pShader_Shadow);
+		ReleasePtr(m_pShader_Blur);
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Floor);
 		ReleasePtr(m_pMesh_Sphere);
@@ -436,6 +440,7 @@ void Application::ProcessShaders()
 	m_pShader_Sprite->Update(m_deltaTick);
 	m_pShader_ShadowMap->SetUpPerFrame();
 	m_pShader_Shadow->SetUpPerFrame();
+	m_pShader_Blur->SetUpPerFrame();
 }
 
 void Application::Render()
@@ -447,7 +452,7 @@ void Application::Render()
 
 		D3DXVECTOR3 lightPos;
 		lightPos.x =   0.0f;
-		lightPos.y =  20.0f;
+		lightPos.y =  50.0f;
 		lightPos.z = -50.0f;
 
 		D3DXMATRIX matLightView;
@@ -463,8 +468,10 @@ void Application::Render()
 		m_pShader_ShadowMap->Render(m_pObj_Pyramid, matLightView);
 		
 		m_pShadowMap->EndRender();
-
-
+		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
+		m_pShader_Blur->Render(m_pShadowMap->GetShaderResourceView(), m_pShadowMap->GetBuffer(), TECH_BLUR_HORIZONTAL);
+		//m_pShader_Blur->Render(m_pShadowMap->GetBlurredMap(), m_pShadowMap->GetBuffer(), TECH_BLUR_VERTICAL);
+		m_pDX10_Renderer->ApplyDepthStencilState(DS_NORMAL);
 		// Tell the Renderer that the data input for the back buffer is about to commence
 		m_pDX10_Renderer->StartRender();
 
@@ -473,11 +480,11 @@ void Application::Render()
 		//m_pObj_Sphere->Render();
 		//m_pObj_Capsule->Render();
 		//m_pObj_Pyramid->Render();
-		m_pShader_Shadow->Render(m_pObj_Floor, matLightView, m_pShadowMap);
-		m_pShader_Shadow->Render(m_pObj_Sphere, matLightView, m_pShadowMap);
-		m_pShader_Shadow->Render(m_pObj_Capsule, matLightView, m_pShadowMap);
-		m_pShader_Shadow->Render(m_pObj_Pyramid, matLightView, m_pShadowMap);
-
+		m_pShader_Shadow->Render(m_pObj_Floor, matLightView, m_pShadowMap->GetBlurredMap());
+		m_pShader_Shadow->Render(m_pObj_Sphere, matLightView, m_pShadowMap->GetBlurredMap());
+		m_pShader_Shadow->Render(m_pObj_Capsule, matLightView, m_pShadowMap->GetBlurredMap());
+		m_pShader_Shadow->Render(m_pObj_Pyramid, matLightView, m_pShadowMap->GetBlurredMap());
+		
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		//m_pSprite_InstructionsLeft->Render();
 		//m_pSprite_InstructionsRight->Render();

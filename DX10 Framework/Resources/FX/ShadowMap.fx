@@ -51,6 +51,11 @@ void PS_Standard(VS_OUT _inputPS)
 	clip(diffuse.a - 0.15f);
 }
 
+RasterizerState ShadowCulling
+{
+	CullMode = Front;
+};
+
 technique10 CreateShadowMapTech
 {
 	pass P0

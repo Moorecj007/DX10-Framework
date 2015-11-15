@@ -63,6 +63,11 @@ public:
 		VALIDATE(CreateFXVarPointers());
 		VALIDATE(CreateVertexLayout());
 
+		// Set the view matrix. No need for a camera.
+		D3DXMatrixLookAtLH(&m_matView, &D3DXVECTOR3(0.0f, 0.0f, -1.0f), &D3DXVECTOR3(0.0f, 0.0f, 0.0f), &D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+		// Create Identity matrix for the world 
+		D3DXMatrixIdentity(&m_matWorld);
+
 		return true;
 	}
 
@@ -73,7 +78,9 @@ public:
 	********************/
 	void SetUpPerFrame()
 	{
-
+		m_pMatWorld->SetMatrix((float*)m_matWorld);
+		//m_pMatView->SetMatrix((float*)m_matView);
+		m_pMatProj->SetMatrix((float*)m_pDX10_Renderer->GetShadowProjMatrix());
 	}
 
 	/***********************
@@ -93,10 +100,17 @@ public:
 		for (UINT i = 0; i < techDesc.Passes; ++i)
 		{
 			m_pTexture->SetResource(_pSRV);
+			m_pMatView->SetMatrix((float*)*m_pDX10_Renderer->GetViewMatrix());
+			m_pTextureWidth->SetFloat(2048);
+			m_pTextureHeight->SetFloat(2048);
 
 			m_pTech_Current->GetPassByIndex(i)->Apply(0);
 			_pBuff->Render();
-		}
+
+			// Remove the Shader Resource as an input so it can be written to again
+			m_pTexture->SetResource(NULL);
+			m_pTech_Current->GetPassByIndex(i)->Apply(0);
+		}		
 	}
 
 private:
@@ -121,9 +135,14 @@ private:
 	********************/
 	bool CreateFXVarPointers()
 	{
+		// Per Frame
+		m_pMatProj = m_pFX->GetVariableByName("g_matProj")->AsMatrix();
+
 		// Per Object
 		m_pTextureWidth = m_pFX->GetVariableByName("g_textureWidth")->AsScalar();
 		m_pTextureHeight = m_pFX->GetVariableByName("g_textureHeight")->AsScalar();
+		m_pMatWorld = m_pFX->GetVariableByName("g_matWorld")->AsMatrix();
+		m_pMatView = m_pFX->GetVariableByName("g_matView")->AsMatrix();
 
 		// Globals
 		m_pTexture = m_pFX->GetVariableByName("g_texture")->AsShaderResource();
@@ -131,6 +150,10 @@ private:
 		VALIDATE(m_pTextureWidth != 0);
 		VALIDATE(m_pTextureHeight != 0);
 		VALIDATE(m_pTexture != 0);
+
+		VALIDATE(m_pMatWorld != 0);
+		VALIDATE(m_pMatView != 0);
+		VALIDATE(m_pMatProj != 0);
 
 		return true;
 	}
@@ -145,7 +168,8 @@ private:
 		// Vertex Desc for a basic vertex with Normals and UV coordinates
 		D3D10_INPUT_ELEMENT_DESC vertexDesc[] =
 		{
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 }
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D10_APPEND_ALIGNED_ELEMENT, D3D10_INPUT_PER_VERTEX_DATA, 0 }
 		};
 		UINT elementNum = sizeof(vertexDesc) / sizeof(vertexDesc[0]);
 
@@ -200,6 +224,12 @@ private:
 	ID3D10EffectScalarVariable* m_pTextureWidth;
 	ID3D10EffectScalarVariable* m_pTextureHeight;
 	ID3D10EffectShaderResourceVariable* m_pTexture;
+	ID3D10EffectMatrixVariable* m_pMatWorld;
+	ID3D10EffectMatrixVariable* m_pMatView;
+	ID3D10EffectMatrixVariable* m_pMatProj;
+
+	D3DXMATRIX m_matWorld;
+	D3DXMATRIX m_matView;
 };
 
 #endif	// __DX10_SHADER_BLUR_H__

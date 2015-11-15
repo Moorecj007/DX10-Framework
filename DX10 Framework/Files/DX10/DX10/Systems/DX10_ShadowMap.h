@@ -73,6 +73,7 @@ public:
 	void RenderBuffer();
 	DX10_Buffer* GetBuffer() { return m_pBuff; };
 	ID3D10ShaderResourceView* GetBlurredMap() { return m_ShaderResourceView_Blurred; };
+	bool PopulateBuffer();
 
 private:
 	// Disallowing copies

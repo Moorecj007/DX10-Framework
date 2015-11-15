@@ -6,6 +6,9 @@
 /////////////
 // GLOBALS //
 /////////////
+float4x4 g_matWorld;
+float4x4 g_matView;
+float4x4 g_matProj;
 Texture2D g_texture;
 float g_textureWidth;
 float g_textureHeight;
@@ -25,12 +28,14 @@ SamplerState SampleType
 //////////////
 struct VertexInputType
 {
-	float2 texCoord : TEXCOORD0;
+	float4 position : POSITION;
+	float2 tex : TEXCOORD0;
 };
 
 struct PixelInputType
 {
-	float2 texCoord0 : TEXCOORD0;
+	float4 position : SV_POSITION;
+	float2 tex : TEXCOORD0;
 	float2 texCoord1 : TEXCOORD1;
 	float2 texCoord2 : TEXCOORD2;
 	float2 texCoord3 : TEXCOORD3;
@@ -52,32 +57,33 @@ PixelInputType VerticalBlurVertexShader(VertexInputType input)
 
 
 	// Change the position vector to be 4 units for proper matrix calculations.
-	//input.position.w = 1.0f;
+	input.position.w = 1.0f;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
-	//output.position = mul(input.position, worldMatrix);
-	//output.position = mul(output.position, viewMatrix);
-	//output.position = mul(output.position, projectionMatrix);
+	output.position = mul(input.position, g_matWorld);
+	output.position = mul(output.position, g_matView);
+	output.position = mul(output.position, g_matProj);
 
 	// Store the texture coordinates for the pixel shader.
-	output.texCoord0 = input.texCoord;
+	output.tex = input.tex;
 
 	// Determine the floating point size of a texel for a screen with this specific height.
 	texelSize = 1.0f / g_textureHeight;
 
 	// Create UV coordinates for the pixel and its four vertical neighbors on either side.
-	output.texCoord1 = input.texCoord + float2(0.0f, texelSize * -4.0f);
-	output.texCoord2 = input.texCoord + float2(0.0f, texelSize * -3.0f);
-	output.texCoord3 = input.texCoord + float2(0.0f, texelSize * -2.0f);
-	output.texCoord4 = input.texCoord + float2(0.0f, texelSize * -1.0f);
-	output.texCoord5 = input.texCoord + float2(0.0f, texelSize *  0.0f);
-	output.texCoord6 = input.texCoord + float2(0.0f, texelSize *  1.0f);
-	output.texCoord7 = input.texCoord + float2(0.0f, texelSize *  2.0f);
-	output.texCoord8 = input.texCoord + float2(0.0f, texelSize *  3.0f);
-	output.texCoord9 = input.texCoord + float2(0.0f, texelSize *  4.0f);
+	output.texCoord1 = input.tex + float2(0.0f, texelSize * -4.0f);
+	output.texCoord2 = input.tex + float2(0.0f, texelSize * -3.0f);
+	output.texCoord3 = input.tex + float2(0.0f, texelSize * -2.0f);
+	output.texCoord4 = input.tex + float2(0.0f, texelSize * -1.0f);
+	output.texCoord5 = input.tex + float2(0.0f, texelSize *  0.0f);
+	output.texCoord6 = input.tex + float2(0.0f, texelSize *  1.0f);
+	output.texCoord7 = input.tex + float2(0.0f, texelSize *  2.0f);
+	output.texCoord8 = input.tex + float2(0.0f, texelSize *  3.0f);
+	output.texCoord9 = input.tex + float2(0.0f, texelSize *  4.0f);
 
 	return output;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
@@ -126,12 +132,13 @@ float4 VerticalBlurPixelShader(PixelInputType input) : SV_Target
 	return color;
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // Technique
 ////////////////////////////////////////////////////////////////////////////////
 technique10 BlurVerticalTech
 {
-	pass P0
+	pass pass0
 	{
 		SetVertexShader(CompileShader(vs_4_0, VerticalBlurVertexShader()));
 		SetPixelShader(CompileShader(ps_4_0, VerticalBlurPixelShader()));
@@ -149,32 +156,33 @@ PixelInputType HorizontalBlurVertexShader(VertexInputType input)
 
 
 	// Change the position vector to be 4 units for proper matrix calculations.
-	//input.position.w = 1.0f;
+	input.position.w = 1.0f;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
-	//output.position = mul(input.position, worldMatrix);
-	//output.position = mul(output.position, viewMatrix);
-	//output.position = mul(output.position, projectionMatrix);
+	output.position = mul(input.position, g_matWorld);
+	output.position = mul(output.position, g_matView);
+	output.position = mul(output.position, g_matProj);
 
 	// Store the texture coordinates for the pixel shader.
-	output.texCoord0 = input.texCoord;
+	output.tex = input.tex;
 
 	// Determine the floating point size of a texel for a screen with this specific width.
 	texelSize = 1.0f / g_textureWidth;
 
 	// Create UV coordinates for the pixel and its four horizontal neighbors on either side.
-	output.texCoord1 = input.texCoord + float2(texelSize * -4.0f, 0.0f);
-	output.texCoord2 = input.texCoord + float2(texelSize * -3.0f, 0.0f);
-	output.texCoord3 = input.texCoord + float2(texelSize * -2.0f, 0.0f);
-	output.texCoord4 = input.texCoord + float2(texelSize * -1.0f, 0.0f);
-	output.texCoord5 = input.texCoord + float2(texelSize *  0.0f, 0.0f);
-	output.texCoord6 = input.texCoord + float2(texelSize *  1.0f, 0.0f);
-	output.texCoord7 = input.texCoord + float2(texelSize *  2.0f, 0.0f);
-	output.texCoord8 = input.texCoord + float2(texelSize *  3.0f, 0.0f);
-	output.texCoord9 = input.texCoord + float2(texelSize *  4.0f, 0.0f);
+	output.texCoord1 = input.tex + float2(texelSize * -4.0f, 0.0f);
+	output.texCoord2 = input.tex + float2(texelSize * -3.0f, 0.0f);
+	output.texCoord3 = input.tex + float2(texelSize * -2.0f, 0.0f);
+	output.texCoord4 = input.tex + float2(texelSize * -1.0f, 0.0f);
+	output.texCoord5 = input.tex + float2(texelSize *  0.0f, 0.0f);
+	output.texCoord6 = input.tex + float2(texelSize *  1.0f, 0.0f);
+	output.texCoord7 = input.tex + float2(texelSize *  2.0f, 0.0f);
+	output.texCoord8 = input.tex + float2(texelSize *  3.0f, 0.0f);
+	output.texCoord9 = input.tex + float2(texelSize *  4.0f, 0.0f);
 
 	return output;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
@@ -223,12 +231,13 @@ float4 HorizontalBlurPixelShader(PixelInputType input) : SV_Target
 	return color;
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // Technique
 ////////////////////////////////////////////////////////////////////////////////
 technique10 BlurHorizontalTech
 {
-	pass P0
+	pass pass0
 	{
 		SetVertexShader(CompileShader(vs_4_0, HorizontalBlurVertexShader()));
 		SetPixelShader(CompileShader(ps_4_0, HorizontalBlurPixelShader()));
