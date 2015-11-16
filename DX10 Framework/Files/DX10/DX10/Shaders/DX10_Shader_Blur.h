@@ -22,13 +22,6 @@
 #include "../DX10_Utilities.h"
 #include "../DX10_Renderer.h"
 
-// TO DO CAL
-enum eTech_Blur
-{
-	TECH_BLUR_HORIZONTAL,
-	TECH_BLUR_VERTICAL
-};
-
 class DX10_Shader_Blur
 {
 public:
@@ -82,20 +75,93 @@ public:
 	// TO DO CAL
 	* @return: void
 	********************/
-	void Render(ID3D10ShaderResourceView* _pTexture, eTech_Blur _eTech)
+	void Render(DX10_ShadowMap* _pShadowMap)
 	{	
-		SetCurrentPtrs(_eTech);
-		m_pDX10_Renderer->SetInputLayout(m_pVertexLayout_Current);
-
 		D3D10_TECHNIQUE_DESC techDesc;
-		m_pTech_Current->GetDesc(&techDesc);
+		m_pDX10_Renderer->SetInputLayout(m_pVertexLayout_All);
+		m_pDX10_Renderer->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+		m_pTech_Resize->GetDesc(&techDesc);
 		for (UINT i = 0; i < techDesc.Passes; ++i)
 		{
-			m_pTexture->SetResource(_pTexture);
+			// Resize image to half the size
+			_pShadowMap->GetBlurTex_DownSized()->SetRenderTarget();
+			_pShadowMap->GetBlurTex_DownSized()->ClearRenderTarget(0, 0, 0, 1);
+			m_pMatWorld->SetMatrix((float*)&_pShadowMap->GetBlurTex_DownSized()->GetWorldMatrix());
+			m_pMatView->SetMatrix((float*)&_pShadowMap->GetBlurTex_DownSized()->GetViewMatrix());
+			m_pMatProj->SetMatrix((float*)&_pShadowMap->GetBlurTex_DownSized()->GetOrthoMatrix());
 
-			m_pTech_Current->GetPassByIndex(i)->Apply(0);
+			m_pTexture->SetResource(_pShadowMap->GetShadowedTex()->GetShaderResourceView());
+
+			m_pTech_Resize->GetPassByIndex(i)->Apply(0);
+			_pShadowMap->GetHalfWindow()->pBuff->Render();
+
+			m_pTexture->SetResource(NULL);
+			m_pTech_Resize->GetPassByIndex(i)->Apply(0);
 		}
+
+		m_pTech_Horizontal->GetDesc(&techDesc);
+		for (UINT i = 0; i < techDesc.Passes; ++i)
+		{
+			// Horizontal Blurring
+			_pShadowMap->GetBlurTex_Horizontal()->SetRenderTarget();
+			_pShadowMap->GetBlurTex_Horizontal()->ClearRenderTarget(0, 0, 0, 1);
+			m_pMatWorld->SetMatrix((float*)&_pShadowMap->GetBlurTex_Horizontal()->GetWorldMatrix());
+			m_pMatView->SetMatrix((float*)&_pShadowMap->GetBlurTex_Horizontal()->GetViewMatrix());
+			m_pMatProj->SetMatrix((float*)&_pShadowMap->GetBlurTex_Horizontal()->GetOrthoMatrix());
+
+			m_pTexture->SetResource(_pShadowMap->GetBlurTex_DownSized()->GetShaderResourceView());
+
+			float width = (float)_pShadowMap->GetWidth() / _pShadowMap->GetDownsizeScalar();
+			m_pTextureWidth->SetFloat(width);
+
+			m_pTech_Horizontal->GetPassByIndex(i)->Apply(0);
+			_pShadowMap->GetHalfWindow()->pBuff->Render();
+
+			m_pTexture->SetResource(NULL);
+			m_pTech_Horizontal->GetPassByIndex(i)->Apply(0);
+		}
+
+		m_pTech_Vertical->GetDesc(&techDesc);
+		for (UINT i = 0; i < techDesc.Passes; ++i)
+		{
+			// Vertical Vertical
+			_pShadowMap->GetBlurTex_Vertical()->SetRenderTarget();
+			_pShadowMap->GetBlurTex_Vertical()->ClearRenderTarget(0, 0, 0, 1);
+			m_pMatWorld->SetMatrix((float*)&_pShadowMap->GetBlurTex_Vertical()->GetWorldMatrix());
+			m_pMatView->SetMatrix((float*)&_pShadowMap->GetBlurTex_Vertical()->GetViewMatrix());
+			m_pMatProj->SetMatrix((float*)&_pShadowMap->GetBlurTex_Vertical()->GetOrthoMatrix());
+
+			m_pTexture->SetResource(_pShadowMap->GetBlurTex_Horizontal()->GetShaderResourceView());
+
+			float height = (float)_pShadowMap->GetHeight() / _pShadowMap->GetDownsizeScalar();
+			m_pTextureHeight->SetFloat(height);
+
+			m_pTech_Vertical->GetPassByIndex(i)->Apply(0);
+			_pShadowMap->GetHalfWindow()->pBuff->Render();
+
+			m_pTexture->SetResource(NULL);
+			m_pTech_Vertical->GetPassByIndex(i)->Apply(0);
+		}
+
+		m_pTech_Resize->GetDesc(&techDesc);
+		for (UINT i = 0; i < techDesc.Passes; ++i)
+		{
+			// Resize back to original size
+			_pShadowMap->GetBlurTex_UpSized()->SetRenderTarget();
+			_pShadowMap->GetBlurTex_UpSized()->ClearRenderTarget(0, 0, 0, 1);
+			m_pMatWorld->SetMatrix((float*)&_pShadowMap->GetBlurTex_UpSized()->GetWorldMatrix());
+			m_pMatView->SetMatrix((float*)&_pShadowMap->GetBlurTex_UpSized()->GetViewMatrix());
+			m_pMatProj->SetMatrix((float*)&_pShadowMap->GetBlurTex_UpSized()->GetOrthoMatrix());
+
+			m_pTexture->SetResource(_pShadowMap->GetBlurTex_Vertical()->GetShaderResourceView());
+
+			m_pTech_Resize->GetPassByIndex(i)->Apply(0);
+			_pShadowMap->GetScreenWindow()->pBuff->Render();
+
+			m_pTexture->SetResource(NULL);
+			m_pTech_Resize->GetPassByIndex(i)->Apply(0);
+		}	
 	}
 
 private:
@@ -109,6 +175,7 @@ private:
 	{
 		VALIDATE(m_pDX10_Renderer->BuildFX("Blur.fx", "BlurHorizontalTech", m_pFX, m_pTech_Horizontal));
 		VALIDATE(m_pDX10_Renderer->BuildFX("Blur.fx", "BlurVerticalTech", m_pFX, m_pTech_Vertical));
+		VALIDATE(m_pDX10_Renderer->BuildFX("Blur.fx", "ResizeTech", m_pFX, m_pTech_Resize));
 
 		return true;
 	}
@@ -121,15 +188,24 @@ private:
 	bool CreateFXVarPointers()
 	{
 		// Per Object
-		m_pTextureWidth = m_pFX->GetVariableByName("g_textureWidth")->AsScalar();
-		m_pTextureHeight = m_pFX->GetVariableByName("g_textureHeight")->AsScalar();
+		m_pMatWorld = m_pFX->GetVariableByName("worldMatrix")->AsMatrix();
+		m_pMatView = m_pFX->GetVariableByName("viewMatrix")->AsMatrix();
+		m_pMatProj = m_pFX->GetVariableByName("projectionMatrix")->AsMatrix();
+
+		m_pTextureWidth = m_pFX->GetVariableByName("screenWidth")->AsScalar();
+		m_pTextureHeight = m_pFX->GetVariableByName("screenHeight")->AsScalar();
 
 		// Globals
-		m_pTexture = m_pFX->GetVariableByName("g_texture")->AsShaderResource();
+		m_pTexture = m_pFX->GetVariableByName("shaderTexture")->AsShaderResource();
 
+		VALIDATE(m_pMatWorld != 0);
+		VALIDATE(m_pMatView != 0);
+		VALIDATE(m_pMatProj != 0);
+
+		VALIDATE(m_pTexture != 0);
 		VALIDATE(m_pTextureWidth != 0);
 		VALIDATE(m_pTextureHeight != 0);
-		VALIDATE(m_pTexture != 0);
+		
 
 		return true;
 	}
@@ -144,61 +220,34 @@ private:
 		// Vertex Desc for a basic vertex with Normals and UV coordinates
 		D3D10_INPUT_ELEMENT_DESC vertexDesc[] =
 		{
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 }
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D10_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D10_APPEND_ALIGNED_ELEMENT, D3D10_INPUT_PER_VERTEX_DATA, 0 }
 		};
 		UINT elementNum = sizeof(vertexDesc) / sizeof(vertexDesc[0]);
 
-		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Horizontal, m_pVertexLayout_Horizontal);
-		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Vertical, m_pVertexLayout_Vertical);
+		m_pDX10_Renderer->CreateVertexLayout(vertexDesc, elementNum, m_pTech_Horizontal, m_pVertexLayout_All);
 
 		return true;
-	}
-
-	/***********************
-	* SetCurrentPtrs: Set the Current Vertex Layout and Technique pointers
-	* @author: Callan Moore
-	* @parameter: _tech: Enumerator to determine which set of pointers to use as current
-	* @return: void
-	********************/
-	void SetCurrentPtrs(eTech_Blur _tech)
-	{
-		switch (_tech)
-		{
-			case TECH_LITTEX_STANDARD:
-			{
-				m_pVertexLayout_Current = m_pVertexLayout_Horizontal;
-				m_pTech_Current = m_pTech_Horizontal;
-			}
-			break;
-			case TECH_LITTEX_FADE:
-			{
-				m_pVertexLayout_Current = m_pVertexLayout_Vertical;
-				m_pTech_Current = m_pTech_Vertical;
-			}
-			break;
-			default:
-			{
-				m_pVertexLayout_Current = 0;
-				m_pTech_Current = 0;
-			}
-		}	// End Switch
 	}
 
 private:
 	DX10_Renderer*						m_pDX10_Renderer;
 	ID3D10Effect*						m_pFX;
 
-	ID3D10InputLayout*					m_pVertexLayout_Current;
-	ID3D10InputLayout*					m_pVertexLayout_Horizontal;
-	ID3D10InputLayout*					m_pVertexLayout_Vertical;
+	ID3D10InputLayout*					m_pVertexLayout_All;
 
-	ID3D10EffectTechnique*				m_pTech_Current;
 	ID3D10EffectTechnique*				m_pTech_Horizontal;
 	ID3D10EffectTechnique*				m_pTech_Vertical;
+	ID3D10EffectTechnique*				m_pTech_Resize;
+
+	ID3D10EffectMatrixVariable* m_pMatWorld;
+	ID3D10EffectMatrixVariable* m_pMatView;
+	ID3D10EffectMatrixVariable* m_pMatProj;
+
+	ID3D10EffectShaderResourceVariable* m_pTexture;
 
 	ID3D10EffectScalarVariable* m_pTextureWidth;
 	ID3D10EffectScalarVariable* m_pTextureHeight;
-	ID3D10EffectShaderResourceVariable* m_pTexture;
 };
 
 #endif	// __DX10_SHADER_BLUR_H__

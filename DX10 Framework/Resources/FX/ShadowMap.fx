@@ -50,6 +50,10 @@ void PS_Standard(VS_OUT _inputPS)
 	// Clip all the transparent or mostly transparent pixels
 	clip(diffuse.a - 0.15f);
 }
+RasterizerState RS_ShadowCulling
+{
+	CullMode = front;
+};
 
 technique10 CreateShadowMapTech
 {

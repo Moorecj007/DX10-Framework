@@ -49,6 +49,14 @@ bool DX10_Renderer::Initialise(int _clientWidth, int _clientHeight, HWND _hWND)
 	pLight->specular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	AddLight("Main", pLight);
 	
+	pLight = new TLight();
+	pLight->type = LT_DIRECTIONAL;
+	pLight->dir_spotPow = D3DXVECTOR4(0.0f, -1.0f, -1.0f, 0.0f);
+	pLight->ambient = D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f);
+	pLight->diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	pLight->specular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	AddLight("Main2", pLight);
+	
 	return true;
 }
 
@@ -824,59 +832,6 @@ bool DX10_Renderer::LoadMeshObj(std::string _fileName, TVertexNormalUV*& _prVert
 	return true;
 }
 
-bool DX10_Renderer::CreateTextureResource(TextureResource*& _prTextureResource)
-{
-	// Initialise the Texture 2D description
-	D3D10_TEXTURE2D_DESC textureDesc;
-	ZeroMemory(&textureDesc, sizeof(textureDesc));
-
-	// Setup the render target texture description.
-	textureDesc.Width = m_clientWidth;
-	textureDesc.Height = m_clientHeight;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D10_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D10_BIND_RENDER_TARGET | D3D10_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-
-	// Create the Texture 2D from the Description
-	ID3D10Texture2D* pTexture2D;
-	VALIDATEHR(m_pDX10Device->CreateTexture2D(&textureDesc, NULL, &pTexture2D));
-
-	// Initialise the Render Target View Description
-	D3D10_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
-
-	renderTargetViewDesc.Format = textureDesc.Format;
-	renderTargetViewDesc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
-	renderTargetViewDesc.Texture2D.MipSlice = 0;
-
-	// Create the Render Target View from the created Texture 2D and the Description
-	ID3D10RenderTargetView* pRenderTargetView;
-	VALIDATEHR(m_pDX10Device->CreateRenderTargetView(pTexture2D, &renderTargetViewDesc, &pRenderTargetView));
-
-	// Initialise the Shader Resource View Description
-	D3D10_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-
-	shaderResourceViewDesc.Format = textureDesc.Format;
-	shaderResourceViewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-
-	// Create the Shader Resource View from the Texture 2D and the Description
-	ID3D10ShaderResourceView* pShaderResourceView;
-	VALIDATEHR(m_pDX10Device->CreateShaderResourceView(pTexture2D, &shaderResourceViewDesc, &pShaderResourceView));
-
-	// Create and Initialise a Texture Resource
-	TextureResource* pTexRes = new TextureResource();
-	VALIDATE(pTexRes->Initialise(m_pDX10Device, m_pDepthStencilView, m_clearColor, pTexture2D, pRenderTargetView, pShaderResourceView));
-	_prTextureResource = pTexRes;
-
-	return true;
-}
-
 void DX10_Renderer::ApplyRasterizerState(eRasterizerState _rs)
 {
 	switch (_rs)
@@ -951,13 +906,11 @@ void DX10_Renderer::RemoveLight(std::string _lightName)
 {
 	ReleasePtr(m_mapLights.find(_lightName)->second);
 	m_mapLights.erase(_lightName);
-}
 
-TLight* DX10_Renderer::GetActiveLights()
-{
 	// Delete the pointer to current array of lights
 	ReleasePtr(m_pArrLights);
 
+	// Re-create the array of lights for passing to shaders
 	m_pArrLights = new TLight[m_mapLights.size()];
 	std::map<std::string, TLight*>::iterator iterLights = m_mapLights.begin();
 	int index = 0;
@@ -969,6 +922,24 @@ TLight* DX10_Renderer::GetActiveLights()
 		iterLights++;
 	}
 	m_lightCount = index;
+}
+
+TLight* DX10_Renderer::GetActiveLights()
+{
+	//// Delete the pointer to current array of lights
+	//ReleasePtr(m_pArrLights);
+	//
+	//m_pArrLights = new TLight[m_mapLights.size()];
+	//std::map<std::string, TLight*>::iterator iterLights = m_mapLights.begin();
+	//int index = 0;
+	//while (iterLights != m_mapLights.end())
+	//{
+	//	m_pArrLights[index] = *iterLights->second;
+	//
+	//	index++;
+	//	iterLights++;
+	//}
+	//m_lightCount = index;
 
 	return m_pArrLights;
 };
@@ -995,10 +966,10 @@ void DX10_Renderer::CalcProjMatrix()
 	D3DXMatrixPerspectiveFovLH(&m_matProj, 0.25f*PI, aspect, 1.0f, 10000.0f);
 }
 
-bool DX10_Renderer::CreateShadowMap(DX10_ShadowMap*& _prShadowMap)
+bool DX10_Renderer::CreateShadowMap(DX10_ShadowMap*& _prShadowMap, int _width, int _height, float _downSizeScalar)
 {
 	_prShadowMap = new DX10_ShadowMap();
-	VALIDATE(_prShadowMap->Initialise(m_pDX10Device, 2048, 2048));
+	VALIDATE(_prShadowMap->Initialise(m_pDX10Device, _width, _height, _downSizeScalar));
 
 	return true;
 }
@@ -1006,4 +977,20 @@ bool DX10_Renderer::CreateShadowMap(DX10_ShadowMap*& _prShadowMap)
 void DX10_Renderer::CreateShadowProjMatrix()
 {
 	D3DXMatrixOrthoLH(&m_matShadowProj, 100, 100, 1.0f, 200.0f);
+}
+
+void DX10_Renderer::CreateLightPosForShadowing(float _distance)
+{
+	for (int i = 0; i < m_lightCount; i++)
+	{
+		if (m_pArrLights[i].type == LT_DIRECTIONAL)
+		{
+			v3float lightPos = { m_pArrLights[i].dir_spotPow.x, m_pArrLights[i].dir_spotPow.y, m_pArrLights[i].dir_spotPow.z };
+			lightPos = lightPos.Normalise() * -1.0f;
+			lightPos = lightPos * _distance;
+			m_pArrLights[i].pos_range.x = lightPos.x;
+			m_pArrLights[i].pos_range.y = lightPos.y;
+			m_pArrLights[i].pos_range.z = lightPos.z;
+		}
+	}
 }

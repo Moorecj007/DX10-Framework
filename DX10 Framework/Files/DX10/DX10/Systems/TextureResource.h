@@ -36,48 +36,30 @@ public:
 	********************/
 	~TextureResource();
 
-	/***********************
-	* Initialise: Initialise the Texture Resource for use
-	* @author: Callan Moore
-	* @parameter: _pDX10Device: The graphics device
-	* @parameter: _pDepthStencilView: Pointer to the Depth Stencil View that the Renderer uses
-	* @parameter: _clearColor: The clear color of the Renderer
-	* @parameter: _pTexture: The Texture 2D created fro this resource
-	* @parameter: _pRenderTargetView: RenderTargetView of the Texture
-	* @parameter: _pShaderResourceView: ShaderResourceView of the Texture
-	* @return: bool: Successful or not
-	********************/
-	bool Initialise(ID3D10Device* _pDX10Device, ID3D10DepthStencilView* _pDepthStencilView, D3DXCOLOR _clearColor, ID3D10Texture2D* _pTexture, ID3D10RenderTargetView* _pRenderTargetView, ID3D10ShaderResourceView* _pShaderResourceView);
-	
-	/***********************
-	* SetRenderTarget: Set the Texture Resource as the Render Target of the Graphics Device
-	* @author: Callan Moore
-	* @return: void
-	********************/
-	void SetRenderTarget();
-	
-	/***********************
-	* ClearRenderTarget: Clear the Render Target of this Texture Resource to the clear color
-	* @author: Callan Moore
-	* @return: void
-	********************/
-	void ClearRenderTarget();
+	bool Initialize(ID3D10Device*, int, int, float, float);
+	void Shutdown();
 
-	/***********************
-	* GetShaderResource: Retrieve the ShaderResourceView of the Texture Resource
-	* @author: Callan Moore
-	* @return: ID3D10ShaderResourceView*: Shader Resource View to input to a shader
-	********************/
-	ID3D10ShaderResourceView* GetShaderResource() { return m_pShaderResourceView; };
+	void SetRenderTarget();
+	void ClearRenderTarget(float, float, float, float);
+	ID3D10ShaderResourceView* GetShaderResourceView();
+	D3DXMATRIX GetProjectionMatrix() { return m_projectionMatrix; };
+	D3DXMATRIX GetOrthoMatrix(){ return m_orthoMatrix; };
+	D3DXMATRIX GetViewMatrix(){ return m_viewMatrix; };
+	D3DXMATRIX GetWorldMatrix(){ return m_worldMatrix; };
 
 private:
-	ID3D10Device* m_pDX10Device;
-	ID3D10DepthStencilView* m_pDepthStencilView;
-	D3DXCOLOR m_clearColor;
+	ID3D10Device* m_pDevice;
 
-	ID3D10Texture2D* m_pTexture;
-	ID3D10RenderTargetView* m_pRenderTargetView;
-	ID3D10ShaderResourceView* m_pShaderResourceView;
+	ID3D10Texture2D* m_renderTargetTexture;
+	ID3D10RenderTargetView* m_renderTargetView;
+	ID3D10ShaderResourceView* m_shaderResourceView;
+	ID3D10Texture2D* m_depthStencilBuffer;
+	ID3D10DepthStencilView* m_depthStencilView;
+	D3D10_VIEWPORT m_viewport;
+	D3DXMATRIX m_projectionMatrix;
+	D3DXMATRIX m_orthoMatrix;
+	D3DXMATRIX m_viewMatrix;
+	D3DXMATRIX m_worldMatrix;
 };
 
 #endif	// __TEXTURE_RESOURCE_H__

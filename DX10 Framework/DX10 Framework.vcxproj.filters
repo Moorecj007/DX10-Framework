@@ -195,6 +195,9 @@
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Blur.h">
       <Filter>Header Files\DX10\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_ShadowSoft.h">
+      <Filter>Header Files\DX10\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Files\Application.cpp">
@@ -275,6 +278,9 @@
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
     <FxCompile Include="Resources\FX\Blur.fx">
+      <Filter>Resource Files\FX Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\FX\ShadowSoft.fx">
       <Filter>Resource Files\FX Files</Filter>
     </FxCompile>
   </ItemGroup>

@@ -151,6 +151,7 @@
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_LitTex.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Shadow.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_ShadowMap.h" />
+    <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_ShadowSoft.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Sprite.h" />
     <ClInclude Include="Files\DX10\DX10\Shaders\DX10_Shader_Water.h" />
     <ClInclude Include="Files\DX10\DX10\Systems\DX10_Buffer.h" />
@@ -175,6 +176,7 @@
     <FxCompile Include="Resources\FX\Cloth.fx" />
     <FxCompile Include="Resources\FX\LightStructures.fx" />
     <FxCompile Include="Resources\FX\LitTex.fx" />
+    <FxCompile Include="Resources\FX\ShadowSoft.fx" />
     <FxCompile Include="Resources\FX\Sprite.fx" />
     <FxCompile Include="Resources\FX\Water.fx" />
   </ItemGroup>

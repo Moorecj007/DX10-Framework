@@ -54,6 +54,7 @@
 #include "DX10\Shaders\DX10_Shader_Cloth.h"
 #include "DX10\Shaders\DX10_Shader_ShadowMap.h"
 #include "DX10\Shaders\DX10_Shader_Shadow.h"
+#include "DX10\Shaders\DX10_Shader_ShadowSoft.h"
 #include "DX10\Shaders\DX10_Shader_Blur.h"
 
 // Systems

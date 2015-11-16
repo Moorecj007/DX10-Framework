@@ -234,14 +234,6 @@ public:
 	* @return: bool: Successful or not
 	********************/
 	bool LoadMeshObj(std::string _fileName, TVertexNormalUV*& _prVertexBuffer, DWORD*& _prIndexBuffer, int* _pVertexCount, int* _pIndexCount, v3float _scale);
-	
-	/***********************
-	* CreateTextureResource: Create and initialize a Texture Resource class
-	* @author: Callan Moore
-	* @parameter: _prTextureResource: Storage variable to hold the created Texture Resource
-	* @return: bool
-	********************/
-	bool CreateTextureResource(TextureResource*& _prTextureResource);
 
 	/***********************
 	* ResetRenderTarget: Reset the Devices Render Target to be the default back buffer on the swap chain
@@ -395,9 +387,10 @@ public:
 	* CreateShadowMap: Create a ShadowMap object for storing depth values
 	* @author: Callan Moore
 	* @parameter: _prShadowMap: Storage variable for the created Shadow Map
+	// TO DO CAL
 	* @return: bool: Successful or not
 	********************/
-	bool CreateShadowMap(DX10_ShadowMap*& _prShadowMap);
+	bool CreateShadowMap(DX10_ShadowMap*& _prShadowMap, int _width, int _height, float _downSizeScalar);
 	
 	/***********************
 	* CreateShadowProjMatrix: Create a orthographic projection matrix for shadowing effects
@@ -412,6 +405,9 @@ public:
 	* @return: D3DXMATRIX: The shadow projection matrix
 	********************/
 	D3DXMATRIX GetShadowProjMatrix() { return m_matShadowProj; };
+
+	// TO DO CAL
+	void CreateLightPosForShadowing(float _distance);
 
 private:
 	// Window Variables

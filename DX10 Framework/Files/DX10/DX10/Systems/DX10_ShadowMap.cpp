@@ -34,9 +34,20 @@ DX10_ShadowMap::~DX10_ShadowMap()
 	// Release allocated memory
 	ReleaseCOM(m_ShaderResourceView);
 	ReleaseCOM(m_pDepthStencilView);
+
+	// Release the Texture Resources
+	ReleasePtr(m_pShadowedTex);
+	ReleasePtr(m_pBlurTex_DownSized);
+	ReleasePtr(m_pBlurTex_Horizontal);
+	ReleasePtr(m_pBlurTex_Vertical);
+	ReleasePtr(m_pBlurTex_UpSized);
+
+	// Release the TWindows
+	ReleasePtr(m_pScreenWindow);
+	ReleasePtr(m_pHalfWindow);
 }
 
-bool DX10_ShadowMap::Initialise(ID3D10Device* device, UINT width, UINT height)
+bool DX10_ShadowMap::Initialise(ID3D10Device* device, UINT width, UINT height, float _downSizeScalar)
 {
 	if (device == 0)
 	{
@@ -48,6 +59,7 @@ bool DX10_ShadowMap::Initialise(ID3D10Device* device, UINT width, UINT height)
 	m_pDX10Device = device;
 	m_width = width;
 	m_height = height;
+	m_downSizeScalar = _downSizeScalar;
 
 	// Create the view port 
 	mViewport.TopLeftX = 0;
@@ -56,7 +68,45 @@ bool DX10_ShadowMap::Initialise(ID3D10Device* device, UINT width, UINT height)
 	mViewport.Height = height;
 	mViewport.MinDepth = 0.0f;
 	mViewport.MaxDepth = 1.0f;
+
+	m_pScreenWindow = new TWindow();
+	VALIDATE(m_pScreenWindow->Initialise(m_pDX10Device, (float)m_width, (float)m_height));
+
+	m_pHalfWindow = new TWindow();
+	VALIDATE(m_pHalfWindow->Initialise(m_pDX10Device, ((float)m_width / 4.0f), ((float)m_height / 4.0f)));
 	
+	VALIDATE(BuildShadowMap());
+	VALIDATE(BuildShadowedTex());
+	VALIDATE(BuildBlurTex_DownSized());
+	VALIDATE(BuildBlurTex_Horizontal());
+	VALIDATE(BuildBlurTex_Vertical());
+	VALIDATE(BuildBlurTex_UpSized());
+
+	return true;
+}
+
+ID3D10ShaderResourceView* DX10_ShadowMap::GetShaderResourceView()
+{
+	return m_ShaderResourceView;
+}
+
+void DX10_ShadowMap::StartRender()
+{
+	// Set the Render target to NULL (only using the depth stencil) using an array of null elements
+	ID3D10RenderTargetView* renderTargets[1] = { 0 };
+	m_pDX10Device->OMSetRenderTargets(1, renderTargets, m_pDepthStencilView);
+	m_pDX10Device->RSSetViewports(1, &mViewport);
+
+	m_pDX10Device->ClearDepthStencilView(m_pDepthStencilView, D3D10_CLEAR_DEPTH, 1.0f, 0);
+}
+
+void DX10_ShadowMap::EndRender()
+{
+
+}
+
+bool DX10_ShadowMap::BuildShadowMap()
+{
 	//Create a texture description and clear its memory
 	D3D10_TEXTURE2D_DESC texDesc;
 	ZeroMemory(&texDesc, sizeof(texDesc));
@@ -97,22 +147,44 @@ bool DX10_ShadowMap::Initialise(ID3D10Device* device, UINT width, UINT height)
 	return true;
 }
 
-ID3D10ShaderResourceView* DX10_ShadowMap::GetShaderResourceView()
+bool DX10_ShadowMap::BuildShadowedTex()
 {
-	return m_ShaderResourceView;
+	m_pShadowedTex = new TextureResource();
+	VALIDATE(m_pShadowedTex->Initialize(m_pDX10Device, m_width, m_height, 200, 0.1f));
+
+	return true;
 }
 
-void DX10_ShadowMap::StartRender()
+bool DX10_ShadowMap::BuildBlurTex_DownSized()
 {
-	// Set the Render target to NULL (only using the depth stencil) using an array of null elements
-	ID3D10RenderTargetView* renderTargets[1] = { 0 };
-	m_pDX10Device->OMSetRenderTargets(1, renderTargets, m_pDepthStencilView);
-	m_pDX10Device->RSSetViewports(1, &mViewport);
+	m_pBlurTex_DownSized = new TextureResource();
+	VALIDATE(m_pBlurTex_DownSized->Initialize(m_pDX10Device, (int)(m_width / m_downSizeScalar), (int)(m_height / m_downSizeScalar), 200, 0.1f));
 
-	m_pDX10Device->ClearDepthStencilView(m_pDepthStencilView, D3D10_CLEAR_DEPTH, 1.0f, 0);
+	return true;
 }
 
-void DX10_ShadowMap::EndRender()
+bool DX10_ShadowMap::BuildBlurTex_Horizontal()
 {
+	// TO DO CAL - create smaller when upsizing and downsizing
+	m_pBlurTex_Horizontal = new TextureResource();
+	VALIDATE(m_pBlurTex_Horizontal->Initialize(m_pDX10Device, (int)(m_width / m_downSizeScalar), (int)(m_height / m_downSizeScalar), 200, 0.1f));
 
+	return true;
+}
+
+bool DX10_ShadowMap::BuildBlurTex_Vertical()
+{
+	// TO DO CAL - create smaller when upsizing and downsizing
+	m_pBlurTex_Vertical = new TextureResource();
+	VALIDATE(m_pBlurTex_Vertical->Initialize(m_pDX10Device, (int)(m_width / m_downSizeScalar), (int)(m_height / m_downSizeScalar), 200, 0.1f));
+
+	return true;
+}
+
+bool DX10_ShadowMap::BuildBlurTex_UpSized()
+{
+	m_pBlurTex_UpSized = new TextureResource();
+	VALIDATE(m_pBlurTex_UpSized->Initialize(m_pDX10Device, m_width, m_height, 200, 0.1f));
+
+	return true;
 }

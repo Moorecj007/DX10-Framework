@@ -32,12 +32,9 @@
 #endif // _DEBUG
 
 // Local Includes
-//#include "Utility\Utilities.h"
 #include "Utility\Timer.h"
 #include "DX10\DX10.h"
 #include "DX10\DX10\2D Objects\DX10_UI_Elements.h"
-//#include "Input\InputGamePad.h"
-//#include "Menus\Menu.h"
 #include "Physics\Physics_3D.h"
 
 class Application
@@ -280,7 +277,8 @@ private:
 	// Shadowing Variables
 	DX10_Shader_ShadowMap* m_pShader_ShadowMap;
 	DX10_Shader_Shadow* m_pShader_Shadow;
-	DX10_ShadowMap* m_pShadowMap;
+	DX10_Shader_ShadowSoft* m_pShader_ShadowSoft;
+	DX10_ShadowMap* m_pShadowMap[2];
 
 	// TO DO CAL
 	DX10_Shader_Blur* m_pShader_Blur;

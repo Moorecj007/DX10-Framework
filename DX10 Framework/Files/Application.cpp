@@ -245,6 +245,12 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	m_pShader_Shadow = new DX10_Shader_Shadow();
 	VALIDATE(m_pShader_Shadow->Initialise(m_pDX10_Renderer));
 
+	m_pShader_ShadowSoft = new DX10_Shader_ShadowSoft();
+	VALIDATE(m_pShader_ShadowSoft->Initialise(m_pDX10_Renderer));
+
+	m_pShader_Blur = new DX10_Shader_Blur();
+	VALIDATE(m_pShader_Blur->Initialise(m_pDX10_Renderer));
+
 	//--------------------------------------------------------------
 	// Create the Meshes
 	//--------------------------------------------------------------
@@ -323,7 +329,10 @@ bool Application::Initialise_DX10(HINSTANCE _hInstance)
 	// Create Shadowing variables
 	//--------------------------------------------------------------
 
-	VALIDATE(m_pDX10_Renderer->CreateShadowMap(m_pShadowMap));
+	for (int i = 0; i < 2; i++)
+	{
+		VALIDATE(m_pDX10_Renderer->CreateShadowMap(m_pShadowMap[i], 1024, 1024, 4.0f));
+	}
 
 	return true;
 }
@@ -354,6 +363,8 @@ void Application::ShutDown()
 		ReleasePtr(m_pShader_Sprite);
 		ReleasePtr(m_pShader_ShadowMap);
 		ReleasePtr(m_pShader_Shadow);
+		ReleasePtr(m_pShader_ShadowSoft);
+		ReleasePtr(m_pShader_Blur);
 		// Release the Meshes
 		ReleasePtr(m_pMesh_Floor);
 		ReleasePtr(m_pMesh_Sphere);
@@ -373,7 +384,10 @@ void Application::ShutDown()
 		ReleasePtr(m_pObj_Capsule);
 		ReleasePtr(m_pObj_Pyramid);
 		// Release Shadowing Variables 	
-		ReleasePtr(m_pShadowMap);
+		for (int i = 0; i < 2; i++)
+		{
+			ReleasePtr(m_pShadowMap[i]);
+		}
 
 		// Release the Renderers resources
 		m_pDX10_Renderer->ShutDown();
@@ -444,39 +458,50 @@ void Application::Render()
 	if (m_pDX10_Renderer != 0)
 	{		
 		m_pDX10_Renderer->RestoreDefaultRenderStates();
+		m_pDX10_Renderer->CreateLightPosForShadowing(50.0f);
 
-		D3DXVECTOR3 lightPos;
-		lightPos.x =   0.0f;
-		lightPos.y =  20.0f;
-		lightPos.z = -50.0f;
+		int lightCount = m_pDX10_Renderer->GetLightCount();
+		TLight* pLightArray = m_pDX10_Renderer->GetActiveLights();
 
-		D3DXMATRIX matLightView;
-		D3DXMatrixLookAtLH(&matLightView, &lightPos, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), &D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+		for (int i = 0; i < lightCount; i++)
+		{
+			D3DXMATRIX matLightView;
+			D3DXVECTOR3 lightPos = { pLightArray[i].pos_range.x, pLightArray[i].pos_range.y, pLightArray[i].pos_range.z };
+			D3DXMatrixLookAtLH(&matLightView, &lightPos, &D3DXVECTOR3(0.0f, 0.0f, 0.0f), &D3DXVECTOR3(0.0f, 1.0f, 0.0f));
 
-		D3DXMATRIX camView = *m_pDX10_Renderer->GetViewMatrix();
+			D3DXMATRIX camView = *m_pDX10_Renderer->GetViewMatrix();
 
-		m_pShadowMap->StartRender();
-		
-		//m_pShader_ShadowMap->Render(m_pObj_Floor, matLightView);
-		m_pShader_ShadowMap->Render(m_pObj_Sphere, matLightView);
-		m_pShader_ShadowMap->Render(m_pObj_Capsule, matLightView);
-		m_pShader_ShadowMap->Render(m_pObj_Pyramid, matLightView);
-		
-		m_pShadowMap->EndRender();
+			// Render the Shadow Map as a depth stencil
+			m_pShadowMap[i]->StartRender();
 
+			m_pShader_ShadowMap->Render(m_pObj_Sphere, matLightView);
+			m_pShader_ShadowMap->Render(m_pObj_Capsule, matLightView);
+			m_pShader_ShadowMap->Render(m_pObj_Pyramid, matLightView);
+
+			m_pShadowMap[i]->EndRender();
+
+			// Render the scene with shadows to a black and white image
+			m_pShadowMap[i]->GetShadowedTex()->SetRenderTarget();
+			m_pShadowMap[i]->GetShadowedTex()->ClearRenderTarget(0, 0, 0, 1);
+			m_pShader_Shadow->Render(m_pObj_Floor, &pLightArray[i], matLightView, m_pShadowMap[i]);
+			m_pShader_Shadow->Render(m_pObj_Sphere, &pLightArray[i], matLightView, m_pShadowMap[i]);
+			m_pShader_Shadow->Render(m_pObj_Capsule, &pLightArray[i], matLightView, m_pShadowMap[i]);
+			m_pShader_Shadow->Render(m_pObj_Pyramid, &pLightArray[i], matLightView, m_pShadowMap[i]);
+
+			m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
+			m_pShader_Blur->Render(m_pShadowMap[i]);
+			m_pDX10_Renderer->ApplyDepthStencilState(DS_NORMAL);
+		}
 
 		// Tell the Renderer that the data input for the back buffer is about to commence
 		m_pDX10_Renderer->StartRender();
 
 		// Render the Objects of the Scene	
-		//m_pObj_Floor->Render();
-		m_pObj_Sphere->Render();
-		m_pObj_Capsule->Render();
-		m_pObj_Pyramid->Render();
-		m_pShader_Shadow->Render(m_pObj_Floor, matLightView, m_pShadowMap);
-		//m_pShader_Shadow->Render(m_pObj_Sphere, matLightView, m_pShadowMap);
-		//m_pShader_Shadow->Render(m_pObj_Capsule, matLightView, m_pShadowMap);
-		//m_pShader_Shadow->Render(m_pObj_Pyramid, matLightView, m_pShadowMap);
+		m_pShader_ShadowSoft->Render(m_pObj_Floor, m_pShadowMap[0], m_pShadowMap[1]);
+		m_pShader_ShadowSoft->Render(m_pObj_Sphere, m_pShadowMap[0], m_pShadowMap[1]);
+		m_pShader_ShadowSoft->Render(m_pObj_Capsule, m_pShadowMap[0], m_pShadowMap[1]);
+		m_pShader_ShadowSoft->Render(m_pObj_Pyramid, m_pShadowMap[0], m_pShadowMap[1]);
+		
 
 		m_pDX10_Renderer->ApplyDepthStencilState(DS_ZDISABLED);
 		//m_pSprite_InstructionsLeft->Render();
